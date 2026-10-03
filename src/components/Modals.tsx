@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { classKey, modeLabel, placeOf } from "../data/courses.ts";
 import { HOLIDAYS } from "../data/holidays.ts";
 import { MEALS, mealWhen } from "../data/meals.ts";
@@ -46,10 +46,21 @@ function holidayNote(iso: string): string | null {
   return `${name}. La malla semanal igual aparece; confirma con la universidad si ese feriado suspende la clase.`;
 }
 
+type StackItem = { id: number; entry: Entry; trigger: HTMLElement | null };
+
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function focusableItems(node: HTMLElement): HTMLElement[] {
+  return [...node.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((element) => element.tabIndex >= 0);
+}
+
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const [stack, setStack] = useState<Entry[]>([]);
+  const [stack, setStack] = useState<StackItem[]>([]);
+  const nextId = useRef(1);
   const push = useCallback((entry: Entry) => {
-    setStack((current) => [...current, entry]);
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setStack((current) => [...current, { id: nextId.current++, entry, trigger }]);
   }, []);
   const pop = useCallback(() => {
     setStack((current) => current.slice(0, -1));
@@ -65,59 +76,78 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     openExercise: (sessionId, index) => push({ type: "exercise", sessionId, index }),
   };
 
-  const top = stack[stack.length - 1];
+  useEffect(() => {
+    if (stack.length === 0) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [stack.length]);
 
   return (
     <ModalContext.Provider value={api}>
-      {children}
-      {top ? <ModalShell entry={top} onClose={pop} /> : null}
+      <div inert={stack.length > 0 ? true : undefined}>{children}</div>
+      {stack.map((item, index) => (
+        <ModalShell key={item.id} entry={item.entry} trigger={item.trigger} active={index === stack.length - 1} onClose={pop} />
+      ))}
     </ModalContext.Provider>
   );
 }
 
-function ModalShell({ entry, onClose }: { entry: Entry; onClose: () => void }) {
+function ModalShell({ entry, trigger, onClose, active }: { entry: Entry; trigger: HTMLElement | null; onClose: () => void; active: boolean }) {
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const title = titleFor(entry);
+  useLayoutEffect(() => {
+    ref.current?.querySelector<HTMLElement>("[data-close]")?.focus();
+    return () => {
+      if (trigger?.isConnected) trigger.focus();
+    };
+  }, [trigger]);
 
   useEffect(() => {
-    const node = ref.current;
-    const previously = document.activeElement as HTMLElement | null;
-    node?.querySelector<HTMLElement>("[data-close]")?.focus();
+    if (!active) return;
     const onKey = (event: KeyboardEvent) => {
+      const node = ref.current;
       if (event.key === "Escape") {
         event.preventDefault();
         onClose();
         return;
       }
       if (event.key !== "Tab" || !node) return;
-      const items = [...node.querySelectorAll<HTMLElement>("button, a, input, textarea, select")].filter(
-        (element) => !element.hasAttribute("disabled"),
-      );
-      if (items.length === 0) return;
+      const items = focusableItems(node);
+      if (items.length === 0) {
+        event.preventDefault();
+        return;
+      }
       const first = items[0];
       const last = items[items.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      const current = document.activeElement;
+      if (!(current instanceof Node) || !node.contains(current)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first)?.focus();
+        return;
+      }
+      if (event.shiftKey && current === first) {
         event.preventDefault();
         last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && current === last) {
         event.preventDefault();
         first?.focus();
       }
     };
     document.addEventListener("keydown", onKey);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
-      previously?.focus();
-    };
-  }, [onClose, entry]);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [active, onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
-      <button type="button" aria-label="Cerrar detalle" className="absolute inset-0 bg-black/70" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6"
+      hidden={!active}
+      inert={active ? undefined : true}
+    >
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <div
         ref={ref}
         role="dialog"

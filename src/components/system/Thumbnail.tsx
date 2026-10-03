@@ -7,6 +7,7 @@ export function Thumbnail({ photo }: { photo: Photo }) {
     <img
       src={photo.src}
       alt=""
+      aria-hidden="true"
       className="size-10 shrink-0 rounded-row object-cover"
     />
   );

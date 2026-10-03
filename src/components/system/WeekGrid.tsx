@@ -1,6 +1,7 @@
 import { COURSE_SHORT, classKey } from "../../data/courses.ts";
 import { mealWhen } from "../../data/meals.ts";
-import { WEEK_LETTERS, isInRange, isSameDay, toIso } from "../../lib/dates.ts";
+import { WEEK_LETTERS, formatLong, isInRange, isSameDay, toIso } from "../../lib/dates.ts";
+import { useRef, type KeyboardEvent } from "react";
 import { buildDay, type TimelineItem } from "../../lib/schedule.ts";
 import { classInterval, formatClock, formatSpan, parseClock, spanInterval } from "../../lib/time.ts";
 import { cn } from "../../lib/utils.ts";
@@ -73,10 +74,71 @@ export function WeekGrid({
 }) {
   const height = HOURS.length * HOUR_PX;
 
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  function onHeaderKey(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft" && event.key !== "Home" && event.key !== "End") return;
+    const buttons = [...(headerRef.current?.querySelectorAll<HTMLButtonElement>("button") ?? [])].filter(
+      (button) => !button.disabled,
+    );
+    const index = buttons.indexOf(event.currentTarget);
+    if (index < 0 || buttons.length === 0) return;
+    const next =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? buttons.length - 1
+          : event.key === "ArrowRight"
+            ? (index + 1) % buttons.length
+            : (index - 1 + buttons.length) % buttons.length;
+    event.preventDefault();
+    const target = buttons[next];
+    if (!target) return;
+    target.focus();
+    const iso = target.dataset.iso;
+    if (iso) {
+      const [year, month, day] = iso.split("-").map(Number);
+      onSelect(new Date(year, month - 1, day));
+    }
+  }
+
+  function onGridKey(event: KeyboardEvent<HTMLDivElement>) {
+    if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button[data-block]")];
+    const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    if (index < 0 || buttons.length === 0) return;
+    const day = buttons[index]?.dataset.day;
+    const same = buttons.filter((button) => button.dataset.day === day);
+    const pos = same.indexOf(buttons[index]!);
+    const daysInGrid = [...new Set(buttons.map((button) => button.dataset.day))];
+    const dayIndex = daysInGrid.indexOf(day);
+    let next: HTMLButtonElement | undefined;
+    if (event.key === "ArrowDown") next = same[pos + 1] ?? same[0];
+    if (event.key === "ArrowUp") next = same[pos - 1] ?? same[same.length - 1];
+    if (event.key === "Home") next = same[0];
+    if (event.key === "End") next = same[same.length - 1];
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      const neighbor =
+        event.key === "ArrowRight"
+          ? daysInGrid[(dayIndex + 1) % daysInGrid.length]
+          : daysInGrid[(dayIndex - 1 + daysInGrid.length) % daysInGrid.length];
+      const column = buttons.filter((button) => button.dataset.day === neighbor);
+      next = column[Math.min(pos, column.length - 1)] ?? column[0];
+    }
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+  }
+
   return (
-    <div className="overflow-x-auto rounded-row border border-line bg-ink">
+    <div
+      className="overflow-x-auto rounded-row border border-grid bg-ink"
+      role="region"
+      aria-label="Calendario semanal"
+      onKeyDown={onGridKey}
+    >
       <div className="min-w-[760px]">
-        <div className="sticky top-0 z-10 grid grid-cols-[3.25rem_repeat(7,minmax(0,1fr))] border-b border-line bg-ink">
+        <div ref={headerRef} className="sticky top-0 z-10 grid grid-cols-[3.25rem_repeat(7,minmax(0,1fr))] border-b border-grid bg-ink">
           <div />
           {days.map((date) => {
             const inside = isInRange(date);
@@ -86,10 +148,14 @@ export function WeekGrid({
               <button
                 key={toIso(date)}
                 type="button"
+                data-iso={toIso(date)}
                 disabled={!inside}
+                aria-current={active ? "date" : undefined}
+                aria-label={formatLong(date)}
                 onClick={() => onSelect(date)}
+                onKeyDown={onHeaderKey}
                 className={cn(
-                  "border-l border-line px-1 py-2 text-center",
+                  "border-l border-grid px-1 py-2 text-center",
                   active && "bg-wash",
                   !inside && "opacity-35",
                 )}
@@ -112,7 +178,7 @@ export function WeekGrid({
           })}
         </div>
         <div className="relative grid grid-cols-[3.25rem_repeat(7,minmax(0,1fr))]" style={{ height }}>
-          <div className="relative border-r border-line bg-ink">
+          <div className="relative border-r border-grid bg-ink">
             {HOURS.map((hour) => (
               <div
                 key={hour}
@@ -152,10 +218,10 @@ function DayColumn({
 
   return (
     <div
-      className={cn("relative border-l border-line", selected && "bg-wash", !inside && "opacity-40")}
+      className={cn("relative border-l border-grid", selected && "bg-wash", !inside && "opacity-40")}
       style={{
         height,
-        backgroundImage: "linear-gradient(to bottom, transparent calc(100% - 1px), var(--color-line) calc(100% - 1px))",
+        backgroundImage: "linear-gradient(to bottom, transparent calc(100% - 1px), var(--color-grid) calc(100% - 1px))",
         backgroundSize: `100% ${HOUR_PX}px`,
       }}
     >
@@ -169,9 +235,12 @@ function DayColumn({
           <button
             key={`${item.kind}-${item.start}-${index}`}
             type="button"
+            data-block
+            data-day={toIso(date)}
+            aria-label={`${formatLong(date)}, ${itemLabel(item)}, ${itemMeta(item)}`}
             onClick={() => openItem(modals, plan!.iso, plan!, item)}
             className={cn(
-              "absolute overflow-hidden rounded-block px-1 py-0.5 text-left",
+              "week-block absolute overflow-hidden rounded-block px-1 py-0.5 text-left",
               KIND_CLASS[item.kind],
             )}
             style={{ top: top + 1, height: blockHeight, width, left }}

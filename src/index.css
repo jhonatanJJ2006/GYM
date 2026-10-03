@@ -9,7 +9,8 @@
   --color-panel-2: #222222;
   --color-line: #2c2c2c;
   --color-cream: #f2f2f2;
-  --color-muted: #8d8d8d;
+  --color-muted: #9b9b9b;
+  --color-grid: #5e5e5e;
   --color-accent: #f2f2f2;
   --color-work: #d0d0d0;
   --color-meal: #c8c8c8;
@@ -47,9 +48,17 @@
 
   button:focus-visible,
   a:focus-visible,
-  summary:focus-visible {
+  summary:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
     outline: 2px solid var(--color-cream);
     outline-offset: 3px;
+  }
+
+  .week-block:focus-visible {
+    outline: 2px solid var(--color-cream);
+    outline-offset: -2px;
   }
 
   summary {
@@ -80,5 +89,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
