@@ -95,15 +95,29 @@ export function TrainingPage() {
 
       <h2 className="mb-2 mt-8 font-display text-2xl tracking-tight">Cada día</h2>
       <ul className="overflow-hidden rounded-[1.4rem] bg-panel">
-        {PATTERN.map(([day, title, time]) => (
-          <li key={day} className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3 last:border-0">
-            <span>
-              <span className="block text-sm font-semibold">{day}</span>
-              <span className="text-sm text-muted">{title}</span>
-            </span>
-            <span className="shrink-0 text-sm font-semibold tabular-nums text-cream/80">{time}</span>
-          </li>
-        ))}
+        {PATTERN.map(([day, title, time], index) => {
+          const session = [
+            SESSIONS.push,
+            SESSIONS.legs,
+            SESSIONS.pull,
+            SESSIONS.tri,
+            SESSIONS.legsB,
+            SESSIONS.absA,
+            SESSIONS.absB,
+          ][index];
+          return (
+            <li key={day} className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3 last:border-0">
+              <span className="flex min-w-0 items-center gap-3">
+                <ExerciseThumb pose={session.exercises[0].pose} />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">{day}</span>
+                  <span className="text-sm text-muted">{title}</span>
+                </span>
+              </span>
+              <span className="shrink-0 text-sm font-semibold tabular-nums text-cream/80">{time}</span>
+            </li>
+          );
+        })}
       </ul>
 
       <h2 className="mb-1 mt-8 font-display text-2xl tracking-tight">Qué semana toca</h2>
