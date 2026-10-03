@@ -8,6 +8,7 @@ import { formatLong, parseIso } from "../lib/dates.ts";
 import { buildDay } from "../lib/schedule.ts";
 import { formatDuration, formatSpan } from "../lib/time.ts";
 import { ExerciseFigure } from "./ExerciseFigure.tsx";
+import { ExerciseViewSwitch } from "./ExerciseView.tsx";
 import { MealArt } from "./MealArt.tsx";
 import { ExerciseList, MealDetail } from "./Recipe.tsx";
 import { CompactRow } from "./system/CompactRow.tsx";
@@ -362,6 +363,7 @@ function SessionBody({
       <p className="text-sm text-muted">
         {session.time} · {session.minutesLabel}
       </p>
+      <ExerciseViewSwitch />
       <p className="text-sm leading-relaxed text-cream/85">{session.note}</p>
       {note ? <p className="rounded-row bg-panel px-3 py-3 text-sm leading-relaxed text-cream">{note}</p> : null}
       <ExerciseList exercises={session.exercises} onOpen={(index) => modals.openExercise(session.id, index)} />
@@ -422,6 +424,7 @@ function ExerciseBody({
       <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
         {title}
       </h2>
+      <ExerciseViewSwitch />
       <p className="text-sm leading-relaxed text-cream/90">{exercise.how}</p>
       <dl className="grid gap-2 sm:grid-cols-2">
         <div className="rounded-row bg-panel px-3 py-3">

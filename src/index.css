@@ -101,4 +101,8 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  .exercise-glyph animateTransform {
+    display: none;
+  }
 }
