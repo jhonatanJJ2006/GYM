@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useModals } from "../components/Modals.tsx";
 import { Button } from "../components/ui/button.tsx";
-import { classKey, classesFor } from "../data/courses.ts";
+import { classKey, classesFor, courseColor } from "../data/courses.ts";
 import { CompactRow } from "../components/system/CompactRow.tsx";
 import { HOLIDAYS } from "../data/holidays.ts";
 import {
@@ -115,7 +115,8 @@ function DayColumn({ date }: { date: Date }) {
               <CompactRow
                 title={block.name}
                 meta={`${block.start}–${block.end}`}
-                className="shadow-[inset_3px_0_0_var(--color-rail-class)]"
+                wrap
+                accent={courseColor(block.name)}
                 onClick={() => modals.openClass(iso, classKey(block))}
               />
             </li>

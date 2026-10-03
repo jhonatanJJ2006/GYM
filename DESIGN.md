@@ -8,7 +8,7 @@ La interfaz sigue oscura y callada, pero cada tipo de bloque y cada sección tie
 - Una fila de lista no lleva foto grande.
 - La foto grande vive solo dentro del modal, al tocar el bloque, la comida o el ejercicio.
 - No se inventan horarios. Desayuno 5:30–6:00. Gym y trabajo se leen de los datos que ya existen.
-- Las materias no se distinguen entre sí. El color de clase es uno solo. El nombre y la hora bastan.
+- En la grilla de `/` todas las clases comparten el azul acero. En `/clases` cada asignatura tiene su color, siempre el mismo.
 
 ## Color
 
@@ -96,6 +96,26 @@ Los filtros (clases, trabajo, gym, comidas) solo muestran u ocultan bloques. No 
 
 Una línea: título que trunca, y a la derecha un meta (hora) si se pasa. En `/clases` el meta es la hora de inicio; tipo, salón y profesor quedan en el modal. En `/comidas` y en entreno el meta es la hora y, a la izquierda, una miniatura.
 
+
+### Asignaturas en `/clases`
+
+El color no se sortea. Sale del mapa fijo `COURSE_COLOR` en `src/data/courses.ts`, leído con `courseColor(nombre)`. La misma asignatura usa el mismo hex todos los días y todas las semanas.
+
+| Asignatura | Hex | Matiz |
+| --- | --- | --- |
+| Fundamentos de Ingeniería de Software | `#6ea8fe` | azul |
+| Practicum 2.1 | `#2ec4b6` | verde azulado |
+| Estadística y Probabilidad | `#f0c14a` | ámbar |
+| Sistemas Operativos | `#ff6b4a` | coral |
+| Lógica Digital | `#c084fc` | violeta |
+| Ética y Moral | `#8fd99a` | verde |
+| Ingeniería Web | `#ff8fab` | rosa |
+| Introducción a la Inteligencia de Negocios | `#f3a35c` | naranja |
+
+La fila mezcla ese hex al 26% con `--color-panel` y lleva una franja de 3px del color pleno. El nombre va en `--color-cream`, así el texto no se apoya en el tinte claro. No hay `truncate`, `line-clamp` ni `overflow: hidden` sobre el nombre: si no entra en una línea, hace salto y la fila crece. La hora permanece entera a la derecha.
+
+Ese mapa no se usa en la grilla de `/`. Allí un bloque de clase sigue en `--color-block-class` y `--color-rail-class`.
+
 ### Miniatura — `Thumbnail`
 
 `src/components/system/Thumbnail.tsx`.
@@ -113,7 +133,7 @@ Hoja inferior en el teléfono y diálogo centrado desde `sm`. Fondo `ink`, radio
 
 - Comida: `MealArt` / `PhotoHero`, aspecto 4/3, crédito de la foto.
 - Ejercicio y sesión de gym: `ExerciseFigure` / `PhotoHero`.
-- Clase: nombre, y en filas etiquetadas el horario, la descripción (tipo y modalidad), el aula, el profesor y el NRC. Sin foto. La fila de `/clases` solo lleva el nombre y la hora en la misma línea.
+- Clase: nombre, y en el modal el horario, la descripción (tipo y modalidad), el aula, el profesor y el NRC. Sin foto. En `/clases` la fila muestra el nombre completo y la hora; si el nombre no cabe, parte líneas y la fila crece.
 
 El resumen del día, si se abre, usa filas cortas. No apila fotos grandes.
 
@@ -136,7 +156,7 @@ Abdomen y oblicuos son un solo grupo: cuatro máquinas cada uno, no un 4+4 inven
 
 ## Qué no hacer
 
-- No volver al verde lima ni a un color por materia. Tampoco vuelvas a dejar clase, trabajo, gym y comida del mismo gris.
+- No volver al verde lima. En `/` no pintes cada materia de un color distinto: ahí manda el tipo de bloque. En `/clases` sí, con el mapa fijo de abajo. No dejes clase, trabajo, gym y comida del mismo gris.
 - No poner la foto del plato o del ejercicio en la grilla ni en la fila.
 - No alargar una fila con descripción, salón o profesor.
 - No cambiar el desayuno, el gym del jueves (19:15–20:30) ni los bloques de trabajo calculados.
