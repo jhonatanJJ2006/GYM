@@ -12,22 +12,22 @@
   --color-muted: #9b9b9b;
   --color-grid: #5e5e5e;
   --color-accent: #f2f2f2;
-  --color-work: #d4b483;
-  --color-meal: #9dbea0;
+  --color-work: #e8c98a;
+  --color-meal: #b7dcb8;
   --color-warn: #e6e6e6;
-  --color-block-class: #1c2a38;
-  --color-block-work: #2c261c;
-  --color-block-gym: #2c221c;
-  --color-block-meal: #1c2820;
-  --color-rail-class: #8eb4d4;
-  --color-rail-work: #d4b483;
-  --color-rail-gym: #e09a78;
-  --color-rail-meal: #9dbea0;
-  --color-mark-cal: #9bb8d0;
-  --color-mark-clases: #7eadd4;
-  --color-mark-semana: #c4b4dc;
-  --color-mark-entreno: #e09a78;
-  --color-mark-comidas: #9dbea0;
+  --color-block-class: #2a4660;
+  --color-block-work: #4a3b28;
+  --color-block-gym: #4a3228;
+  --color-block-meal: #2a4634;
+  --color-rail-class: #a9d0f2;
+  --color-rail-work: #e8c98a;
+  --color-rail-gym: #f0b08a;
+  --color-rail-meal: #b7dcb8;
+  --color-mark-cal: #b7d4ee;
+  --color-mark-clases: #9ec4ee;
+  --color-mark-semana: #d4c6ee;
+  --color-mark-entreno: #f0b08a;
+  --color-mark-comidas: #b7dcb8;
   --color-wash: #141414;
   --radius-block: 0.35rem;
   --radius-row: 0.5rem;
@@ -117,7 +117,7 @@
 }
 
 .page-root {
-  --page-glow: rgb(155 184 208 / 0.14);
+  --page-glow: rgb(169 208 242 / 0.22);
   --color-mark: var(--color-mark-cal);
   min-height: 100dvh;
   background:
@@ -126,21 +126,21 @@
 }
 
 .page-root[data-page="clases"] {
-  --page-glow: rgb(126 173 212 / 0.16);
+  --page-glow: rgb(158 196 238 / 0.24);
   --color-mark: var(--color-mark-clases);
 }
 
 .page-root[data-page="semana"] {
-  --page-glow: rgb(196 180 220 / 0.14);
+  --page-glow: rgb(212 198 238 / 0.2);
   --color-mark: var(--color-mark-semana);
 }
 
 .page-root[data-page="entreno"] {
-  --page-glow: rgb(224 154 120 / 0.14);
+  --page-glow: rgb(240 176 138 / 0.2);
   --color-mark: var(--color-mark-entreno);
 }
 
 .page-root[data-page="comidas"] {
-  --page-glow: rgb(157 190 160 / 0.15);
+  --page-glow: rgb(183 220 184 / 0.22);
   --color-mark: var(--color-mark-comidas);
 }

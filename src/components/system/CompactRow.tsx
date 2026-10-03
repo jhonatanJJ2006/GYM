@@ -25,7 +25,7 @@ export function CompactRow({
 }) {
   const accentStyle: CSSProperties | undefined = accent
     ? {
-        backgroundColor: `color-mix(in srgb, ${accent} 26%, var(--color-panel))`,
+        backgroundColor: `color-mix(in srgb, ${accent} 42%, var(--color-panel))`,
         boxShadow: `inset 3px 0 0 ${accent}`,
       }
     : undefined;

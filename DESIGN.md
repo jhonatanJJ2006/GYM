@@ -26,21 +26,21 @@ Tokens en `src/index.css` (`@theme`). No uses hex sueltos en las pantallas.
 | `--color-grid` | `#5e5e5e` | Líneas de la grilla del calendario |
 | `--color-accent` | `#f2f2f2` | Igual que cream. Selección, no un acento de color |
 | `--color-warn` | `#e6e6e6` | Aviso, sin amarillo |
-| `--color-block-class` | `#1c2a38` | Fondo del bloque de clase, azul acero oscuro |
-| `--color-rail-class` | `#8eb4d4` | Franja de clase (`bg-rail-class`) |
-| `--color-block-work` | `#2c261c` | Fondo del bloque de trabajo, piedra cálida |
-| `--color-rail-work` | `#d4b483` | Franja de trabajo, arena |
-| `--color-block-gym` | `#2c221c` | Fondo del bloque de gym, cobre oscuro |
-| `--color-rail-gym` | `#e09a78` | Franja de gym, cobre |
-| `--color-block-meal` | `#1c2820` | Fondo del bloque de comida, verde oscuro |
-| `--color-rail-meal` | `#9dbea0` | Franja de comida, salvia |
-| `--color-mark-cal` | `#9bb8d0` | Marca de `/`, acero |
-| `--color-mark-clases` | `#7eadd4` | Marca de `/clases`, azul |
-| `--color-mark-semana` | `#c4b4dc` | Marca de `/semana`, lila |
-| `--color-mark-entreno` | `#e09a78` | Marca de `/entreno`, cobre |
-| `--color-mark-comidas` | `#9dbea0` | Marca de `/comidas`, salvia |
-| `--color-work` | `#d4b483` | Mismo matiz que la franja de trabajo |
-| `--color-meal` | `#9dbea0` | Mismo matiz que la franja de comida |
+| `--color-block-class` | `#2a4660` | Fondo del bloque de clase, azul acero |
+| `--color-rail-class` | `#a9d0f2` | Franja de clase (`bg-rail-class`) |
+| `--color-block-work` | `#4a3b28` | Fondo del bloque de trabajo, arena oscura |
+| `--color-rail-work` | `#e8c98a` | Franja de trabajo, arena |
+| `--color-block-gym` | `#4a3228` | Fondo del bloque de gym, cobre |
+| `--color-rail-gym` | `#f0b08a` | Franja de gym, cobre |
+| `--color-block-meal` | `#2a4634` | Fondo del bloque de comida, salvia |
+| `--color-rail-meal` | `#b7dcb8` | Franja de comida, salvia |
+| `--color-mark-cal` | `#b7d4ee` | Marca de `/`, acero |
+| `--color-mark-clases` | `#9ec4ee` | Marca de `/clases`, azul |
+| `--color-mark-semana` | `#d4c6ee` | Marca de `/semana`, lila |
+| `--color-mark-entreno` | `#f0b08a` | Marca de `/entreno`, cobre |
+| `--color-mark-comidas` | `#b7dcb8` | Marca de `/comidas`, salvia |
+| `--color-work` | `#e8c98a` | Mismo matiz que la franja de trabajo |
+| `--color-meal` | `#b7dcb8` | Mismo matiz que la franja de comida |
 | `--color-wash` | `#141414` | Columna o día seleccionado (`bg-wash`) |
 
 El texto de los bloques es `--color-cream` sobre esos fondos oscuros. La hora dentro del bloque va en `text-cream/80`, no en un tinte claro. La franja es `box-shadow: inset 3px 0 0` con el token `--color-rail-*`. No uses un fondo pálido con texto claro.
@@ -112,7 +112,9 @@ El color no se sortea. Sale del mapa fijo `COURSE_COLOR` en `src/data/courses.ts
 | Ingeniería Web | `#ff8fab` | rosa |
 | Introducción a la Inteligencia de Negocios | `#f3a35c` | naranja |
 
-La fila mezcla ese hex al 26% con `--color-panel` y lleva una franja de 3px del color pleno. El nombre va en `--color-cream`, así el texto no se apoya en el tinte claro. No hay `truncate`, `line-clamp` ni `overflow: hidden` sobre el nombre: si no entra en una línea, hace salto y la fila crece. La hora permanece entera a la derecha.
+La fila mezcla ese hex al 42% con `--color-panel` y lleva una franja de 3px del color pleno. El nombre va en `--color-cream`, así el texto no se apoya en el tinte claro. No hay `truncate`, `line-clamp` ni `overflow: hidden` sobre el nombre: si no entra en una línea, hace salto y la fila crece. La hora permanece entera a la derecha.
+
+En la grilla de `/`, gym y comida llevan una miniatura de 16px (`size-4`) si ya existe foto en `mealPhoto` o `exercisePhoto`. Clase y trabajo no tienen imagen y no se inventa una. La foto grande sigue solo en el modal.
 
 Ese mapa no se usa en la grilla de `/`. Allí un bloque de clase sigue en `--color-block-class` y `--color-rail-class`.
 
