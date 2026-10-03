@@ -37,7 +37,7 @@ export function MealsPage() {
 
   return (
     <div>
-      <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
+      <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
       <h1 className="font-display text-4xl leading-none tracking-tight">Comidas</h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
         Meta ~{PROFILE.kcal} kcal y {PROFILE.protein} g de proteína. Estimación para {PROFILE.weightKg} kg y{" "}
@@ -112,6 +112,7 @@ export function MealsPage() {
                 title={meal.role}
                 meta={mealWhen(meal)}
                 thumb={<MealThumb ingredients={meal.ingredients} />}
+                className="shadow-[inset_3px_0_0_var(--color-rail-meal)]"
                 onClick={() => modals.openMeal(dow, index)}
               />
             </li>

@@ -15,10 +15,10 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, index) => START_
 type Kind = "clase" | "trabajo" | "gym" | "comida";
 
 const KIND_CLASS: Record<Kind, string> = {
-  clase: "bg-block-class text-cream",
-  trabajo: "bg-block-work text-cream ring-1 ring-inset ring-line",
-  gym: "bg-block-gym text-cream",
-  comida: "bg-block-meal text-cream ring-1 ring-inset ring-line",
+  clase: "bg-block-class text-cream shadow-[inset_3px_0_0_var(--color-rail-class)]",
+  trabajo: "bg-block-work text-cream shadow-[inset_3px_0_0_var(--color-rail-work)]",
+  gym: "bg-block-gym text-cream shadow-[inset_3px_0_0_var(--color-rail-gym)]",
+  comida: "bg-block-meal text-cream shadow-[inset_3px_0_0_var(--color-rail-meal)]",
 };
 
 function itemEnd(item: TimelineItem): number {
@@ -240,14 +240,14 @@ function DayColumn({
             aria-label={`${formatLong(date)}, ${itemLabel(item)}, ${itemMeta(item)}`}
             onClick={() => openItem(modals, plan!.iso, plan!, item)}
             className={cn(
-              "week-block absolute overflow-hidden rounded-block px-1 py-0.5 text-left",
+              "week-block absolute overflow-hidden rounded-block py-0.5 pl-1.5 pr-1 text-left",
               KIND_CLASS[item.kind],
             )}
             style={{ top: top + 1, height: blockHeight, width, left }}
           >
             <span className="block truncate text-[10px] font-medium leading-tight">{itemLabel(item)}</span>
             {blockHeight >= 32 ? (
-              <span className="block truncate text-[9px] leading-tight text-muted">{itemMeta(item)}</span>
+              <span className="block truncate text-[9px] leading-tight text-cream/80">{itemMeta(item)}</span>
             ) : null}
           </button>
         );
