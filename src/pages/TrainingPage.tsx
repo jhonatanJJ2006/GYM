@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ExerciseViewSwitch } from "../components/ExerciseView.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { CompactRow } from "../components/system/CompactRow.tsx";
 import { ExerciseThumb } from "../components/system/Thumbnail.tsx";
@@ -50,6 +51,7 @@ export function TrainingPage() {
         El ciclo abre el lunes 5 de octubre de 2026. Semanas 1 y 3, el jueves es hombro + tríceps. Semanas 2 y 4,
         hombro + bíceps. El primer jueves, el 8 de octubre, es hombro y tríceps. En febrero el jueves sigue igual.
       </p>
+      <ExerciseViewSwitch className="mt-4 max-w-sm" />
       {isInRange(today) ? (
         <div className="mt-5">
           <CompactRow

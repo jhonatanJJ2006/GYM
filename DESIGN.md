@@ -90,6 +90,9 @@ Una línea: título que trunca, y a la derecha un meta (hora) si se pasa. En `/c
 
 40×40 (`size-10`), `object-cover`, radio `--radius-row`. `MealThumb` y `ExerciseThumb` leen las mismas fotos de `src/data/photos.ts`. El `alt` va vacío porque el texto de la fila ya nombra el elemento. En `/comidas` la miniatura va en la fila; la foto 4/3 sigue solo en el modal.
 
+`ExerciseThumb` sigue esa medida. En Entreno, y en el modal de la sesión o del ejercicio, el control «Vista de los ejercicios» alterna las fotos actuales y unas figuras de trazo (sin foto de persona). Por defecto quedan las fotos, para no tapar la revisión de las imágenes. La elección se guarda en `localStorage` (`hierro.exercise-view`). Las comidas no entran en el interruptor: `MealThumb` y `MealArt` siguen siendo fotos. Con «reducir movimiento» del sistema, la figura se queda quieta en una pose que todavía se lee como el ejercicio.
+
+
 ### Modal
 
 `ModalShell` en `src/components/Modals.tsx`.
