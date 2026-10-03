@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { MealDetail } from "../components/Recipe.tsx";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion.tsx";
+import { MealArt } from "../components/MealArt.tsx";
+import { useModals } from "../components/Modals.tsx";
 import { Button } from "../components/ui/button.tsx";
-import { MEALS, WEEKDAY_MEAL_ORDER } from "../data/meals.ts";
+import { MEALS, WEEKDAY_MEAL_ORDER, mealWhen } from "../data/meals.ts";
 import { DISCLAIMER, KCAL_INTRO, KCAL_POINTS, PROFILE, SHOPPING, SHOPPING_NOTE } from "../data/nutrition.ts";
 import { DOW_LONG, initialIso, parseIso } from "../lib/dates.ts";
 import { cn } from "../lib/utils.ts";
@@ -24,6 +24,7 @@ function readChecks(): boolean[] {
 }
 
 export function MealsPage() {
+  const modals = useModals();
   const [dow, setDow] = useState(() => parseIso(initialIso()).getDay());
   const [checks, setChecks] = useState<boolean[]>(readChecks);
   const day = MEALS[dow];
@@ -43,23 +44,25 @@ export function MealsPage() {
       </p>
 
       <dl className="mt-5 grid grid-cols-3 gap-2">
-        <div className="rounded-2xl bg-accent px-3 py-3 text-ink">
-          <dt className="text-[0.68rem] font-semibold uppercase tracking-wide">Kcal</dt>
+        <div className="rounded-[1.4rem] bg-accent px-3 py-4 text-ink">
+          <dt className="text-sm font-semibold">Kcal</dt>
           <dd className="font-display text-3xl leading-none">{PROFILE.kcal}</dd>
         </div>
-        <div className="rounded-2xl bg-panel px-3 py-3">
-          <dt className="text-[0.68rem] font-semibold uppercase tracking-wide text-muted">Proteína</dt>
+        <div className="rounded-[1.4rem] bg-panel px-3 py-4 ring-1 ring-white/8">
+          <dt className="text-sm text-muted">Proteína</dt>
           <dd className="font-display text-3xl leading-none">{PROFILE.protein} g</dd>
         </div>
-        <div className="rounded-2xl bg-panel px-3 py-3">
-          <dt className="text-[0.68rem] font-semibold uppercase tracking-wide text-muted">IMC</dt>
+        <div className="rounded-[1.4rem] bg-panel px-3 py-4 ring-1 ring-white/8">
+          <dt className="text-sm text-muted">IMC</dt>
           <dd className="font-display text-3xl leading-none">~{PROFILE.bmi}</dd>
         </div>
       </dl>
 
       <section className="mt-8">
         <h2 className="font-display text-2xl tracking-tight">Hoy en el plato</h2>
-        <p className="mt-1 text-sm text-muted">El jueves el pre-entreno es a las 19:00, no a las 17:10.</p>
+        <p className="mt-1 text-sm text-muted">
+          El desayuno es de 5:30 a 6:00. El jueves el pre-entreno sigue a las 19:00.
+        </p>
         <div className="mt-3 grid grid-cols-7 gap-1">
           {WEEKDAY_MEAL_ORDER.map((value, index) => (
             <button
@@ -79,26 +82,26 @@ export function MealsPage() {
         <p className="mt-3 text-sm text-cream/85">
           {DOW_LONG[dow].replace(/^./, (letter) => letter.toUpperCase())} · ~{day.total}
         </p>
-        <Accordion key={dow} type="multiple" className="mt-3 space-y-2">
-          {day.items.map((meal) => (
-            <AccordionItem
-              key={`${dow}-${meal.time}-${meal.role}`}
-              value={`${meal.time}-${meal.role}`}
-              className="rounded-2xl bg-panel px-3"
-            >
-              <AccordionTrigger className="min-h-16">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-meal">{meal.time}</p>
-                <p className="mt-1 font-display text-xl leading-tight">{meal.role}</p>
-                <p className="text-sm text-muted">
-                  ~{meal.kcal} kcal · ~{meal.protein} g
-                </p>
-              </AccordionTrigger>
-              <AccordionContent>
-                <MealDetail meal={meal} />
-              </AccordionContent>
-            </AccordionItem>
+        <ul className="mt-3 space-y-2">
+          {day.items.map((meal, index) => (
+            <li key={`${dow}-${meal.time}-${meal.role}`}>
+              <button
+                type="button"
+                onClick={() => modals.openMeal(dow, index)}
+                className="w-full overflow-hidden rounded-[1.6rem] bg-panel text-left ring-1 ring-white/8"
+              >
+                <MealArt ingredients={meal.ingredients} label={meal.role} />
+                <span className="block px-4 py-4">
+                  <span className="block text-sm text-meal">{mealWhen(meal)}</span>
+                  <span className="mt-1 block font-display text-2xl leading-tight">{meal.role}</span>
+                  <span className="text-sm text-muted">
+                    ~{meal.kcal} kcal · ~{meal.protein} g
+                  </span>
+                </span>
+              </button>
+            </li>
           ))}
-        </Accordion>
+        </ul>
       </section>
 
       <section className="mt-8">

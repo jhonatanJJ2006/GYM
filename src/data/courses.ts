@@ -189,6 +189,10 @@ export const CLASSES: Record<Weekday, ClassBlock[]> = {
   ],
 };
 
+export function classKey(block: ClassBlock): string {
+  return `${block.start}|${block.end}|${block.name}|${block.type}`;
+}
+
 export function classesFor(date: Date): ClassBlock[] {
   if (!isInTerm(date)) return [];
   const dow = date.getDay();

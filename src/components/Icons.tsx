@@ -41,6 +41,14 @@ export function IconTrain(props: IconProps) {
   );
 }
 
+export function IconClasses(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M5 5.5h6.5V12H5zM12.5 5.5H19V9h-6.5zM12.5 11H19v7.5h-6.5zM5 14h6.5v4.5H5z" />
+    </svg>
+  );
+}
+
 export function IconMeal(props: IconProps) {
   return (
     <svg {...base(props)}>

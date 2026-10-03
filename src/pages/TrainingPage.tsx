@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ExerciseList } from "../components/Recipe.tsx";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion.tsx";
+import { ExerciseFigure } from "../components/ExerciseFigure.tsx";
+import { useModals } from "../components/Modals.tsx";
 import { SESSIONS, sessionColor, sessionFor, shoulderFocus, type Session } from "../data/sessions.ts";
 import {
   ANCHOR_MON,
@@ -37,6 +37,7 @@ const PATTERN = [
 ] as const;
 
 export function TrainingPage() {
+  const modals = useModals();
   const weeks = weeksCoveringRange();
   const [today] = useState(() => new Date());
 
@@ -44,10 +45,29 @@ export function TrainingPage() {
     <div>
       <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
       <h1 className="font-display text-[2.6rem] leading-none tracking-tight">Entreno</h1>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
+      <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted">
         El ciclo abre el lunes 5 de octubre de 2026. Semanas 1 y 3, el jueves es hombro + tríceps. Semanas 2 y 4,
         hombro + bíceps. El primer jueves, el 8 de octubre, es hombro y tríceps. En febrero el jueves sigue igual.
       </p>
+      {isInRange(today) ? (
+        <button
+          type="button"
+          onClick={() => modals.openGym(toIso(today))}
+          className="mt-5 w-full overflow-hidden rounded-[1.8rem] bg-panel text-left ring-1 ring-white/10"
+        >
+          <ExerciseFigure
+            pose={(sessionFor(today).exercises.find((exercise) => exercise.name !== "Calentamiento") ?? sessionFor(today).exercises[0]).pose}
+            label={sessionFor(today).title}
+          />
+          <span className="block px-4 py-4">
+            <span className="text-sm text-muted">Hoy · {sessionFor(today).time}</span>
+            <span className="mt-1 block font-display text-3xl leading-none">{sessionFor(today).title}</span>
+            <span className="mt-4 inline-flex rounded-full bg-accent px-4 py-2 text-sm font-semibold text-ink">
+              Abrir la sesión
+            </span>
+          </span>
+        </button>
+      ) : null}
 
       <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
         {[1, 2, 3, 4].map((week) => {
@@ -58,7 +78,7 @@ export function TrainingPage() {
               key={week}
               className="w-[82%] shrink-0 snap-start rounded-[1.6rem] bg-panel p-4 ring-1 ring-white/10 sm:w-[46%]"
             >
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-accent">Semana {week}</p>
+              <p className="text-sm font-semibold text-accent">Semana {week}</p>
               <h2 className="mt-2 font-display text-3xl leading-none tracking-tight">Hombro + {focus}</h2>
               <p className="mt-2 text-sm text-muted">
                 Jueves {thursday.getDate()} de octubre · {sessionFor(thursday).time}
@@ -136,22 +156,28 @@ export function TrainingPage() {
 
       <h2 className="mb-2 mt-8 font-display text-2xl tracking-tight">Rutinas</h2>
       <p className="mb-3 text-sm text-muted">Abre una sesión y, dentro, cada ejercicio: el dibujo, las repeticiones y el peso.</p>
-      <Accordion type="single" collapsible className="space-y-2">
-        {ROUTINES.map((session) => (
-          <AccordionItem key={session.id} value={session.id} className="rounded-[1.4rem] bg-panel px-3 ring-1 ring-white/8">
-            <AccordionTrigger className="min-h-16">
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em]" style={{ color: sessionColor(session) }}>
-                {session.time} · {session.minutesLabel}
-              </p>
-              <p className="mt-1 font-display text-xl leading-tight">{session.title}</p>
-            </AccordionTrigger>
-            <AccordionContent>
-              <p className="mb-2 text-sm leading-relaxed text-muted">{session.note}</p>
-              <ExerciseList exercises={session.exercises} />
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+      <ul className="space-y-2">
+        {ROUTINES.map((session) => {
+          const hero = session.exercises.find((exercise) => exercise.name !== "Calentamiento") ?? session.exercises[0];
+          return (
+            <li key={session.id}>
+              <button
+                type="button"
+                onClick={() => modals.openSession(session.id)}
+                className="w-full overflow-hidden rounded-[1.6rem] bg-panel text-left ring-1 ring-white/8"
+              >
+                <ExerciseFigure pose={hero.pose} label={session.title} />
+                <span className="block px-4 py-4">
+                  <span className="block text-sm" style={{ color: sessionColor(session) }}>
+                    {session.time} · {session.minutesLabel}
+                  </span>
+                  <span className="mt-1 block font-display text-2xl leading-tight">{session.title}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

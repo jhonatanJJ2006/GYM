@@ -1,5 +1,7 @@
 export type Meal = {
   time: string;
+  /** Minuto en que cierra la ventana. Si no hay, la comida es un punto en el día. */
+  end?: string;
   role: string;
   kcal: number;
   protein: number;
@@ -19,8 +21,13 @@ function meal(
   protein: number,
   ingredients: string[],
   steps: string[],
+  end?: string,
 ): Meal {
-  return { time, role, kcal, protein, ingredients, steps };
+  return { time, end, role, kcal, protein, ingredients, steps };
+}
+
+export function mealWhen(item: Meal): string {
+  return item.end ? `${item.time}–${item.end}` : item.time;
 }
 
 export const MEALS: Record<number, MealDay> = {
@@ -28,7 +35,7 @@ export const MEALS: Record<number, MealDay> = {
     total: "2780 kcal · 141 g proteína",
     items: [
       meal(
-        "7:00",
+        "5:30",
         "Desayuno",
         590,
         30,
@@ -111,7 +118,7 @@ export const MEALS: Record<number, MealDay> = {
     total: "2900 kcal · 132 g proteína",
     items: [
       meal(
-        "7:00",
+        "5:30",
         "Desayuno",
         565,
         28,
@@ -186,7 +193,7 @@ export const MEALS: Record<number, MealDay> = {
     total: "2940 kcal · 141 g proteína",
     items: [
       meal(
-        "7:00",
+        "5:30",
         "Desayuno",
         630,
         25,
@@ -254,7 +261,7 @@ export const MEALS: Record<number, MealDay> = {
     total: "2900 kcal · 136 g proteína",
     items: [
       meal(
-        "7:00",
+        "5:30",
         "Desayuno",
         530,
         29,
@@ -328,7 +335,7 @@ export const MEALS: Record<number, MealDay> = {
     total: "2920 kcal · 139 g proteína",
     items: [
       meal(
-        "7:00",
+        "5:30",
         "Desayuno",
         590,
         30,
@@ -401,7 +408,7 @@ export const MEALS: Record<number, MealDay> = {
     total: "2900 kcal · 133 g proteína",
     items: [
       meal(
-        "8:00",
+        "5:30",
         "Desayuno · pre del abdomen",
         590,
         25,
@@ -466,7 +473,7 @@ export const MEALS: Record<number, MealDay> = {
     total: "2990 kcal · 138 g proteína",
     items: [
       meal(
-        "8:00",
+        "5:30",
         "Desayuno · pre del abdomen",
         565,
         28,
@@ -539,3 +546,12 @@ export const MEALS: Record<number, MealDay> = {
 };
 
 export const WEEKDAY_MEAL_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
+
+for (const day of Object.values(MEALS)) {
+  for (const item of day.items) {
+    if (item.role.startsWith("Desayuno")) {
+      item.time = "5:30";
+      item.end = "6:00";
+    }
+  }
+}

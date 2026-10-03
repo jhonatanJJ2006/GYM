@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Legend } from "../components/Legend.tsx";
-import { CLASSES, courseColor, modeLabel, placeOf, type Weekday } from "../data/courses.ts";
+import { useModals } from "../components/Modals.tsx";
+import { CLASSES, classKey, courseColor, modeLabel, placeOf, type Weekday } from "../data/courses.ts";
 import { sessionColor, sessionFor, shoulderFocus } from "../data/sessions.ts";
-import { ANCHOR_MON, DOW_LONG, WEEK_LETTERS, addDays, toIso } from "../lib/dates.ts";
+import { ANCHOR_MON, DOW_LONG, addDays, toIso } from "../lib/dates.ts";
 import { cn } from "../lib/utils.ts";
 
 const DAY_LABEL = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 export function WeekPage() {
+  const modals = useModals();
   const [week, setWeek] = useState(1);
   const [dayIndex, setDayIndex] = useState(0);
   const monday = addDays(ANCHOR_MON, (week - 1) * 7);
@@ -39,7 +41,7 @@ export function WeekPage() {
               week === value ? "bg-accent text-ink" : "text-cream",
             )}
           >
-            <span className="block text-[0.62rem] uppercase tracking-wide">Semana</span>
+            <span className="block text-[0.68rem] font-medium">Semana</span>
             <span className="font-display text-xl leading-none">{value}</span>
           </button>
         ))}
@@ -68,7 +70,6 @@ export function WeekPage() {
       </div>
 
       <article className="mt-4 rounded-[1.6rem] bg-panel p-4" style={{ boxShadow: `inset 4px 0 0 ${color}` }}>
-        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted">{WEEK_LETTERS[dayIndex]}</p>
         <h2 className="font-display text-3xl capitalize tracking-tight">{DOW_LONG[dow]}</h2>
         <p className="mt-1 text-lg font-semibold" style={{ color }}>
           {session.title}
@@ -86,21 +87,27 @@ export function WeekPage() {
         ) : (
           <ul className="mt-4 space-y-4">
             {classes.map((block) => (
-              <li key={`${block.start}-${block.name}-${block.type}`} className="grid grid-cols-[4.6rem_1fr] gap-3">
-                <p className="pt-0.5 text-sm font-semibold tabular-nums" style={{ color: courseColor(block.name) }}>
-                  {block.start}
-                  <span className="mt-0.5 block text-xs font-medium text-muted">{block.end}</span>
-                </p>
-                <div className="min-w-0 border-l border-white/10 pl-3">
-                  <p className="font-semibold leading-snug">{block.name}</p>
-                  <p className="mt-0.5 text-sm text-muted">
-                    {modeLabel(block) === "Sin salón"
-                      ? `${block.type} · ${placeOf(block)}`
-                      : `${modeLabel(block)} · ${block.type} · ${placeOf(block)}`}
-                    {block.nrc ? ` · NRC ${block.nrc}` : ""}
+              <li key={classKey(block)}>
+                <button
+                  type="button"
+                  onClick={() => modals.openClass(toIso(date), classKey(block))}
+                  className="grid w-full grid-cols-[4.6rem_1fr] gap-3 rounded-2xl py-1 text-left"
+                >
+                  <p className="pt-0.5 text-sm font-semibold tabular-nums" style={{ color: courseColor(block.name) }}>
+                    {block.start}
+                    <span className="mt-0.5 block text-xs font-medium text-muted">{block.end}</span>
                   </p>
-                  {block.professor ? <p className="text-sm text-muted">{block.professor}</p> : null}
-                </div>
+                  <span className="min-w-0 border-l border-white/10 pl-3">
+                    <span className="block font-semibold leading-snug">{block.name}</span>
+                    <span className="mt-0.5 block text-sm text-muted">
+                      {modeLabel(block) === "Sin salón"
+                        ? `${block.type} · ${placeOf(block)}`
+                        : `${modeLabel(block)} · ${block.type} · ${placeOf(block)}`}
+                      {block.nrc ? ` · NRC ${block.nrc}` : ""}
+                    </span>
+                    {block.professor ? <span className="block text-sm text-muted">{block.professor}</span> : null}
+                  </span>
+                </button>
               </li>
             ))}
           </ul>

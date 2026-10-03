@@ -36,6 +36,12 @@ export type DayPlan = {
 
 const KIND_ORDER = { clase: 0, trabajo: 1, gym: 2, comida: 3 } as const;
 
+function mealBusy(item: Meal): Interval {
+  const start = parseClock(item.time);
+  if (item.end) return { start, end: parseClock(item.end) };
+  return { start, end: start + MEAL_HOLD };
+}
+
 function mergeIntervals(list: Interval[]): Interval[] {
   const sorted = [...list].sort((a, b) => a.start - b.start || a.end - b.end);
   const merged: Interval[] = [];
@@ -77,10 +83,7 @@ export function workBlocksFor(date: Date): Interval[] {
   const busy: Interval[] = [
     ...classesFor(date).map((block) => classInterval(block.start, block.end)),
     spanInterval(sessionFor(date).time),
-    ...MEALS[dow].items.map((item) => {
-      const start = parseClock(item.time);
-      return { start, end: start + MEAL_HOLD };
-    }),
+    ...MEALS[dow].items.map((item) => mealBusy(item)),
   ];
 
   const blocks: Interval[] = [];

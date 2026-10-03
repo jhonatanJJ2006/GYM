@@ -3,17 +3,17 @@
 @theme {
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #0e0d12;
-  --color-ink-2: #17161e;
-  --color-panel: #1c1b24;
-  --color-panel-2: #262432;
-  --color-line: #3c3850;
-  --color-cream: #f4f0ea;
-  --color-muted: #a39cb2;
-  --color-accent: #ffb086;
-  --color-work: #c5d0ff;
-  --color-meal: #f3b7c9;
-  --color-warn: #f0c9a0;
+  --color-ink: #050607;
+  --color-ink-2: #0c0e11;
+  --color-panel: #12151a;
+  --color-panel-2: #1a1e24;
+  --color-line: #2a3038;
+  --color-cream: #f4f7f2;
+  --color-muted: #9aa39a;
+  --color-accent: #c6f135;
+  --color-work: #c9d4ff;
+  --color-meal: #f0b7c8;
+  --color-warn: #e6c27a;
 }
 
 @layer base {
@@ -25,7 +25,7 @@
     margin: 0;
     min-height: 100dvh;
     background:
-      radial-gradient(720px 280px at 100% -12%, rgb(255 176 134 / 0.16), transparent 58%),
+      radial-gradient(880px 320px at 50% -18%, rgb(198 241 53 / 0.07), transparent 62%),
       var(--color-ink);
     color: var(--color-cream);
     font-family: var(--font-sans);
@@ -39,6 +39,13 @@
     touch-action: manipulation;
   }
 
+  button:focus-visible,
+  a:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
   summary {
     list-style: none;
   }
@@ -50,5 +57,22 @@
   ::selection {
     background: var(--color-accent);
     color: var(--color-ink);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .modal-sheet {
+    animation: sheet-in 180ms ease-out;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

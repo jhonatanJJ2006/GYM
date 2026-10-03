@@ -1,0 +1,58 @@
+# Créditos de las fotos
+
+Las fotografías están en Wikimedia Commons y se pueden usar con la licencia indicada. Cada imagen también lleva el autor y la licencia en la propia pantalla.
+
+- Tazón de avena — Keypunch, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Bowl_of_porridge_with_spoon.jpg
+- Huevos revueltos — OmegaFallon, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Scrambled_eggs_with_basil.jpg
+- Tostada con aguacate y huevo — Asramsey, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Fresh_Avocado_Toast_with_Egg.jpg
+- Arroz con pollo y tomate — Petar Milošević, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Parboiled_rice_with_chicken,_peppers,_cucurbita,_peas_and_tomato.jpg
+- Pollo con pasta y brócoli — FitTasteTic, CC BY-SA 2.0. https://commons.wikimedia.org/wiki/File:Chicken_with_pasta_and_mushroom_ragout_and_Broccoli.jpg
+- Pollo con verde, fréjol y arroz — Endee n, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Fried_rice,_baked_beans_with_fried_plantains_and_chicken.jpg
+- Verde con huevo — Edithobayaa1, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Beans,_fried_plantain_with_egg.jpg
+- Sándwich de atún — Le living and co, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Tuna_sandwich.jpg
+- Arroz con atún — pelican, CC BY-SA 2.0. https://commons.wikimedia.org/wiki/File:Spicy_tuna_rice_bowl_(35032450572).jpg
+- Tazón de yogur con fruta — Jumbocombo0811, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Yogurt_fruit_bowl.jpg
+- Arroz con carne molida — Alpha, CC BY-SA 2.0. https://commons.wikimedia.org/wiki/File:Mince_Beef_Fried_Rice_-_Nam_Loong_Seafood_Restaurant_AUD8_(4730288622).jpg
+- Pollo con papa — HaJunkiyada, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Homemade_Grilled_Chicken_with_Baked_Potatoes_and_Israeli_Salad.jpg
+- Camote horneado — Ella Olsson, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Baked_Cinnamon_Sweet_Potatoes_(30863441397).jpg
+- Choclo cocido — NeoBatfreak, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Air_fried_corn-on-the-cob_(United_States).jpg
+- Arroz con lenteja — Joey Doll, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Lentils_and_rice_(29307658418).jpg
+- Pan con queso y manzana — Kitchen Life of a Navy Wife, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Rosemary_Apple_Butter_Grilled_Cheese_Sandwich.jpg
+- Huevo duro — Marc-Lautenbacher, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Hard_boiled_egg_on_breakfast_table.jpg
+- Pan con plátano — Navin75, CC BY-SA 2.0. https://commons.wikimedia.org/wiki/File:Bananas_Foster_French_Toast_(15288002250).jpg
+- Press de banca con barra — Aditya Oberai, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Bench_Press.jpg
+- Press inclinado con mancuernas — Jeffery J. Gabriel Jr., U.S. Navy, Dominio público. https://commons.wikimedia.org/wiki/File:US_Navy_070227-N-0998G-003_Operations_Specialist_3rd_Class_Greg_Ivy,_a_native_of_Sacramento,_Calif.,_incline_presses_two_30-pound_dumbbells_as_Quartermaster_Seaman_Julian_Marulanda,_a_native_of_Bridgeport,_Conn.,_acts_as_spotte.jpg
+- Aperturas en polea — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Attractive_beautiful_girl_working_on_cross_machine_in_the_gym.jpg
+- Fondos en banco — PTPioneer, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_dips_Exercise.jpg
+- Extensión de tríceps en polea — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:CableMachinePushdown.JPG
+- Elevaciones laterales con mancuernas — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellLateralRaise.JPG
+- Sentadilla con barra — RickyBennison, CC0. https://commons.wikimedia.org/wiki/File:Barbell_pad_back_squat.jpg
+- Prensa de piernas — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_man_using_a_leg_press_machine_at_the_gym.jpg
+- Peso muerto con mancuernas, cadera atrás — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellDeadlift.JPG
+- Zancada con mancuernas — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Dumbbell_lunges.jpg
+- Curl femoral acostado — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:LyingLegCurlMachineExercise.JPG
+- Gemelos de pie con mancuernas — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellStandingCalfRaise.JPG
+- Gemelos sentado — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:SeatedCalfRaiseMachineExercise.JPG
+- Jalón al pecho — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:PulldownMachineExercise.JPG
+- Remo con mancuerna — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellBentOverRow.JPG
+- Remo en polea sentado — Miguel Angel Omaña Rojas, CC0. https://commons.wikimedia.org/wiki/File:Woman_using_a_seated_cable_row_machine_at_the_gym.jpg
+- Curl de bíceps con barra — Scoobytrash, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:StandingBarbellCurl.jpg
+- Curl con mancuerna — PTPioneer, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_one_arm_dumbbell_curl_exercise.jpg
+- Press militar con mancuernas — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_dumbbell_shoulder_press_02.jpg
+- Extensión de tríceps sobre la cabeza — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_double_dumbbell_tricep_extension.jpg
+- Puente de cadera — Sasha Kargaltsev, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Bridge_pose.jpg
+- Dead bug, brazo y pierna contrarios — Jaykayfit, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Alternating_upper_and_lower_extremities.jpg
+- Plancha sobre los antebrazos — Jaykayfit, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Plank.jpg
+- Plancha alta — PTPioneer, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_push-ups_from_the_side.jpg
+- Crunch en el suelo — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:FloorCrunch.JPG
+- Elevación de piernas — PTPioneer, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Abdominal_exercise_leg_raise.jpg
+- Plancha lateral — Jaykayfit, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Side_Plank.jpg
+- Plancha lateral — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_exercising_side_plank.jpg
+- Paseo del granjero con mancuernas — Lance Cpl. Mondo Lescaud, Dominio público. https://commons.wikimedia.org/wiki/File:USMC-111018-M-FY706-002.jpg
+- Giro de tronco sentado — Mr. Yoga, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Mr-yoga-svastika-legs-twist.jpg
+- Rueda abdominal — Corn cheese, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Ab_wheel.jpg
+- Acostado, respirando — Joseph RENGER, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Shavasana.jpg
+- Bicicleta estática — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_attractive_man_practicing_on_exercise_bike_during_cross_training_in_a_gym.jpg
+- Caminata en la caminadora — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Fit_woman_wearing_sportswear_doing_cardio_in_gym_on_a_treadmill.jpg
+- Hombro con banda elástica — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_lateral_raises_with_bands.jpg
+- Brazos abiertos a la altura del hombro — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:The_gym_girl_is_stretching_her_arms.jpg
