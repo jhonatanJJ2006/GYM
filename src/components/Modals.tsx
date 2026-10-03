@@ -11,7 +11,7 @@ import { ExerciseFigure } from "./ExerciseFigure.tsx";
 import { MealArt } from "./MealArt.tsx";
 import { ExerciseList, MealDetail } from "./Recipe.tsx";
 import { CompactRow } from "./system/CompactRow.tsx";
-import { MealThumb } from "./system/Thumbnail.tsx";
+import { ExerciseThumb, MealThumb } from "./system/Thumbnail.tsx";
 
 type Entry =
   | { type: "day"; iso: string }
@@ -182,7 +182,12 @@ function DayBody({ iso, titleId, title }: { iso: string; titleId: string; title:
           {banner}
         </p>
       ))}
-      <CompactRow title={plan.session.title} meta={plan.session.time} onClick={() => modals.openGym(iso)} />
+      <CompactRow
+        title={plan.session.title}
+        meta={plan.session.time}
+        thumb={<ExerciseThumb pose={plan.session.exercises[0].pose} />}
+        onClick={() => modals.openGym(iso)}
+      />
       <ul className="space-y-1">
         {plan.classes.map((block) => (
           <li key={classKey(block)}>
