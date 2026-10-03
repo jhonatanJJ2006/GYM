@@ -140,15 +140,17 @@ export function WeekGrid({
     next.focus();
   }
 
+  const cols = days.length === 1 ? "grid-cols-[2.75rem_minmax(0,1fr)]" : "grid-cols-[2.5rem_repeat(7,minmax(0,1fr))]";
+
   return (
     <div
-      className="overflow-x-auto rounded-row border border-grid bg-ink"
+      className="w-full min-w-0 rounded-row border border-grid bg-ink"
       role="region"
-      aria-label="Calendario semanal"
+      aria-label={days.length === 1 ? "Calendario del día" : "Calendario semanal"}
       onKeyDown={onGridKey}
     >
-      <div className="min-w-[760px]">
-        <div ref={headerRef} className="sticky top-0 z-10 grid grid-cols-[3.25rem_repeat(7,minmax(0,1fr))] border-b border-grid bg-ink">
+      <div className="w-full min-w-0">
+        <div ref={headerRef} className={cn("sticky top-0 z-10 grid border-b border-grid bg-ink", cols)}>
           <div />
           {days.map((date) => {
             const inside = isInRange(date);
@@ -187,7 +189,7 @@ export function WeekGrid({
             );
           })}
         </div>
-        <div className="relative grid grid-cols-[3.25rem_repeat(7,minmax(0,1fr))]" style={{ height }}>
+        <div className={cn("relative grid", cols)} style={{ height }}>
           <div className="relative border-r border-grid bg-ink">
             {HOURS.map((hour) => (
               <div
@@ -268,6 +270,68 @@ function DayColumn({
               </span>
             </span>
           </button>
+        );
+      })}
+    </div>
+  );
+}
+
+
+export function WeekAgenda({
+  days,
+  kinds,
+  selected,
+  onSelect,
+}: {
+  days: Date[];
+  kinds: Record<Kind, boolean>;
+  selected: Date;
+  onSelect: (date: Date) => void;
+}) {
+  const modals = useModals();
+  return (
+    <div className="w-full min-w-0 space-y-3">
+      {days.map((date) => {
+        const inside = isInRange(date);
+        if (!inside) return null;
+        const plan = buildDay(date);
+        const items = plan.items.filter((item) => kinds[item.kind]);
+        const active = isSameDay(date, selected);
+        return (
+          <section key={toIso(date)} className={cn("min-w-0 rounded-row border border-grid", active && "bg-wash")}>
+            <button
+              type="button"
+              onClick={() => onSelect(date)}
+              aria-current={active ? "date" : undefined}
+              className="flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left"
+            >
+              <span className="text-sm font-medium">{formatLong(date)}</span>
+              <span className="text-[0.62rem] uppercase tracking-wide text-muted">{WEEK_LETTERS[(date.getDay() + 6) % 7]}</span>
+            </button>
+            {plan.holiday ? <p className="px-3 pb-2 text-xs text-muted">{plan.holiday}</p> : null}
+            {items.length === 0 ? <p className="px-3 pb-3 text-xs text-muted">Nada con estos filtros.</p> : null}
+            <ul className="space-y-1 px-2 pb-2">
+              {items.map((item, index) => {
+                const thumb = itemThumb(item);
+                return (
+                  <li key={`${item.kind}-${item.start}-${index}`}>
+                    <button
+                      type="button"
+                      onClick={() => openItem(modals, plan.iso, plan, item)}
+                      className={cn(
+                        "flex w-full min-w-0 items-center gap-2 rounded-block px-2 py-1.5 text-left",
+                        KIND_CLASS[item.kind],
+                      )}
+                    >
+                      {thumb ? <img src={thumb} alt="" className="size-4 shrink-0 rounded-[3px] object-cover" /> : null}
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">{itemLabel(item)}</span>
+                      <span className="shrink-0 text-xs tabular-nums text-cream/80">{itemMeta(item)}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
         );
       })}
     </div>

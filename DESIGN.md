@@ -80,15 +80,20 @@ No uses `rounded-[1.6rem]` ni `rounded-[1.8rem]` en filas nuevas.
 
 ## Componentes
 
-### Calendario — `WeekGrid`
+### Calendario — día, semana y mes
 
-`src/components/system/WeekGrid.tsx`.
+`src/pages/CalendarPage.tsx` y `src/components/system/WeekGrid.tsx`.
 
-Semana tipo Apple Calendar: días en la fila de arriba, horas en la columna izquierda, bloques absolutos según la hora de inicio y fin. En pantallas estrechas la grilla se desplaza en horizontal (`min-w-[760px]`); no se convierte en una lista de tarjetas.
+Hay un control de tres vistas: Día, Semana y Mes. En un teléfono (ancho menor a 768px) la vista inicial es el día. Desde 768px la inicial es la semana.
 
-El bloque muestra el nombre corto y, si hay alto, la hora. No importa `MealArt` ni `ExerciseFigure`. Al tocarlo abre el modal que ya existía (`openClass`, `openWork`, `openGym`, `openMeal`).
+Ninguna vista usa scroll horizontal. No pongas `overflow-x` ni un `min-width` que fuerce a deslizar de lado.
 
-Los filtros (clases, trabajo, gym, comidas) solo muestran u ocultan bloques. No cambian horarios.
+- Día: una sola columna de horas (5:00–23:00) a la izquierda y los bloques a la derecha. Cabe en el ancho de la pantalla.
+- Semana, desde 768px: grilla de siete columnas fluidas (`minmax(0, 1fr)`), sin ancho mínimo. Las columnas se comprimen.
+- Semana, por debajo de 768px: no cabe una grilla de siete días con horas. Se apilan siete agendas, una bajo la otra, con la hora a la derecha del nombre. Sigue sin scroll lateral.
+- Mes: siete columnas de fechas, letras de un carácter, y hasta tres puntos de color (clase, trabajo, gym, comida). Debajo, la agenda del día elegido.
+
+El bloque de la grilla muestra el nombre corto, la hora si hay alto, y una miniatura de 16px en gym y comida cuando ya hay foto. Al tocarlo abre el modal de siempre. Los filtros solo muestran u ocultan bloques. No cambian horarios.
 
 ### Fila — `CompactRow`
 

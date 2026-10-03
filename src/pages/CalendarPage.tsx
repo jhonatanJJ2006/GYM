@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Legend } from "../components/Legend.tsx";
-import { WeekGrid } from "../components/system/WeekGrid.tsx";
+import { WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
 import { Button } from "../components/ui/button.tsx";
 import {
   MONTHS,
@@ -40,7 +40,10 @@ export function CalendarPage() {
   const [cursor, setCursor] = useState(initial);
   const [year, setYear] = useState(initial.getFullYear());
   const [month, setMonth] = useState(initial.getMonth());
-  const [monthOpen, setMonthOpen] = useState(false);
+  const [narrow, setNarrow] = useState(() => window.matchMedia("(max-width: 767px)").matches);
+  const [view, setView] = useState<"dia" | "semana" | "mes">(() =>
+    window.matchMedia("(max-width: 767px)").matches ? "dia" : "semana",
+  );
   const [kinds, setKinds] = useState<Record<Kind, boolean>>({
     clase: true,
     trabajo: true,
@@ -48,6 +51,14 @@ export function CalendarPage() {
     comida: true,
   });
   const [today] = useState(() => new Date());
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const onChange = () => setNarrow(query.matches);
+    onChange();
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
 
   const monday = mondayOnOrBefore(cursor);
   const week = Array.from({ length: 7 }, (_, index) => addDays(monday, index));
@@ -71,13 +82,28 @@ export function CalendarPage() {
     setCursor(date);
     setYear(date.getFullYear());
     setMonth(date.getMonth());
-    setMonthOpen(false);
   }
 
   function moveMonth(delta: number) {
+    if (delta < 0 && !canGoPrevMonth(year, month)) return;
+    if (delta > 0 && !canGoNextMonth(year, month)) return;
     const next = shiftMonth(year, month, delta);
     setYear(next.year);
     setMonth(next.month);
+    const count = daysInMonth(next.year, next.month);
+    for (let day = Math.min(cursor.getDate(), count); day >= 1; day -= 1) {
+      const date = new Date(next.year, next.month, day);
+      if (isInRange(date)) {
+        setCursor(date);
+        return;
+      }
+    }
+  }
+
+  function goDay(delta: number) {
+    const next = addDays(cursor, delta);
+    if (!isInRange(next)) return;
+    choose(next);
   }
 
   const active = FILTERS.filter((item) => kinds[item.id]);
@@ -88,11 +114,32 @@ export function CalendarPage() {
         <div>
           <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
           <h1 className="font-display text-4xl leading-none tracking-tight">Calendario</h1>
-          <p className="mt-1 text-sm text-muted">Días arriba, horas a la izquierda · 1 oct – 28 feb</p>
+          <p className="mt-1 text-sm text-muted">Día, semana o mes · 1 oct – 28 feb</p>
         </div>
-        <Button variant="outline" onClick={() => setMonthOpen((value) => !value)}>
-          {monthOpen ? "Cerrar mes" : "Elegir día"}
-        </Button>
+      </div>
+
+      <div className="mb-3 grid grid-cols-3 gap-1" role="tablist" aria-label="Vista del calendario">
+        {(
+          [
+            ["dia", "Día"],
+            ["semana", "Semana"],
+            ["mes", "Mes"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={view === id}
+            onClick={() => setView(id)}
+            className={cn(
+              "min-h-9 rounded-row text-sm font-medium",
+              view === id ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
+            )}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <div className="sticky top-0 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6">
@@ -137,34 +184,66 @@ export function CalendarPage() {
         </div>
       </div>
 
-      {monthOpen ? (
-        <MonthJump
-          year={year}
-          month={month}
-          selected={cursor}
-          today={today}
-          onMove={moveMonth}
-          onChoose={choose}
-        />
-      ) : null}
-
       <div className="mb-3 flex items-center justify-between gap-3">
-        <Button variant="outline" size="icon" aria-label="Semana anterior" disabled={weekIndex <= 0} onClick={() => goWeek(-1)}>
-          ‹
-        </Button>
-        <p className="text-center text-sm font-medium">{formatWeekSpan(week.filter((date) => isInRange(date)))}</p>
         <Button
           variant="outline"
           size="icon"
-          aria-label="Semana siguiente"
-          disabled={weekIndex < 0 || weekIndex >= weeks.length - 1}
-          onClick={() => goWeek(1)}
+          aria-label={view === "dia" ? "Día anterior" : view === "mes" ? "Mes anterior" : "Semana anterior"}
+          disabled={view === "dia" ? !isInRange(addDays(cursor, -1)) : view === "mes" ? !canGoPrevMonth(year, month) : weekIndex <= 0}
+          onClick={() => (view === "dia" ? goDay(-1) : view === "mes" ? moveMonth(-1) : goWeek(-1))}
+        >
+          ‹
+        </Button>
+        <p className="min-w-0 text-center text-sm font-medium">
+          {view === "dia"
+            ? formatLong(cursor).replace(/^./, (letter) => letter.toUpperCase())
+            : view === "mes"
+              ? `${MONTHS[month]} ${year}`
+              : formatWeekSpan(week.filter((date) => isInRange(date)))}
+        </p>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={view === "dia" ? "Día siguiente" : view === "mes" ? "Mes siguiente" : "Semana siguiente"}
+          disabled={
+            view === "dia"
+              ? !isInRange(addDays(cursor, 1))
+              : view === "mes"
+                ? !canGoNextMonth(year, month)
+                : weekIndex < 0 || weekIndex >= weeks.length - 1
+          }
+          onClick={() => (view === "dia" ? goDay(1) : view === "mes" ? moveMonth(1) : goWeek(1))}
         >
           ›
         </Button>
       </div>
 
-      <WeekGrid days={week} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
+      {view === "dia" ? (
+        <WeekGrid days={[cursor]} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
+      ) : null}
+
+      {view === "semana" && narrow ? (
+        <WeekAgenda days={week} kinds={kinds} selected={cursor} onSelect={choose} />
+      ) : null}
+      {view === "semana" && !narrow ? (
+        <WeekGrid days={week} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
+      ) : null}
+
+      {view === "mes" ? (
+        <>
+          <MonthJump
+            year={year}
+            month={month}
+            selected={cursor}
+            today={today}
+            kinds={kinds}
+            onChoose={choose}
+          />
+          <div className="mt-3">
+            <WeekAgenda days={[cursor]} kinds={kinds} selected={cursor} onSelect={choose} />
+          </div>
+        </>
+      ) : null}
 
       {active.length === 0 ? (
         <p className="mt-4 rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Activa al menos un tipo para ver el día.</p>
@@ -180,19 +259,26 @@ export function CalendarPage() {
   );
 }
 
+const DOT: Record<Kind, string> = {
+  clase: "bg-rail-class",
+  trabajo: "bg-rail-work",
+  gym: "bg-rail-gym",
+  comida: "bg-rail-meal",
+};
+
 function MonthJump({
   year,
   month,
   selected,
   today,
-  onMove,
+  kinds,
   onChoose,
 }: {
   year: number;
   month: number;
   selected: Date;
   today: Date;
-  onMove: (delta: number) => void;
+  kinds: Record<Kind, boolean>;
   onChoose: (date: Date) => void;
 }) {
   const lead = mondayLead(year, month);
@@ -205,17 +291,6 @@ function MonthJump({
 
   return (
     <div className="mb-4 rounded-row border border-line bg-ink-2 p-3">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="font-display text-xl capitalize">{MONTHS[month]}</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" size="icon" aria-label="Mes anterior" disabled={!canGoPrevMonth(year, month)} onClick={() => onMove(-1)}>
-            ‹
-          </Button>
-          <Button variant="outline" size="icon" aria-label="Mes siguiente" disabled={!canGoNextMonth(year, month)} onClick={() => onMove(1)}>
-            ›
-          </Button>
-        </div>
-      </div>
       <div className="grid grid-cols-7 gap-1 text-center text-[0.68rem] font-semibold text-muted">
         {WEEK_LETTERS.map((letter) => (
           <div key={letter}>{letter}</div>
@@ -268,6 +343,15 @@ function MonthJump({
               )}
             >
               <span className="font-display text-base leading-none">{date.getDate()}</span>
+              <span className="mt-1 flex h-1 justify-center gap-0.5">
+                {plan.items
+                  .filter((item) => kinds[item.kind])
+                  .filter((item, index, list) => list.findIndex((other) => other.kind === item.kind) === index)
+                  .slice(0, 3)
+                  .map((item) => (
+                    <span key={item.kind} className={cn("size-1 rounded-full", DOT[item.kind])} />
+                  ))}
+              </span>
               {plan.holiday ? <span className="sr-only">feriado</span> : null}
             </button>
           );
