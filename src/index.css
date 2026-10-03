@@ -14,6 +14,11 @@
   --color-work: #d0d0d0;
   --color-meal: #c8c8c8;
   --color-warn: #e6e6e6;
+  --color-block-class: #2a2a2a;
+  --color-block-work: #1c1c1c;
+  --color-block-gym: #333333;
+  --color-block-meal: #242424;
+  --color-wash: #141414;
   --radius-block: 0.35rem;
   --radius-row: 0.5rem;
   --radius-modal: 1.25rem;

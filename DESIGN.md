@@ -27,13 +27,13 @@ Tokens en `src/index.css` (`@theme`). No uses hex sueltos en las pantallas.
 | `--color-work` | `#d0d0d0` | Texto de trabajo, si hace falta un gris distinto |
 | `--color-meal` | `#c8c8c8` | Texto de comida, mismo criterio |
 | `--color-warn` | `#e6e6e6` | Aviso, sin amarillo |
+| `--color-block-class` | `#2a2a2a` | Bloque de clase (`bg-block-class`) |
+| `--color-block-work` | `#1c1c1c` | Bloque de trabajo (`bg-block-work`) |
+| `--color-block-gym` | `#333333` | Bloque de gym (`bg-block-gym`) |
+| `--color-block-meal` | `#242424` | Bloque de comida (`bg-block-meal`) |
+| `--color-wash` | `#141414` | Columna o día seleccionado (`bg-wash`) |
 
-En el calendario los tipos se separan por densidad, no por tinte:
-
-- Clase: `bg-white/20`
-- Trabajo: `bg-white/10` y anillo fino
-- Gym: `bg-white/30`
-- Comida: `bg-white/15` y anillo fino
+En el calendario los tipos se separan por densidad, no por tinte. Esos cuatro fondos son los tokens de arriba. Trabajo y comida llevan además `ring-line`. No uses `bg-white/10` ni hex sueltos en la grilla.
 
 El foco visible es un anillo de `--color-cream`.
 
@@ -54,7 +54,7 @@ No subas el título de una fila a `text-2xl`. Si el dato no cabe, se trunca; no 
 - Entre filas: `space-y-1` (4px).
 - Alto de fila: 44px (`h-11`).
 - Hora del calendario: 52px (`HOUR_PX` en `WeekGrid`).
-- El día visible va de las 5:00 a las 23:00, para incluir el desayuno de las 5:30 y el cierre del trabajo.
+- El día visible va de las 5:00 a las 23:00, para incluir el desayuno de las 5:30 y el cierre del trabajo. La hora se escribe bajo la línea, no encima, para que las 05:00 no queden cortadas. El día elegido lleva el número en un círculo `--color-cream`.
 
 ## Radios
 
@@ -88,7 +88,7 @@ Una línea: título que trunca, y a la derecha un meta (hora) si se pasa. En `/c
 
 `src/components/system/Thumbnail.tsx`.
 
-40×40, `object-cover`, radio `--radius-row`. `MealThumb` y `ExerciseThumb` leen las mismas fotos de `src/data/photos.ts`. El `alt` va vacío porque el texto de la fila ya nombra el elemento.
+40×40 (`size-10`), `object-cover`, radio `--radius-row`. `MealThumb` y `ExerciseThumb` leen las mismas fotos de `src/data/photos.ts`. El `alt` va vacío porque el texto de la fila ya nombra el elemento. En `/comidas` la miniatura va en la fila; la foto 4/3 sigue solo en el modal.
 
 ### Modal
 
@@ -98,7 +98,7 @@ Hoja inferior en el teléfono y diálogo centrado desde `sm`. Fondo `ink`, radio
 
 - Comida: `MealArt` / `PhotoHero`, aspecto 4/3, crédito de la foto.
 - Ejercicio y sesión de gym: `ExerciseFigure` / `PhotoHero`.
-- Clase: nombre, horario, tipo, modalidad, salón, profesor y NRC. Sin foto.
+- Clase: nombre, y en filas etiquetadas el horario, la descripción (tipo y modalidad), el aula, el profesor y el NRC. Sin foto. La fila de `/clases` solo lleva el nombre y la hora en la misma línea.
 
 El resumen del día, si se abre, usa filas cortas. No apila fotos grandes.
 

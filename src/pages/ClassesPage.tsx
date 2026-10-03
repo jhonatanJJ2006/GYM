@@ -30,7 +30,7 @@ export function ClassesPage() {
   return (
     <div>
       <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
-      <h1 className="font-display text-[2.6rem] leading-none tracking-tight">Clases</h1>
+      <h1 className="font-display text-4xl leading-none tracking-tight">Clases</h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
         Semana a semana, del 6 de octubre de 2026 al 2 de febrero de 2027. Sábado y domingo no hay clases. Si un día ya
         está marcado como feriado, la clase puede suspenderse y sigue etiquetada.
@@ -40,7 +40,6 @@ export function ClassesPage() {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-2xl"
           aria-label="Semana anterior"
           disabled={index === 0}
           onClick={() => setIndex((value) => Math.max(0, value - 1))}
@@ -56,7 +55,6 @@ export function ClassesPage() {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-2xl"
           aria-label="Semana siguiente"
           disabled={index >= weeks.length - 1}
           onClick={() => setIndex((value) => Math.min(weeks.length - 1, value + 1))}
@@ -66,7 +64,7 @@ export function ClassesPage() {
       </div>
 
       {holidayDays.length ? (
-        <p className="mt-3 rounded-2xl bg-panel px-3 py-3 text-sm leading-relaxed text-muted">
+        <p className="mt-3 rounded-row border border-line bg-panel px-3 py-3 text-sm leading-relaxed text-muted">
           Esta semana tiene feriado: {holidayDays.map((date) => HOLIDAYS[toIso(date)]).join(" · ")}.
         </p>
       ) : null}
@@ -94,10 +92,10 @@ function DayColumn({ date }: { date: Date }) {
   const title = `${DOW_LONG[dow].replace(/^./, (letter) => letter.toUpperCase())} ${date.getDate()}`;
 
   return (
-    <section className="min-w-0 rounded-lg bg-ink-2 p-3 ring-1 ring-white/8">
+    <section className="min-w-0 rounded-row border border-line bg-ink-2 p-3">
       <button type="button" onClick={() => modals.openDay(iso)} className="w-full text-left">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-muted">{WEEK_LETTERS[(dow + 6) % 7]}</p>
-        <h2 className="font-display text-2xl leading-none">{title}</h2>
+        <p className="text-[0.62rem] font-medium uppercase tracking-wide text-muted">{WEEK_LETTERS[(dow + 6) % 7]}</p>
+        <h2 className="text-sm font-medium leading-tight">{title}</h2>
       </button>
       {holiday ? (
         <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -116,7 +114,7 @@ function DayColumn({ date }: { date: Date }) {
             <li key={classKey(block)}>
               <CompactRow
                 title={block.name}
-                meta={block.start}
+                meta={`${block.start}–${block.end}`}
                 onClick={() => modals.openClass(iso, classKey(block))}
               />
             </li>

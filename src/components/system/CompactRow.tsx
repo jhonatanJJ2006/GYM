@@ -23,7 +23,7 @@ export function CompactRow({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex h-11 w-full min-w-0 items-center gap-2 rounded-[var(--radius-row)] bg-panel px-2 text-left ring-1 ring-white/10",
+        "flex h-11 w-full min-w-0 items-center gap-2.5 rounded-row border border-line bg-panel px-2.5 text-left",
         className,
       )}
     >

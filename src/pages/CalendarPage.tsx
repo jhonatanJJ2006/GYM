@@ -90,7 +90,7 @@ export function CalendarPage() {
           <h1 className="font-display text-4xl leading-none tracking-tight">Calendario</h1>
           <p className="mt-1 text-sm text-muted">Días arriba, horas a la izquierda · 1 oct – 28 feb</p>
         </div>
-        <Button variant="outline" className="rounded-lg" onClick={() => setMonthOpen((value) => !value)}>
+        <Button variant="outline" onClick={() => setMonthOpen((value) => !value)}>
           {monthOpen ? "Cerrar mes" : "Elegir día"}
         </Button>
       </div>
@@ -106,8 +106,8 @@ export function CalendarPage() {
                 aria-pressed={on}
                 onClick={() => setKinds((current) => ({ ...current, [filter.id]: !current[filter.id] }))}
                 className={cn(
-                  "min-h-10 rounded-full text-xs font-semibold",
-                  on ? "bg-cream text-ink" : "bg-panel text-muted",
+                  "min-h-9 rounded-row text-xs font-medium",
+                  on ? "bg-panel-2 text-cream ring-1 ring-line" : "text-muted",
                 )}
               >
                 {filter.label}
@@ -129,14 +129,13 @@ export function CalendarPage() {
       ) : null}
 
       <div className="mb-3 flex items-center justify-between gap-3">
-        <Button variant="outline" size="icon" className="rounded-lg" aria-label="Semana anterior" disabled={weekIndex <= 0} onClick={() => goWeek(-1)}>
+        <Button variant="outline" size="icon" aria-label="Semana anterior" disabled={weekIndex <= 0} onClick={() => goWeek(-1)}>
           ‹
         </Button>
         <p className="text-center text-sm font-medium">{formatWeekSpan(week.filter((date) => isInRange(date)))}</p>
         <Button
           variant="outline"
           size="icon"
-          className="rounded-lg"
           aria-label="Semana siguiente"
           disabled={weekIndex < 0 || weekIndex >= weeks.length - 1}
           onClick={() => goWeek(1)}
@@ -145,17 +144,13 @@ export function CalendarPage() {
         </Button>
       </div>
 
-      <WeekGrid days={week} kinds={kinds} selected={cursor} />
+      <WeekGrid days={week} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
 
       {active.length === 0 ? (
-        <p className="mt-4 rounded-lg bg-panel px-3 py-3 text-sm text-muted">Activa al menos un tipo para ver el día.</p>
+        <p className="mt-4 rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Activa al menos un tipo para ver el día.</p>
       ) : null}
 
-      <p className="mt-3 text-xs leading-relaxed text-muted">
-        Toca un bloque para abrirlo. La foto grande está solo en ese modal. Los bloques no llevan imagen.
-      </p>
-
-      <details className="mt-4 rounded-lg bg-panel">
+      <details className="mt-4 rounded-row border border-line bg-panel">
         <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>
         <div className="px-4 pb-4">
           <Legend />
@@ -189,14 +184,14 @@ function MonthJump({
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
-    <div className="mb-4 rounded-lg bg-ink-2 p-3 ring-1 ring-white/10">
+    <div className="mb-4 rounded-row border border-line bg-ink-2 p-3">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-display text-xl capitalize">{MONTHS[month]}</h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" className="rounded-lg" aria-label="Mes anterior" disabled={!canGoPrevMonth(year, month)} onClick={() => onMove(-1)}>
+          <Button variant="outline" size="icon" aria-label="Mes anterior" disabled={!canGoPrevMonth(year, month)} onClick={() => onMove(-1)}>
             ‹
           </Button>
-          <Button variant="outline" size="icon" className="rounded-lg" aria-label="Mes siguiente" disabled={!canGoNextMonth(year, month)} onClick={() => onMove(1)}>
+          <Button variant="outline" size="icon" aria-label="Mes siguiente" disabled={!canGoNextMonth(year, month)} onClick={() => onMove(1)}>
             ›
           </Button>
         </div>
@@ -218,10 +213,10 @@ function MonthJump({
               onClick={() => onChoose(date)}
               aria-label={formatLong(date)}
               className={cn(
-                "flex min-h-10 flex-col items-center justify-center rounded-md",
-                active ? "bg-cream text-ink" : "bg-panel text-cream",
+                "flex min-h-10 flex-col items-center justify-center rounded-row",
+                active ? "bg-cream text-ink" : "text-cream",
                 !active && !isInTerm(date) && "text-muted",
-                !active && isSameDay(date, today) && "ring-1 ring-cream/50",
+                !active && isSameDay(date, today) && "ring-1 ring-line",
               )}
             >
               <span className="font-display text-base leading-none">{date.getDate()}</span>
