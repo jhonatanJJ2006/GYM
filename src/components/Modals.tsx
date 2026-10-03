@@ -419,10 +419,6 @@ function ExerciseBody({
       <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
         {title}
       </h2>
-      <p className="text-sm leading-relaxed text-muted">
-        La figura naranja es la posición a la que llegas. La figura azul tenue es el inicio. La flecha amarilla marca el
-        recorrido.
-      </p>
       <p className="text-sm leading-relaxed text-cream/90">{exercise.how}</p>
       <dl className="grid gap-2 sm:grid-cols-2">
         <div className="rounded-2xl bg-panel px-3 py-3">

@@ -1,6 +1,7 @@
+import { existsSync } from "node:fs";
 import { classesFor } from "../src/data/courses.ts";
 import { foodsIn } from "../src/data/plate.ts";
-import { SCENES } from "../src/data/figures.ts";
+import { exercisePhoto, mealPhoto } from "../src/data/photos.ts";
 import { SESSIONS } from "../src/data/sessions.ts";
 import { RANGE_END, RANGE_START, addDays, toIso } from "../src/lib/dates.ts";
 import { buildDay, overlaps } from "../src/lib/schedule.ts";
@@ -42,6 +43,8 @@ for (let cursor = RANGE_START; cursor.getTime() <= RANGE_END.getTime(); cursor =
   check(breakfast?.time === "5:30" && breakfast.end === "6:00", `${iso} desayuno ${breakfast?.time}–${breakfast?.end}`);
   for (const meal of plan.meals.items) {
     check(foodsIn(meal.ingredients).length > 0, `${iso} ${meal.role} sin alimentos reconocibles`);
+    const plate = mealPhoto(meal.ingredients);
+    check(existsSync(`public${plate.src}`), `${iso} ${meal.role} sin foto ${plate.src}`);
     if (!meal.role.startsWith("Desayuno")) {
       check(meal.time !== "5:30", `${iso} ${meal.role} no debería moverse a las 5:30`);
     }
@@ -50,7 +53,8 @@ for (let cursor = RANGE_START; cursor.getTime() <= RANGE_END.getTime(); cursor =
 
 for (const session of Object.values(SESSIONS)) {
   for (const exercise of session.exercises) {
-    check(Boolean(SCENES[exercise.pose]), `${session.id} ${exercise.name} sin esquema`);
+    const photo = exercisePhoto(exercise.pose);
+    check(existsSync(`public${photo.src}`), `${session.id} ${exercise.name} sin foto ${photo.src}`);
     check(exercise.reps.length > 0, `${exercise.name} sin repeticiones`);
     check(exercise.weight.length > 0, `${exercise.name} sin peso`);
   }
