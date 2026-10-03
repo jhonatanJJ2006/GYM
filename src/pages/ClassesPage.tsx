@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useModals } from "../components/Modals.tsx";
 import { Button } from "../components/ui/button.tsx";
-import { classKey, classesFor, courseColor, modeLabel, placeOf } from "../data/courses.ts";
+import { classKey, classesFor } from "../data/courses.ts";
+import { CompactRow } from "../components/system/CompactRow.tsx";
 import { HOLIDAYS } from "../data/holidays.ts";
 import {
   DOW_LONG,
@@ -65,7 +66,7 @@ export function ClassesPage() {
       </div>
 
       {holidayDays.length ? (
-        <p className="mt-3 rounded-2xl bg-warn/10 px-3 py-3 text-sm leading-relaxed text-warn">
+        <p className="mt-3 rounded-2xl bg-panel px-3 py-3 text-sm leading-relaxed text-muted">
           Esta semana tiene feriado: {holidayDays.map((date) => HOLIDAYS[toIso(date)]).join(" · ")}.
         </p>
       ) : null}
@@ -93,13 +94,13 @@ function DayColumn({ date }: { date: Date }) {
   const title = `${DOW_LONG[dow].replace(/^./, (letter) => letter.toUpperCase())} ${date.getDate()}`;
 
   return (
-    <section className="min-w-0 rounded-[1.4rem] bg-ink-2 p-3 ring-1 ring-white/8">
+    <section className="min-w-0 rounded-lg bg-ink-2 p-3 ring-1 ring-white/8">
       <button type="button" onClick={() => modals.openDay(iso)} className="w-full text-left">
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-muted">{WEEK_LETTERS[(dow + 6) % 7]}</p>
         <h2 className="font-display text-2xl leading-none">{title}</h2>
       </button>
       {holiday ? (
-        <p className="mt-2 text-sm leading-relaxed text-warn">
+        <p className="mt-2 text-sm leading-relaxed text-muted">
           {holiday}. Puede suspender la clase. Confirma con la universidad.
         </p>
       ) : null}
@@ -110,31 +111,16 @@ function DayColumn({ date }: { date: Date }) {
         </p>
       ) : null}
       {classes.length ? (
-        <ul className="mt-3 space-y-2">
-          {classes.map((block) => {
-            const mode = modeLabel(block);
-            const where = mode === "Sin salón" ? placeOf(block) : `${mode} · ${placeOf(block)}`;
-            return (
-              <li key={classKey(block)}>
-                <button
-                  type="button"
-                  onClick={() => modals.openClass(iso, classKey(block))}
-                  className="w-full rounded-2xl bg-panel px-3 py-3 text-left"
-                  style={{ boxShadow: `inset 4px 0 0 ${courseColor(block.name)}` }}
-                >
-                  <span className="font-display text-xl tabular-nums leading-none" style={{ color: courseColor(block.name) }}>
-                    {block.start}
-                    <span className="ml-2 text-sm text-muted">{block.end}</span>
-                  </span>
-                  <span className="mt-1 block font-semibold leading-snug">{block.name}</span>
-                  <span className="mt-0.5 block text-sm text-muted">
-                    {block.type} · {where}
-                  </span>
-                  {holiday ? <span className="mt-1 block text-sm font-semibold text-warn">Puede suspenderse</span> : null}
-                </button>
-              </li>
-            );
-          })}
+        <ul className="mt-3 space-y-1">
+          {classes.map((block) => (
+            <li key={classKey(block)}>
+              <CompactRow
+                title={block.name}
+                meta={block.start}
+                onClick={() => modals.openClass(iso, classKey(block))}
+              />
+            </li>
+          ))}
         </ul>
       ) : null}
     </section>

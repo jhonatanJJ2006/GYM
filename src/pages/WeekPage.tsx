@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Legend } from "../components/Legend.tsx";
 import { useModals } from "../components/Modals.tsx";
-import { CLASSES, classKey, courseColor, modeLabel, placeOf, type Weekday } from "../data/courses.ts";
-import { sessionColor, sessionFor, shoulderFocus } from "../data/sessions.ts";
+import { CLASSES, classKey, modeLabel, placeOf, type Weekday } from "../data/courses.ts";
+import { sessionFor, shoulderFocus } from "../data/sessions.ts";
 import { ANCHOR_MON, DOW_LONG, addDays, toIso } from "../lib/dates.ts";
 import { cn } from "../lib/utils.ts";
 
@@ -18,7 +18,6 @@ export function WeekPage() {
   const dow = date.getDay();
   const session = sessionFor(date);
   const classes = dow === 0 || dow === 6 ? [] : CLASSES[dow as Weekday];
-  const color = sessionColor(session);
 
   return (
     <div>
@@ -38,7 +37,7 @@ export function WeekPage() {
             onClick={() => setWeek(value)}
             className={cn(
               "min-h-14 rounded-[1.1rem] text-sm font-semibold",
-              week === value ? "bg-accent text-ink" : "text-cream",
+              week === value ? "bg-cream text-ink" : "text-cream",
             )}
           >
             <span className="block text-[0.68rem] font-medium">Semana</span>
@@ -46,7 +45,7 @@ export function WeekPage() {
           </button>
         ))}
       </div>
-      <p className="mt-3 text-sm font-semibold" style={{ color }}>
+      <p className="mt-3 text-sm font-semibold text-cream">
         Jueves de la semana {week}: hombro + {shoulderFocus(week)}.
       </p>
 
@@ -69,14 +68,14 @@ export function WeekPage() {
         ))}
       </div>
 
-      <article className="mt-4 rounded-[1.6rem] bg-panel p-4" style={{ boxShadow: `inset 4px 0 0 ${color}` }}>
+      <article className="mt-4 rounded-lg bg-panel p-4 ring-1 ring-white/10">
         <h2 className="font-display text-3xl capitalize tracking-tight">{DOW_LONG[dow]}</h2>
-        <p className="mt-1 text-lg font-semibold" style={{ color }}>
+        <p className="mt-1 text-lg font-semibold text-cream">
           {session.title}
         </p>
         <p className="text-sm text-cream/75">{session.time}</p>
         {dow === 4 ? (
-          <p className="mt-3 text-sm leading-relaxed text-warn">
+          <p className="mt-3 text-sm leading-relaxed text-muted">
             No se entrena a las 18:00. Esa hora es la tutoría virtual de Lógica Digital.
           </p>
         ) : null}
@@ -93,7 +92,7 @@ export function WeekPage() {
                   onClick={() => modals.openClass(toIso(date), classKey(block))}
                   className="grid w-full grid-cols-[4.6rem_1fr] gap-3 rounded-2xl py-1 text-left"
                 >
-                  <p className="pt-0.5 text-sm font-semibold tabular-nums" style={{ color: courseColor(block.name) }}>
+                  <p className="pt-0.5 text-sm font-semibold tabular-nums text-cream">
                     {block.start}
                     <span className="mt-0.5 block text-xs font-medium text-muted">{block.end}</span>
                   </p>
@@ -115,7 +114,7 @@ export function WeekPage() {
       </article>
 
       <details className="mt-4 rounded-2xl bg-panel">
-        <summary className="flex min-h-12 cursor-pointer items-center px-4 text-sm font-semibold">Colores de las materias</summary>
+        <summary className="flex min-h-12 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>
         <div className="px-4 pb-4">
           <Legend />
         </div>
