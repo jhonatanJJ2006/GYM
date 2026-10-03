@@ -26,10 +26,10 @@ import { buildDay } from "../lib/schedule.ts";
 import { cn } from "../lib/utils.ts";
 
 const FILTERS = [
-  { id: "clase", label: "Clases" },
-  { id: "trabajo", label: "Trabajo" },
-  { id: "gym", label: "Gym" },
-  { id: "comida", label: "Comidas" },
+  { id: "clase", label: "Clases", dot: "bg-rail-class" },
+  { id: "trabajo", label: "Trabajo", dot: "bg-rail-work" },
+  { id: "gym", label: "Gym", dot: "bg-rail-gym" },
+  { id: "comida", label: "Comidas", dot: "bg-rail-meal" },
 ] as const;
 
 type Kind = (typeof FILTERS)[number]["id"];
@@ -86,7 +86,7 @@ export function CalendarPage() {
     <div>
       <div className="mb-4 flex items-end justify-between gap-3">
         <div>
-          <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
+          <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
           <h1 className="font-display text-4xl leading-none tracking-tight">Calendario</h1>
           <p className="mt-1 text-sm text-muted">Días arriba, horas a la izquierda · 1 oct – 28 feb</p>
         </div>

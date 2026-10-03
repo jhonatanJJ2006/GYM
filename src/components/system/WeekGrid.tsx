@@ -1,5 +1,6 @@
 import { COURSE_SHORT, classKey } from "../../data/courses.ts";
 import { mealWhen } from "../../data/meals.ts";
+import { exercisePhoto, mealPhoto } from "../../data/photos.ts";
 import { WEEK_LETTERS, formatLong, isInRange, isSameDay, toIso } from "../../lib/dates.ts";
 import { useRef, type KeyboardEvent } from "react";
 import { buildDay, type TimelineItem } from "../../lib/schedule.ts";
@@ -15,10 +16,10 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, index) => START_
 type Kind = "clase" | "trabajo" | "gym" | "comida";
 
 const KIND_CLASS: Record<Kind, string> = {
-  clase: "bg-block-class text-cream",
-  trabajo: "bg-block-work text-cream ring-1 ring-inset ring-line",
-  gym: "bg-block-gym text-cream",
-  comida: "bg-block-meal text-cream ring-1 ring-inset ring-line",
+  clase: "bg-block-class text-cream shadow-[inset_3px_0_0_var(--color-rail-class)]",
+  trabajo: "bg-block-work text-cream shadow-[inset_3px_0_0_var(--color-rail-work)]",
+  gym: "bg-block-gym text-cream shadow-[inset_3px_0_0_var(--color-rail-gym)]",
+  comida: "bg-block-meal text-cream shadow-[inset_3px_0_0_var(--color-rail-meal)]",
 };
 
 function itemEnd(item: TimelineItem): number {
@@ -33,6 +34,15 @@ function itemLabel(item: TimelineItem): string {
   if (item.kind === "trabajo") return "Trabajo";
   if (item.kind === "gym") return item.session.title.split(/[·+]/)[0]?.trim() || item.session.title;
   return item.meal.role;
+}
+
+function itemThumb(item: TimelineItem): string | null {
+  if (item.kind === "comida") return mealPhoto(item.meal.ingredients).src;
+  if (item.kind === "gym") {
+    const exercise = item.session.exercises.find((entry) => entry.name !== "Calentamiento") ?? item.session.exercises[0];
+    return exercise ? exercisePhoto(exercise.pose).src : null;
+  }
+  return null;
 }
 
 function itemMeta(item: TimelineItem): string {
@@ -231,6 +241,7 @@ function DayColumn({
         const blockHeight = Math.max(16, ((end - item.start) / 60) * HOUR_PX - 2);
         const width = `calc(${100 / lanes}% - 3px)`;
         const left = `calc(${(100 / lanes) * lane}% + 1px)`;
+        const thumb = itemThumb(item);
         return (
           <button
             key={`${item.kind}-${item.start}-${index}`}
@@ -240,15 +251,22 @@ function DayColumn({
             aria-label={`${formatLong(date)}, ${itemLabel(item)}, ${itemMeta(item)}`}
             onClick={() => openItem(modals, plan!.iso, plan!, item)}
             className={cn(
-              "week-block absolute overflow-hidden rounded-block px-1 py-0.5 text-left",
+              "week-block absolute overflow-hidden rounded-block py-0.5 pl-1.5 pr-1 text-left",
               KIND_CLASS[item.kind],
             )}
             style={{ top: top + 1, height: blockHeight, width, left }}
           >
-            <span className="block truncate text-[10px] font-medium leading-tight">{itemLabel(item)}</span>
-            {blockHeight >= 32 ? (
-              <span className="block truncate text-[9px] leading-tight text-muted">{itemMeta(item)}</span>
-            ) : null}
+            <span className="flex min-w-0 items-start gap-1">
+              {thumb ? (
+                <img src={thumb} alt="" className="mt-px size-4 shrink-0 rounded-[3px] object-cover" />
+              ) : null}
+              <span className="min-w-0">
+                <span className="block truncate text-[10px] font-medium leading-tight">{itemLabel(item)}</span>
+                {blockHeight >= 32 ? (
+                  <span className="block truncate text-[9px] leading-tight text-cream/80">{itemMeta(item)}</span>
+                ) : null}
+              </span>
+            </span>
           </button>
         );
       })}

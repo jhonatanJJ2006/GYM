@@ -2,7 +2,7 @@
 
 Bitácora personal de clases, gym y comidas, de octubre 2026 a febrero 2027. Pensada para el celular.
 
-El calendario es una semana con los días arriba y las horas a la izquierda. Los bloques son compactos y no llevan foto. La foto grande de un plato o de un ejercicio aparece solo al abrir el modal. En clases, comidas y entreno las listas son filas cortas; las fotos de esas listas son miniaturas.
+Los bloques del calendario se distinguen por tinte: clase en azul acero, trabajo en arena, gym en cobre y comidas en salvia. Cada sección tiene un lavado y una marca propios. El calendario es una semana con los días arriba y las horas a la izquierda. Los bloques son compactos y no llevan foto. La foto grande de un plato o de un ejercicio aparece solo al abrir el modal. En clases, comidas y entreno las listas son filas cortas; las fotos de esas listas son miniaturas.
 
 El desayuno sigue de 5:30 a 6:00. El jueves el pre-entreno sigue a las 19:00 y el gym a las 19:15–20:30. Los feriados que ya estaban en los datos siguen etiquetados. Las fotos vienen de Wikimedia Commons; el autor y la licencia están en el modal y en CREDITS.md.
 

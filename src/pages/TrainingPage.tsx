@@ -45,7 +45,7 @@ export function TrainingPage() {
 
   return (
     <div>
-      <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
+      <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
       <h1 className="font-display text-4xl leading-none tracking-tight">Entreno</h1>
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted">
         El ciclo abre el lunes 5 de octubre de 2026. Semanas 1 y 3, el jueves es hombro + tríceps. Semanas 2 y 4,

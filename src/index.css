@@ -12,13 +12,22 @@
   --color-muted: #9b9b9b;
   --color-grid: #5e5e5e;
   --color-accent: #f2f2f2;
-  --color-work: #d0d0d0;
-  --color-meal: #c8c8c8;
+  --color-work: #e8c98a;
+  --color-meal: #b7dcb8;
   --color-warn: #e6e6e6;
-  --color-block-class: #2a2a2a;
-  --color-block-work: #1c1c1c;
-  --color-block-gym: #333333;
-  --color-block-meal: #242424;
+  --color-block-class: #2a4660;
+  --color-block-work: #4a3b28;
+  --color-block-gym: #4a3228;
+  --color-block-meal: #2a4634;
+  --color-rail-class: #a9d0f2;
+  --color-rail-work: #e8c98a;
+  --color-rail-gym: #f0b08a;
+  --color-rail-meal: #b7dcb8;
+  --color-mark-cal: #b7d4ee;
+  --color-mark-clases: #9ec4ee;
+  --color-mark-semana: #d4c6ee;
+  --color-mark-entreno: #f0b08a;
+  --color-mark-comidas: #b7dcb8;
   --color-wash: #141414;
   --radius-block: 0.35rem;
   --radius-row: 0.5rem;
@@ -105,4 +114,33 @@
   .exercise-glyph animateTransform {
     display: none;
   }
+}
+
+.page-root {
+  --page-glow: rgb(169 208 242 / 0.22);
+  --color-mark: var(--color-mark-cal);
+  min-height: 100dvh;
+  background:
+    radial-gradient(880px 220px at 50% -90px, var(--page-glow), transparent 70%),
+    var(--color-ink);
+}
+
+.page-root[data-page="clases"] {
+  --page-glow: rgb(158 196 238 / 0.24);
+  --color-mark: var(--color-mark-clases);
+}
+
+.page-root[data-page="semana"] {
+  --page-glow: rgb(212 198 238 / 0.2);
+  --color-mark: var(--color-mark-semana);
+}
+
+.page-root[data-page="entreno"] {
+  --page-glow: rgb(240 176 138 / 0.2);
+  --color-mark: var(--color-mark-entreno);
+}
+
+.page-root[data-page="comidas"] {
+  --page-glow: rgb(183 220 184 / 0.22);
+  --color-mark: var(--color-mark-comidas);
 }

@@ -1,6 +1,6 @@
 # Sistema visual de Hierro
 
-La interfaz es monocroma y callada. El gris hace el trabajo; el color de las fotos solo aparece cuando hace falta ver el plato o el ejercicio. Este documento manda sobre calendarios, filas, miniaturas y modales. Si un cambio nuevo necesita otro color, primero se justifica aquí.
+La interfaz sigue oscura y callada, pero cada tipo de bloque y cada sección tienen un tinte propio. El color es una franja y un lavado, no un repintado. Las fotos grandes siguen solo en el modal. Este documento manda sobre calendarios, filas, miniaturas y modales. Si un cambio nuevo necesita otro color, primero se justifica aquí.
 
 ## Principio
 
@@ -8,7 +8,7 @@ La interfaz es monocroma y callada. El gris hace el trabajo; el color de las fot
 - Una fila de lista no lleva foto grande.
 - La foto grande vive solo dentro del modal, al tocar el bloque, la comida o el ejercicio.
 - No se inventan horarios. Desayuno 5:30–6:00. Gym y trabajo se leen de los datos que ya existen.
-- Las materias no se distinguen por color. El nombre y la hora bastan.
+- En la grilla de `/` todas las clases comparten el azul acero. En `/clases` cada asignatura tiene su color, siempre el mismo.
 
 ## Color
 
@@ -22,20 +22,32 @@ Tokens en `src/index.css` (`@theme`). No uses hex sueltos en las pantallas.
 | `--color-panel-2` | `#222222` | Hover de botones con borde |
 | `--color-line` | `#2c2c2c` | Líneas de hora y separadores |
 | `--color-cream` | `#f2f2f2` | Texto principal y estado activo |
-| `--color-muted` | `#8d8d8d` | Texto secundario, horas |
+| `--color-muted` | `#9b9b9b` | Texto secundario |
+| `--color-grid` | `#5e5e5e` | Líneas de la grilla del calendario |
 | `--color-accent` | `#f2f2f2` | Igual que cream. Selección, no un acento de color |
-| `--color-work` | `#d0d0d0` | Texto de trabajo, si hace falta un gris distinto |
-| `--color-meal` | `#c8c8c8` | Texto de comida, mismo criterio |
 | `--color-warn` | `#e6e6e6` | Aviso, sin amarillo |
-| `--color-block-class` | `#2a2a2a` | Bloque de clase (`bg-block-class`) |
-| `--color-block-work` | `#1c1c1c` | Bloque de trabajo (`bg-block-work`) |
-| `--color-block-gym` | `#333333` | Bloque de gym (`bg-block-gym`) |
-| `--color-block-meal` | `#242424` | Bloque de comida (`bg-block-meal`) |
+| `--color-block-class` | `#2a4660` | Fondo del bloque de clase, azul acero |
+| `--color-rail-class` | `#a9d0f2` | Franja de clase (`bg-rail-class`) |
+| `--color-block-work` | `#4a3b28` | Fondo del bloque de trabajo, arena oscura |
+| `--color-rail-work` | `#e8c98a` | Franja de trabajo, arena |
+| `--color-block-gym` | `#4a3228` | Fondo del bloque de gym, cobre |
+| `--color-rail-gym` | `#f0b08a` | Franja de gym, cobre |
+| `--color-block-meal` | `#2a4634` | Fondo del bloque de comida, salvia |
+| `--color-rail-meal` | `#b7dcb8` | Franja de comida, salvia |
+| `--color-mark-cal` | `#b7d4ee` | Marca de `/`, acero |
+| `--color-mark-clases` | `#9ec4ee` | Marca de `/clases`, azul |
+| `--color-mark-semana` | `#d4c6ee` | Marca de `/semana`, lila |
+| `--color-mark-entreno` | `#f0b08a` | Marca de `/entreno`, cobre |
+| `--color-mark-comidas` | `#b7dcb8` | Marca de `/comidas`, salvia |
+| `--color-work` | `#e8c98a` | Mismo matiz que la franja de trabajo |
+| `--color-meal` | `#b7dcb8` | Mismo matiz que la franja de comida |
 | `--color-wash` | `#141414` | Columna o día seleccionado (`bg-wash`) |
 
-En el calendario los tipos se separan por densidad, no por tinte. Esos cuatro fondos son los tokens de arriba. Trabajo y comida llevan además `ring-line`. No uses `bg-white/10` ni hex sueltos en la grilla.
+El texto de los bloques es `--color-cream` sobre esos fondos oscuros. La hora dentro del bloque va en `text-cream/80`, no en un tinte claro. La franja es `box-shadow: inset 3px 0 0` con el token `--color-rail-*`. No uses un fondo pálido con texto claro.
 
-El foco visible es un anillo de `--color-cream`.
+Cada ruta pone `data-page` en `.page-root` (`cal`, `clases`, `semana`, `entreno`, `comidas`). Eso fija `--color-mark` y un lavado superior (`--page-glow`) del mismo matiz. La palabra Hierro y la pestaña activa de la barra usan `var(--color-mark)`. El cromo (paneles, líneas, foco) no se repinta.
+
+El foco visible sigue siendo un anillo de `--color-cream`, también en `.week-block`. No lo cambies por el color de la sección.
 
 ## Tipo
 
@@ -84,6 +96,28 @@ Los filtros (clases, trabajo, gym, comidas) solo muestran u ocultan bloques. No 
 
 Una línea: título que trunca, y a la derecha un meta (hora) si se pasa. En `/clases` el meta es la hora de inicio; tipo, salón y profesor quedan en el modal. En `/comidas` y en entreno el meta es la hora y, a la izquierda, una miniatura.
 
+
+### Asignaturas en `/clases`
+
+El color no se sortea. Sale del mapa fijo `COURSE_COLOR` en `src/data/courses.ts`, leído con `courseColor(nombre)`. La misma asignatura usa el mismo hex todos los días y todas las semanas.
+
+| Asignatura | Hex | Matiz |
+| --- | --- | --- |
+| Fundamentos de Ingeniería de Software | `#6ea8fe` | azul |
+| Practicum 2.1 | `#2ec4b6` | verde azulado |
+| Estadística y Probabilidad | `#f0c14a` | ámbar |
+| Sistemas Operativos | `#ff6b4a` | coral |
+| Lógica Digital | `#c084fc` | violeta |
+| Ética y Moral | `#8fd99a` | verde |
+| Ingeniería Web | `#ff8fab` | rosa |
+| Introducción a la Inteligencia de Negocios | `#f3a35c` | naranja |
+
+La fila mezcla ese hex al 42% con `--color-panel` y lleva una franja de 3px del color pleno. El nombre va en `--color-cream`, así el texto no se apoya en el tinte claro. No hay `truncate`, `line-clamp` ni `overflow: hidden` sobre el nombre: si no entra en una línea, hace salto y la fila crece. La hora permanece entera a la derecha.
+
+En la grilla de `/`, gym y comida llevan una miniatura de 16px (`size-4`) si ya existe foto en `mealPhoto` o `exercisePhoto`. Clase y trabajo no tienen imagen y no se inventa una. La foto grande sigue solo en el modal.
+
+Ese mapa no se usa en la grilla de `/`. Allí un bloque de clase sigue en `--color-block-class` y `--color-rail-class`.
+
 ### Miniatura — `Thumbnail`
 
 `src/components/system/Thumbnail.tsx`.
@@ -101,7 +135,7 @@ Hoja inferior en el teléfono y diálogo centrado desde `sm`. Fondo `ink`, radio
 
 - Comida: `MealArt` / `PhotoHero`, aspecto 4/3, crédito de la foto.
 - Ejercicio y sesión de gym: `ExerciseFigure` / `PhotoHero`.
-- Clase: nombre, y en filas etiquetadas el horario, la descripción (tipo y modalidad), el aula, el profesor y el NRC. Sin foto. La fila de `/clases` solo lleva el nombre y la hora en la misma línea.
+- Clase: nombre, y en el modal el horario, la descripción (tipo y modalidad), el aula, el profesor y el NRC. Sin foto. En `/clases` la fila muestra el nombre completo y la hora; si el nombre no cabe, parte líneas y la fila crece.
 
 El resumen del día, si se abre, usa filas cortas. No apila fotos grandes.
 
@@ -124,7 +158,7 @@ Abdomen y oblicuos son un solo grupo: cuatro máquinas cada uno, no un 4+4 inven
 
 ## Qué no hacer
 
-- No volver al verde lima ni a un color por materia.
+- No volver al verde lima. En `/` no pintes cada materia de un color distinto: ahí manda el tipo de bloque. En `/clases` sí, con el mapa fijo de abajo. No dejes clase, trabajo, gym y comida del mismo gris.
 - No poner la foto del plato o del ejercicio en la grilla ni en la fila.
 - No alargar una fila con descripción, salón o profesor.
 - No cambiar el desayuno, el gym del jueves (19:15–20:30) ni los bloques de trabajo calculados.

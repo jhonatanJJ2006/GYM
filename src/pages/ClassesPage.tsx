@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useModals } from "../components/Modals.tsx";
 import { Button } from "../components/ui/button.tsx";
-import { classKey, classesFor } from "../data/courses.ts";
+import { classKey, classesFor, courseColor } from "../data/courses.ts";
 import { CompactRow } from "../components/system/CompactRow.tsx";
 import { HOLIDAYS } from "../data/holidays.ts";
 import {
@@ -29,7 +29,7 @@ export function ClassesPage() {
 
   return (
     <div>
-      <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
+      <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
       <h1 className="font-display text-4xl leading-none tracking-tight">Clases</h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
         Semana a semana, del 6 de octubre de 2026 al 2 de febrero de 2027. Sábado y domingo no hay clases. Si un día ya
@@ -115,6 +115,8 @@ function DayColumn({ date }: { date: Date }) {
               <CompactRow
                 title={block.name}
                 meta={`${block.start}–${block.end}`}
+                wrap
+                accent={courseColor(block.name)}
                 onClick={() => modals.openClass(iso, classKey(block))}
               />
             </li>
