@@ -96,7 +96,27 @@ export function CalendarPage() {
       </div>
 
       <div className="sticky top-0 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6">
-        <div className="grid grid-cols-4 gap-1" role="group" aria-label="Filtros del calendario">
+        <div
+          className="grid grid-cols-4 gap-1"
+          role="group"
+          aria-label="Filtros del calendario"
+          onKeyDown={(event) => {
+            if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+            const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button")];
+            const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+            if (index < 0 || buttons.length === 0) return;
+            const next =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? buttons.length - 1
+                  : event.key === "ArrowRight"
+                    ? (index + 1) % buttons.length
+                    : (index - 1 + buttons.length) % buttons.length;
+            event.preventDefault();
+            buttons[next]?.focus();
+          }}
+        >
           {FILTERS.map((filter) => {
             const on = kinds[filter.id];
             return (
@@ -107,7 +127,7 @@ export function CalendarPage() {
                 onClick={() => setKinds((current) => ({ ...current, [filter.id]: !current[filter.id] }))}
                 className={cn(
                   "min-h-9 rounded-row text-xs font-medium",
-                  on ? "bg-panel-2 text-cream ring-1 ring-line" : "text-muted",
+                  on ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
                 )}
               >
                 {filter.label}
@@ -201,7 +221,33 @@ function MonthJump({
           <div key={letter}>{letter}</div>
         ))}
       </div>
-      <div className="mt-1 grid grid-cols-7 gap-1">
+      <div
+        className="mt-1 grid grid-cols-7 gap-1"
+        role="grid"
+        aria-label={`Días de ${MONTHS[month]}`}
+        onKeyDown={(event) => {
+          const step = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : event.key === "ArrowUp" ? -7 : event.key === "ArrowDown" ? 7 : 0;
+          const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button")];
+          if (event.key === "Home" || event.key === "End") {
+            event.preventDefault();
+            buttons[event.key === "Home" ? 0 : buttons.length - 1]?.focus();
+            return;
+          }
+          if (!step) return;
+          const current = document.activeElement;
+          if (!(current instanceof HTMLButtonElement) || !current.dataset.iso) return;
+          let cursor = addDays(parseIso(current.dataset.iso), step);
+          for (let hop = 0; hop < 21; hop += 1) {
+            const target = buttons.find((button) => button.dataset.iso === toIso(cursor));
+            if (target) {
+              event.preventDefault();
+              target.focus();
+              return;
+            }
+            cursor = addDays(cursor, step > 0 ? 1 : -1);
+          }
+        }}
+      >
         {cells.map((date, index) => {
           if (!date || !isInRange(date)) return <div key={`vacio-${index}`} className="min-h-10" />;
           const plan = buildDay(date);
@@ -210,13 +256,15 @@ function MonthJump({
             <button
               key={toIso(date)}
               type="button"
+              data-iso={toIso(date)}
               onClick={() => onChoose(date)}
+              aria-current={active ? "date" : undefined}
               aria-label={formatLong(date)}
               className={cn(
                 "flex min-h-10 flex-col items-center justify-center rounded-row",
                 active ? "bg-cream text-ink" : "text-cream",
                 !active && !isInTerm(date) && "text-muted",
-                !active && isSameDay(date, today) && "ring-1 ring-line",
+                !active && isSameDay(date, today) && "ring-1 ring-cream",
               )}
             >
               <span className="font-display text-base leading-none">{date.getDate()}</span>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { Legend } from "../components/Legend.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { CLASSES, classKey, type Weekday } from "../data/courses.ts";
@@ -38,7 +38,7 @@ export function WeekPage() {
             onClick={() => setWeek(value)}
             className={cn(
               "min-h-12 rounded-row text-sm font-medium",
-              week === value ? "bg-panel-2 text-cream ring-1 ring-line" : "text-muted",
+              week === value ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
             )}
           >
             <span className="block text-[0.68rem] font-medium">Semana</span>
@@ -50,13 +50,34 @@ export function WeekPage() {
         Jueves de la semana {week}: hombro + {shoulderFocus(week)}.
       </p>
 
-      <div className="mt-4 grid grid-cols-7 gap-1" role="tablist" aria-label="Día de la semana">
+      <div
+        className="mt-4 grid grid-cols-7 gap-1"
+        role="tablist"
+        aria-label="Día de la semana"
+        onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+          if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+          const next =
+            event.key === "Home"
+              ? 0
+              : event.key === "End"
+                ? days.length - 1
+                : event.key === "ArrowRight"
+                  ? (dayIndex + 1) % days.length
+                  : (dayIndex - 1 + days.length) % days.length;
+          event.preventDefault();
+          setDayIndex(next);
+          event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+        }}
+      >
         {days.map((item, index) => (
           <button
             key={toIso(item)}
             type="button"
             role="tab"
+            id={`dia-semana-${index}`}
+            aria-controls="panel-dia-semana"
             aria-selected={dayIndex === index}
+            tabIndex={dayIndex === index ? 0 : -1}
             onClick={() => setDayIndex(index)}
             className={cn(
               "flex min-h-12 flex-col items-center justify-center rounded-row",
@@ -69,7 +90,7 @@ export function WeekPage() {
         ))}
       </div>
 
-      <article className="mt-4 rounded-row border border-line bg-panel p-4">
+      <article id="panel-dia-semana" role="tabpanel" aria-labelledby={`dia-semana-${dayIndex}`} className="mt-4 rounded-row border border-line bg-panel p-4">
         <h2 className="font-display text-3xl capitalize tracking-tight">{DOW_LONG[dow]}</h2>
         <p className="mt-1 text-lg font-semibold text-cream">
           {session.title}

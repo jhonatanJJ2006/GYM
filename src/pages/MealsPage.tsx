@@ -64,7 +64,29 @@ export function MealsPage() {
         <p className="mt-1 text-sm text-muted">
           El desayuno es de 5:30 a 6:00. El jueves el pre-entreno sigue a las 19:00.
         </p>
-        <div className="mt-3 grid grid-cols-7 gap-1">
+        <div
+          className="mt-3 grid grid-cols-7 gap-1"
+          role="group"
+          aria-label="Día de comidas"
+          onKeyDown={(event) => {
+            if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
+            const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button")];
+            const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+            if (index < 0 || buttons.length === 0) return;
+            const next =
+              event.key === "Home"
+                ? 0
+                : event.key === "End"
+                  ? buttons.length - 1
+                  : event.key === "ArrowRight"
+                    ? (index + 1) % buttons.length
+                    : (index - 1 + buttons.length) % buttons.length;
+            event.preventDefault();
+            buttons[next]?.focus();
+            const value = WEEKDAY_MEAL_ORDER[next];
+            if (value != null) setDow(value);
+          }}
+        >
           {WEEKDAY_MEAL_ORDER.map((value, index) => (
             <button
               key={value}
@@ -73,7 +95,7 @@ export function MealsPage() {
               onClick={() => setDow(value)}
               className={cn(
                 "min-h-10 rounded-row text-xs font-medium",
-                dow === value ? "bg-panel-2 text-cream ring-1 ring-line" : "text-muted",
+                dow === value ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
               )}
             >
               {LABELS[index]}

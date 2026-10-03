@@ -23,7 +23,7 @@ export function CompactRow({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex h-11 w-full min-w-0 items-center gap-2.5 rounded-row border border-line bg-panel px-2.5 text-left",
+        "relative flex h-11 w-full min-w-0 items-center gap-2.5 rounded-row border border-line bg-panel px-2.5 text-left focus-visible:z-10",
         className,
       )}
     >
