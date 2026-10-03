@@ -119,6 +119,27 @@ export function shiftMonth(year: number, month: number, delta: number): { year: 
   return { year: next.getFullYear(), month: next.getMonth() };
 }
 
+/** Semanas de lunes a domingo entre dos lunes, ambos incluidos. */
+export function weeksFromMondays(firstMonday: Date, lastMonday: Date): Date[][] {
+  const weeks: Date[][] = [];
+  let monday = dateOnly(firstMonday);
+  const end = dateOnly(lastMonday).getTime();
+  while (monday.getTime() <= end) {
+    weeks.push(Array.from({ length: 7 }, (_, index) => addDays(monday, index)));
+    monday = addDays(monday, 7);
+  }
+  return weeks;
+}
+
+export function mondayOnOrBefore(date: Date): Date {
+  return addDays(dateOnly(date), -((date.getDay() + 6) % 7));
+}
+
+/** Semanas del periodo de clases, de la semana del 6 oct a la del 2 feb. */
+export function termWeeks(): Date[][] {
+  return weeksFromMondays(mondayOnOrBefore(TERM_START), mondayOnOrBefore(TERM_END));
+}
+
 /** Semanas de lunes a domingo que tocan el rango del calendario. */
 export function weeksCoveringRange(): Date[][] {
   const lead = (RANGE_START.getDay() + 6) % 7;
