@@ -18,6 +18,208 @@ function body(pose: PoseId, how: string): Coach {
 }
 
 const BY_NAME: Record<string, Coach> = {
+  "Press de pecho en máquina": load(
+    "bench",
+    "25 kg en la máquina",
+    "Asiento de modo que las manijas queden a la altura del pecho. Empuja hasta casi estirar los codos, sin bloquearlos.",
+  ),
+  "Press inclinado en máquina": load(
+    "incline",
+    "20 kg en la máquina",
+    "Respaldo inclinado. Empuja las manijas hacia arriba y adelante, sin despegar la espalda del asiento.",
+  ),
+  "Aperturas en pec deck": load(
+    "fly",
+    "15 kg en el pec deck",
+    "Brazos abiertos, junta las almohadillas delante del pecho sin subir los hombros.",
+  ),
+  "Cruces en polea": load(
+    "fly",
+    "8 kg por lado",
+    "De pie, entre las dos poleas altas. Cruza las manos por delante del pecho con los codos blandos.",
+  ),
+  "Extensión de tríceps en polea": load(
+    "pushdown",
+    "12 kg en la polea",
+    "Codos pegados al cuerpo. Solo se mueve el antebrazo hacia abajo.",
+  ),
+  "Extensión de tríceps con cuerda": load(
+    "pushdown",
+    "10 kg en la cuerda",
+    "Igual que el jalón en polea: al final separa un poco los extremos de la cuerda, sin abrir los codos.",
+  ),
+  "Extensión de tríceps sobre la cabeza en polea": load(
+    "overhead",
+    "8 kg en la polea",
+    "De espaldas a la polea baja, cuerda detrás de la cabeza. Estira los codos sin abrirlos.",
+  ),
+  "Fondos en máquina asistida": load(
+    "dip",
+    "la asistencia que deje 8–12 repeticiones limpias",
+    "Rodillas o pies en el apoyo. Baja hasta que el codo pase de 90° y empuja sin encoger los hombros.",
+  ),
+  "Prensa de piernas": load(
+    "press",
+    "50 kg de carga, sin contar el carro",
+    "Empuja la plataforma hasta casi estirar las rodillas, sin bloquearlas.",
+  ),
+  "Sentadilla hack": load(
+    "squat",
+    "40 kg en la máquina, sin contar el carro",
+    "Espalda contra el respaldo, pies bajos. Baja hasta que el muslo quede casi paralelo y sube sin bloquear las rodillas.",
+  ),
+  "Extensión de cuádriceps": load(
+    "press",
+    "20 kg en la máquina",
+    "Sentado, estira las rodillas y baja el rodillo en dos segundos. No despegues la cadera del asiento.",
+  ),
+  "Prensa unilateral": load(
+    "press",
+    "25 kg de carga, sin contar el carro",
+    "Un pie en la plataforma. El mismo recorrido de la prensa, sin que la cadera se rote.",
+  ),
+  "Curl femoral acostado": load(
+    "leg-curl",
+    "18 kg en la máquina",
+    "Boca abajo, lleva los talones hacia el glúteo y baja despacio.",
+  ),
+  "Curl femoral sentado": load(
+    "leg-curl",
+    "18 kg en la máquina",
+    "Sentado, el rodillo sobre los tobillos. Flexiona la rodilla y vuelve lento, sin despegar la espalda.",
+  ),
+  "Curl femoral de pie": load(
+    "leg-curl",
+    "10 kg en la máquina",
+    "De pie, una pierna. Lleva el talón al glúteo sin arquear la zona lumbar.",
+  ),
+  "Peso muerto rumano en Smith": load(
+    "rdl",
+    "30 kg en la barra guiada",
+    "Rodillas blandas, cadera atrás y espalda recta. La barra baja rozando las piernas, dentro de las guías.",
+  ),
+  "Jalón al pecho en máquina": load(
+    "pulldown",
+    "35 kg en el jalón",
+    "Tira la barra hacia la parte alta del pecho, llevando los codos hacia abajo.",
+  ),
+  "Jalón agarre cerrado": load(
+    "pulldown",
+    "30 kg en el jalón",
+    "Agarre estrecho. Tira hacia el pecho sin echar el torso atrás de golpe.",
+  ),
+  "Remo en polea sentado": load(
+    "cable-row",
+    "30 kg en la polea",
+    "Sentado, tira el agarre hacia el abdomen sin echar el torso atrás.",
+  ),
+  "Remo en máquina": load(
+    "row",
+    "25 kg en la máquina",
+    "Pecho apoyado en el cojín. Tira las manijas hacia la cadera y aprieta la escápula.",
+  ),
+  "Curl de bíceps en máquina": load(
+    "curl",
+    "15 kg en la máquina",
+    "Brazos apoyados en el cojín. Sube las manijas y baja en dos segundos, sin despegar los codos.",
+  ),
+  "Curl en polea baja": load(
+    "curl",
+    "12 kg en la polea",
+    "Codos quietos al lado del cuerpo. Sube la barra de la polea y controla la bajada.",
+  ),
+  "Curl martillo en polea": load(
+    "hammer",
+    "8 kg por lado",
+    "Cuerda en la polea baja, palmas enfrentadas. Codos no se van adelante.",
+  ),
+  "Curl en polea alta": load(
+    "curl",
+    "8 kg por lado",
+    "De frente a las poleas altas, brazos abiertos. Dobla los codos y lleva las manos hacia la sien.",
+  ),
+  "Press de hombro en máquina": load(
+    "ohp",
+    "15 kg en la máquina",
+    "Asiento alto, manijas a la altura de los hombros. Empuja arriba sin arquear la espalda.",
+  ),
+  "Elevaciones laterales en máquina": load(
+    "lateral",
+    "8 kg en la máquina",
+    "Codos en las almohadillas. Sube hasta la altura de los hombros, sin encoger el trapecio.",
+  ),
+  "Elevaciones laterales en polea": load(
+    "lateral",
+    "5 kg por lado",
+    "Polea baja, al lado del cuerpo. Sube el brazo hasta el hombro con el codo levemente flexionado.",
+  ),
+  "Deltoides posterior en máquina": load(
+    "rear",
+    "15 kg en el pec deck invertido",
+    "De frente al respaldo, abre los brazos hacia atrás hasta sentir la espalda alta.",
+  ),
+  "Hip thrust en máquina": load(
+    "thrust",
+    "40 kg en la máquina",
+    "Espalda en el apoyo, empuja con los talones hasta alinear rodilla, cadera y hombro.",
+  ),
+  "Patada de glúteo en polea": load(
+    "thrust",
+    "8 kg en la polea",
+    "De pie, el tobillo en el agarre bajo. Lleva el talón atrás sin arquear la lumbar.",
+  ),
+  "Puente de glúteo en máquina": load(
+    "bridge",
+    "30 kg en la máquina",
+    "Igual que el hip thrust, con un recorrido más corto si la máquina lo limita. Aprieta arriba un segundo.",
+  ),
+  "Prensa con pies altos": load(
+    "press-high",
+    "40 kg de carga, sin contar el carro",
+    "Pies altos en la plataforma para cargar más el femoral y el glúteo. No bloquees las rodillas.",
+  ),
+  "Crunch en máquina": load(
+    "crunch",
+    "15 kg en la máquina",
+    "Acerca el pecho a la pelvis empujando el cojín. El rango es corto; no tires del cuello.",
+  ),
+  "Crunch en polea": load(
+    "crunch",
+    "10 kg en la polea",
+    "De rodillas, frente a la polea alta. Flexiona el tronco llevando los codos hacia las rodillas.",
+  ),
+  "Elevación de piernas en silla romana": load(
+    "leg-raise",
+    "peso corporal; si la silla tiene lastre, 5 kg",
+    "Antebrazos en los apoyos. Sube las rodillas y bájalas sin balancear el cuerpo.",
+    false,
+  ),
+  "Encogimiento en máquina declinada": load(
+    "crunch",
+    "el peso del cuerpo en la máquina",
+    "Sujeta los apoyos y enrolla el tronco. Baja solo hasta donde la lumbar siga controlada.",
+    false,
+  ),
+  "Giros en máquina de torso": load(
+    "twist",
+    "10 kg en la máquina",
+    "Sentado, gira el torso de un lado al otro. Las caderas se quedan quietas en el asiento.",
+  ),
+  "Pallof en polea": load(
+    "pallof",
+    "8 kg en la polea",
+    "De lado a la polea, empuja el agarre al frente y no dejes que te rote el torso.",
+  ),
+  "Flexión lateral en polea": load(
+    "side-hip",
+    "8 kg en la polea",
+    "De lado a la polea baja. Inclina el tronco hacia el lado contrario y vuelve sin tirar del brazo.",
+  ),
+  "Crunch oblicuo en polea": load(
+    "crunch",
+    "8 kg en la polea",
+    "De rodillas, lleva un codo hacia la rodilla contraria. El giro sale del tronco, no del brazo.",
+  ),
   "Press banca con barra o mancuernas": load(
     "bench",
     "20 kg en la barra, o 12 kg por mancuerna",
@@ -34,11 +236,6 @@ const BY_NAME: Record<string, Coach> = {
     "Brazos casi estirados, junta las manos por delante del pecho sin subir los hombros.",
   ),
   "Fondos en banco": body("dip", "Manos en el banco, baja doblando los codos y empuja hasta estirarlos."),
-  "Extensión de tríceps en polea": load(
-    "pushdown",
-    "10 kg en la polea",
-    "Codos pegados al cuerpo. Solo se mueve el antebrazo hacia abajo.",
-  ),
   "Elevaciones laterales": load(
     "lateral",
     "4 kg por mancuerna",
@@ -68,7 +265,6 @@ const BY_NAME: Record<string, Coach> = {
     "30 kg en la barra, o 14 kg por mancuerna",
     "Tronco inclinado, tira la carga hacia la cadera y aprieta la escápula.",
   ),
-  "Remo en polea sentado": load("cable-row", "25 kg en la polea", "Sentado, tira el agarre hacia el abdomen sin echar el torso atrás."),
   "Face pull": load("face", "8 kg en la cuerda", "Tira hacia la cara, con los codos altos y las manos a los lados de la frente."),
   "Curl de bíceps con barra": load("curl", "15 kg en la barra", "Codos quietos al lado del cuerpo. Sube la barra y baja en dos segundos."),
   "Curl martillo": load("hammer", "8 kg por mancuerna", "Igual que el curl, con las palmas mirándose. Codos no se van adelante."),

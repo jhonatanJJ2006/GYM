@@ -1,15 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { classKey, courseColor, modeLabel, placeOf } from "../data/courses.ts";
+import { classKey, modeLabel, placeOf } from "../data/courses.ts";
 import { HOLIDAYS } from "../data/holidays.ts";
 import { MEALS, mealWhen } from "../data/meals.ts";
 import { PROFILE } from "../data/nutrition.ts";
-import { SESSIONS, sessionColor, sessionFor, type Session, type SessionId } from "../data/sessions.ts";
+import { SESSIONS, sessionFor, type Session, type SessionId } from "../data/sessions.ts";
 import { formatLong, parseIso } from "../lib/dates.ts";
 import { buildDay } from "../lib/schedule.ts";
 import { formatDuration, formatSpan } from "../lib/time.ts";
 import { ExerciseFigure } from "./ExerciseFigure.tsx";
 import { MealArt } from "./MealArt.tsx";
 import { ExerciseList, MealDetail } from "./Recipe.tsx";
+import { CompactRow } from "./system/CompactRow.tsx";
+import { MealThumb } from "./system/Thumbnail.tsx";
 
 type Entry =
   | { type: "day"; iso: string }
@@ -121,7 +123,7 @@ function ModalShell({ entry, onClose }: { entry: Entry; onClose: () => void }) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="modal-sheet relative flex max-h-[min(92dvh,880px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.8rem] bg-ink shadow-[0_24px_80px_rgb(0_0_0/0.55)] ring-1 ring-white/10 sm:rounded-[1.8rem]"
+        className="modal-sheet relative flex max-h-[min(92dvh,880px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[var(--radius-modal)] bg-ink shadow-[0_24px_80px_rgb(0_0_0/0.55)] ring-1 ring-white/10 sm:rounded-[var(--radius-modal)]"
       >
         <button
           type="button"
@@ -166,91 +168,49 @@ function DayBody({ iso, titleId, title }: { iso: string; titleId: string; title:
   const plan = buildDay(parseIso(iso));
   const note = holidayNote(iso);
   const works = plan.items.filter((item) => item.kind === "trabajo");
-  const hero = heroPose(plan.session);
   return (
-    <div>
-      <ExerciseFigure pose={hero} label={plan.session.title} />
-      <div className="space-y-3 px-5 pb-8 pt-4">
+    <div className="space-y-3 px-5 pb-8 pt-14">
       <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
         {title}
       </h2>
-      <p className="text-sm" style={{ color: sessionColor(plan.session) }}>
+      <p className="text-sm text-muted">
         Semana {plan.cycleWeek} de 4 · {plan.session.title} · {plan.session.time}
       </p>
-      {note ? <p className="rounded-2xl bg-warn/10 px-3 py-3 text-sm leading-relaxed text-warn">{note}</p> : null}
+      {note ? <p className="rounded-lg bg-panel px-3 py-3 text-sm leading-relaxed text-cream">{note}</p> : null}
       {plan.banners.map((banner) => (
-        <p key={banner} className="rounded-2xl bg-panel px-3 py-3 text-sm leading-relaxed text-cream/80">
+        <p key={banner} className="rounded-lg bg-panel px-3 py-3 text-sm leading-relaxed text-cream/80">
           {banner}
         </p>
       ))}
-      <button
-        type="button"
-        onClick={() => modals.openGym(iso)}
-        className="w-full rounded-[1.4rem] bg-panel px-4 py-3 text-left"
-      >
-        <span className="text-sm" style={{ color: sessionColor(plan.session) }}>
-          Gym · {plan.session.time}
-        </span>
-        <span className="mt-1 block font-semibold">{plan.session.title}</span>
-        <span className="mt-2 inline-flex rounded-full bg-accent px-3 py-1 text-xs font-semibold text-ink">Ver la sesión</span>
-      </button>
-      <ul className="space-y-2">
+      <CompactRow title={plan.session.title} meta={plan.session.time} onClick={() => modals.openGym(iso)} />
+      <ul className="space-y-1">
         {plan.classes.map((block) => (
           <li key={classKey(block)}>
-            <button
-              type="button"
-              onClick={() => modals.openClass(iso, classKey(block))}
-              className="w-full rounded-2xl bg-panel px-3 py-3 text-left"
-              style={{ boxShadow: `inset 4px 0 0 ${courseColor(block.name)}` }}
-            >
-              <span className="text-sm font-semibold tabular-nums" style={{ color: courseColor(block.name) }}>
-                {block.start}–{block.end}
-              </span>
-              <span className="mt-1 block font-semibold">{block.name}</span>
-              <span className="block text-sm text-muted">
-                {block.type} · {placeOf(block)}
-              </span>
-            </button>
+            <CompactRow title={block.name} meta={block.start} onClick={() => modals.openClass(iso, classKey(block))} />
           </li>
         ))}
         {works.map((item, index) =>
           item.kind === "trabajo" ? (
             <li key={item.start}>
-              <button
-                type="button"
+              <CompactRow
+                title={`Trabajo ${index + 1} de ${works.length}`}
+                meta={formatSpan({ start: item.start, end: item.end })}
                 onClick={() => modals.openWork(iso, item.start)}
-                className="w-full rounded-2xl bg-work/10 px-3 py-3 text-left ring-1 ring-work/20"
-              >
-                <span className="text-sm font-semibold text-work">
-                  Trabajo · {formatSpan({ start: item.start, end: item.end })}
-                </span>
-                <span className="mt-1 block font-semibold">
-                  Bloque {index + 1} de {works.length}
-                </span>
-              </button>
+              />
             </li>
           ) : null,
         )}
         {plan.meals.items.map((meal, index) => (
           <li key={`${meal.time}-${meal.role}`}>
-            <button
-              type="button"
+            <CompactRow
+              title={meal.role}
+              meta={mealWhen(meal)}
+              thumb={<MealThumb ingredients={meal.ingredients} />}
               onClick={() => modals.openMeal(plan.date.getDay(), index)}
-              className="w-full overflow-hidden rounded-[1.4rem] bg-panel text-left ring-1 ring-white/10"
-            >
-              <MealArt ingredients={meal.ingredients} label={meal.role} />
-              <span className="block px-3 py-3">
-                <span className="block text-sm text-meal">{mealWhen(meal)}</span>
-                <span className="mt-1 block font-display text-xl leading-tight">{meal.role}</span>
-                <span className="block text-sm text-muted">
-                  ~{meal.kcal} kcal · ~{meal.protein} g
-                </span>
-              </span>
-            </button>
+            />
           </li>
         ))}
       </ul>
-      </div>
     </div>
   );
 }
@@ -278,8 +238,8 @@ function ClassBody({
   const mode = modeLabel(block);
   return (
     <div>
-      <div className="bg-panel px-5 pb-8 pt-16" style={{ boxShadow: `inset 0 -6px 0 ${courseColor(block.name)}` }}>
-        <p className="font-display text-5xl tabular-nums leading-none" style={{ color: courseColor(block.name) }}>
+      <div className="bg-panel px-5 pb-8 pt-16">
+        <p className="font-display text-5xl tabular-nums leading-none text-cream">
           {block.start}
         </p>
         <p className="mt-2 text-sm text-muted">hasta {block.end}</p>
@@ -293,7 +253,7 @@ function ClassBody({
       </p>
       {block.professor ? <p className="text-sm text-cream/85">{block.professor}</p> : null}
       {block.nrc ? <p className="text-sm text-muted">NRC {block.nrc}</p> : null}
-      {note ? <p className="rounded-2xl bg-warn/10 px-3 py-3 text-sm leading-relaxed text-warn">{note}</p> : null}
+      {note ? <p className="rounded-2xl bg-panel px-3 py-3 text-sm leading-relaxed text-cream">{note}</p> : null}
       </div>
     </div>
   );
@@ -314,7 +274,7 @@ function WorkBody({ iso, start, titleId, title }: { iso: string; start: number; 
   return (
     <div>
       <div className="bg-panel px-5 pb-8 pt-16">
-        <p className="font-display text-5xl tabular-nums leading-none text-work">{formatSpan(block)}</p>
+        <p className="font-display text-5xl tabular-nums leading-none text-cream">{formatSpan(block)}</p>
       </div>
       <div className="space-y-3 px-5 pb-8 pt-4">
       <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
@@ -356,11 +316,11 @@ function SessionBody({
       <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
         {title}
       </h2>
-      <p className="text-sm" style={{ color: sessionColor(session) }}>
+      <p className="text-sm text-muted">
         {session.time} · {session.minutesLabel}
       </p>
       <p className="text-sm leading-relaxed text-cream/85">{session.note}</p>
-      {note ? <p className="rounded-2xl bg-warn/10 px-3 py-3 text-sm leading-relaxed text-warn">{note}</p> : null}
+      {note ? <p className="rounded-2xl bg-panel px-3 py-3 text-sm leading-relaxed text-cream">{note}</p> : null}
       <ExerciseList exercises={session.exercises} onOpen={(index) => modals.openExercise(session.id, index)} />
       </div>
     </div>
@@ -383,7 +343,7 @@ function MealBody({ dow, index, titleId, title }: { dow: number; index: number; 
       <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
         {title}
       </h2>
-      <p className="font-display text-3xl tabular-nums text-meal">{mealWhen(meal)}</p>
+      <p className="font-display text-3xl tabular-nums text-cream">{mealWhen(meal)}</p>
       <p className="text-sm text-cream/85">
         ~{meal.kcal} kcal · ~{meal.protein} g de proteína
       </p>

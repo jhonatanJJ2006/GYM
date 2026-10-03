@@ -3,17 +3,20 @@
 @theme {
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #050607;
-  --color-ink-2: #0c0e11;
-  --color-panel: #12151a;
-  --color-panel-2: #1a1e24;
-  --color-line: #2a3038;
-  --color-cream: #f4f7f2;
-  --color-muted: #9aa39a;
-  --color-accent: #c6f135;
-  --color-work: #c9d4ff;
-  --color-meal: #f0b7c8;
-  --color-warn: #e6c27a;
+  --color-ink: #0a0a0a;
+  --color-ink-2: #111111;
+  --color-panel: #171717;
+  --color-panel-2: #222222;
+  --color-line: #2c2c2c;
+  --color-cream: #f2f2f2;
+  --color-muted: #8d8d8d;
+  --color-accent: #f2f2f2;
+  --color-work: #d0d0d0;
+  --color-meal: #c8c8c8;
+  --color-warn: #e6e6e6;
+  --radius-block: 0.35rem;
+  --radius-row: 0.5rem;
+  --radius-modal: 1.25rem;
 }
 
 @layer base {
@@ -24,9 +27,7 @@
   body {
     margin: 0;
     min-height: 100dvh;
-    background:
-      radial-gradient(880px 320px at 50% -18%, rgb(198 241 53 / 0.07), transparent 62%),
-      var(--color-ink);
+    background: var(--color-ink);
     color: var(--color-cream);
     font-family: var(--font-sans);
     text-rendering: optimizeLegibility;
@@ -42,7 +43,7 @@
   button:focus-visible,
   a:focus-visible,
   summary:focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-cream);
     outline-offset: 3px;
   }
 
@@ -55,7 +56,7 @@
   }
 
   ::selection {
-    background: var(--color-accent);
+    background: var(--color-cream);
     color: var(--color-ink);
   }
 }
@@ -69,7 +70,7 @@
 @keyframes sheet-in {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;

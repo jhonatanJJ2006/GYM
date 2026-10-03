@@ -108,6 +108,28 @@ for (const item of oct8.items) {
 }
 console.log(`trabajo total ${oct8.workMinutes} min`);
 
+
+const pairs: Record<string, [string, string]> = {
+  push: ["pecho", "tríceps"],
+  legs: ["cuádriceps", "isquiotibiales"],
+  pull: ["espalda", "bíceps"],
+  tri: ["hombro", "tríceps"],
+  bi: ["hombro", "bíceps"],
+  legsB: ["isquiotibiales", "glúteo"],
+};
+for (const [id, [first, second]] of Object.entries(pairs)) {
+  const session = SESSIONS[id as keyof typeof SESSIONS];
+  check(session.exercises.length === 8, `${id} tiene ${session.exercises.length} ejercicios, se esperaban 8`);
+  check(session.note.includes(first) && session.note.includes(second), `${id} no documenta ${first} + ${second}`);
+}
+check(SESSIONS.absA.exercises.length === 4, "abdomen debería quedar en un solo grupo");
+check(SESSIONS.absB.exercises.length === 4, "oblicuos deberían quedar en un solo grupo");
+check(SESSIONS.push.time === "18:00–19:15", "horario de empuje");
+check(SESSIONS.legs.time === "18:00–19:15", "horario de pierna");
+check(SESSIONS.pull.time === "18:00–19:15", "horario de jalón");
+check(SESSIONS.legsB.time === "18:00–19:15", "horario de pierna B");
+check(SESSIONS.absA.time === "10:00–11:00" && SESSIONS.absB.time === "10:00–11:00", "horario de abdomen");
+
 if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);

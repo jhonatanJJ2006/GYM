@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { MealArt } from "../components/MealArt.tsx";
 import { useModals } from "../components/Modals.tsx";
+import { CompactRow } from "../components/system/CompactRow.tsx";
+import { MealThumb } from "../components/system/Thumbnail.tsx";
 import { Button } from "../components/ui/button.tsx";
 import { MEALS, WEEKDAY_MEAL_ORDER, mealWhen } from "../data/meals.ts";
 import { DISCLAIMER, KCAL_INTRO, KCAL_POINTS, PROFILE, SHOPPING, SHOPPING_NOTE } from "../data/nutrition.ts";
@@ -37,7 +38,7 @@ export function MealsPage() {
   return (
     <div>
       <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
-      <h1 className="font-display text-[2.6rem] leading-none tracking-tight">Comidas</h1>
+      <h1 className="font-display text-4xl leading-none tracking-tight">Comidas</h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
         Meta ~{PROFILE.kcal} kcal y {PROFILE.protein} g de proteína. Estimación para {PROFILE.weightKg} kg y{" "}
         {PROFILE.heightM} m, IMC ~{PROFILE.bmi}.
@@ -82,23 +83,15 @@ export function MealsPage() {
         <p className="mt-3 text-sm text-cream/85">
           {DOW_LONG[dow].replace(/^./, (letter) => letter.toUpperCase())} · ~{day.total}
         </p>
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-3 space-y-1">
           {day.items.map((meal, index) => (
             <li key={`${dow}-${meal.time}-${meal.role}`}>
-              <button
-                type="button"
+              <CompactRow
+                title={meal.role}
+                meta={mealWhen(meal)}
+                thumb={<MealThumb ingredients={meal.ingredients} />}
                 onClick={() => modals.openMeal(dow, index)}
-                className="w-full overflow-hidden rounded-[1.6rem] bg-panel text-left ring-1 ring-white/8"
-              >
-                <MealArt ingredients={meal.ingredients} label={meal.role} />
-                <span className="block px-4 py-4">
-                  <span className="block text-sm text-meal">{mealWhen(meal)}</span>
-                  <span className="mt-1 block font-display text-2xl leading-tight">{meal.role}</span>
-                  <span className="text-sm text-muted">
-                    ~{meal.kcal} kcal · ~{meal.protein} g
-                  </span>
-                </span>
-              </button>
+              />
             </li>
           ))}
         </ul>
