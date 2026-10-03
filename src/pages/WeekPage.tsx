@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Legend } from "../components/Legend.tsx";
 import { useModals } from "../components/Modals.tsx";
-import { CLASSES, classKey, modeLabel, placeOf, type Weekday } from "../data/courses.ts";
+import { CLASSES, classKey, type Weekday } from "../data/courses.ts";
+import { CompactRow } from "../components/system/CompactRow.tsx";
 import { sessionFor, shoulderFocus } from "../data/sessions.ts";
 import { ANCHOR_MON, DOW_LONG, addDays, toIso } from "../lib/dates.ts";
 import { cn } from "../lib/utils.ts";
@@ -22,13 +23,13 @@ export function WeekPage() {
   return (
     <div>
       <p className="font-display text-sm tracking-wide text-muted">Hierro</p>
-      <h1 className="font-display text-[2.6rem] leading-none tracking-tight">Semana tipo</h1>
+      <h1 className="font-display text-4xl leading-none tracking-tight">Semana tipo</h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
         La misma malla del 6 de octubre de 2026 al 2 de febrero de 2027. El jueves el gym es a las 19:15 porque a las
         18:00 es la tutoría virtual de Lógica Digital.
       </p>
 
-      <div className="mt-5 grid grid-cols-4 gap-1 rounded-[1.4rem] bg-ink-2 p-1" role="group" aria-label="Semana del ciclo">
+      <div className="mt-5 grid grid-cols-4 gap-1 rounded-row border border-line bg-ink-2 p-1" role="group" aria-label="Semana del ciclo">
         {[1, 2, 3, 4].map((value) => (
           <button
             key={value}
@@ -36,8 +37,8 @@ export function WeekPage() {
             aria-pressed={week === value}
             onClick={() => setWeek(value)}
             className={cn(
-              "min-h-14 rounded-[1.1rem] text-sm font-semibold",
-              week === value ? "bg-cream text-ink" : "text-cream",
+              "min-h-12 rounded-row text-sm font-medium",
+              week === value ? "bg-panel-2 text-cream ring-1 ring-line" : "text-muted",
             )}
           >
             <span className="block text-[0.68rem] font-medium">Semana</span>
@@ -58,8 +59,8 @@ export function WeekPage() {
             aria-selected={dayIndex === index}
             onClick={() => setDayIndex(index)}
             className={cn(
-              "flex min-h-14 flex-col items-center justify-center rounded-2xl",
-              dayIndex === index ? "bg-cream text-ink" : "bg-panel text-cream",
+              "flex min-h-12 flex-col items-center justify-center rounded-row",
+              dayIndex === index ? "bg-cream text-ink" : "text-muted",
             )}
           >
             <span className="text-[0.62rem] font-semibold">{DAY_LABEL[index]}</span>
@@ -68,7 +69,7 @@ export function WeekPage() {
         ))}
       </div>
 
-      <article className="mt-4 rounded-lg bg-panel p-4 ring-1 ring-white/10">
+      <article className="mt-4 rounded-row border border-line bg-panel p-4">
         <h2 className="font-display text-3xl capitalize tracking-tight">{DOW_LONG[dow]}</h2>
         <p className="mt-1 text-lg font-semibold text-cream">
           {session.title}
@@ -84,36 +85,21 @@ export function WeekPage() {
             Fin de semana: sin clases y sin trabajo. Solo abdomen por la mañana.
           </p>
         ) : (
-          <ul className="mt-4 space-y-4">
+          <ul className="mt-4 space-y-1">
             {classes.map((block) => (
               <li key={classKey(block)}>
-                <button
-                  type="button"
+                <CompactRow
+                  title={block.name}
+                  meta={`${block.start}–${block.end}`}
                   onClick={() => modals.openClass(toIso(date), classKey(block))}
-                  className="grid w-full grid-cols-[4.6rem_1fr] gap-3 rounded-2xl py-1 text-left"
-                >
-                  <p className="pt-0.5 text-sm font-semibold tabular-nums text-cream">
-                    {block.start}
-                    <span className="mt-0.5 block text-xs font-medium text-muted">{block.end}</span>
-                  </p>
-                  <span className="min-w-0 border-l border-white/10 pl-3">
-                    <span className="block font-semibold leading-snug">{block.name}</span>
-                    <span className="mt-0.5 block text-sm text-muted">
-                      {modeLabel(block) === "Sin salón"
-                        ? `${block.type} · ${placeOf(block)}`
-                        : `${modeLabel(block)} · ${block.type} · ${placeOf(block)}`}
-                      {block.nrc ? ` · NRC ${block.nrc}` : ""}
-                    </span>
-                    {block.professor ? <span className="block text-sm text-muted">{block.professor}</span> : null}
-                  </span>
-                </button>
+                />
               </li>
             ))}
           </ul>
         )}
       </article>
 
-      <details className="mt-4 rounded-2xl bg-panel">
+      <details className="mt-4 rounded-row border border-line bg-panel">
         <summary className="flex min-h-12 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>
         <div className="px-4 pb-4">
           <Legend />

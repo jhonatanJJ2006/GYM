@@ -7,7 +7,7 @@ export function Thumbnail({ photo }: { photo: Photo }) {
     <img
       src={photo.src}
       alt=""
-      className="size-10 shrink-0 rounded-[var(--radius-row)] object-cover"
+      className="size-10 shrink-0 rounded-row object-cover"
     />
   );
 }

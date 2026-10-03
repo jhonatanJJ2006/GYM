@@ -14,10 +14,10 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, index) => START_
 type Kind = "clase" | "trabajo" | "gym" | "comida";
 
 const KIND_CLASS: Record<Kind, string> = {
-  clase: "bg-white/20 text-cream",
-  trabajo: "bg-white/10 text-cream ring-1 ring-inset ring-white/30",
-  gym: "bg-white/30 text-cream",
-  comida: "bg-white/15 text-cream ring-1 ring-inset ring-white/20",
+  clase: "bg-block-class text-cream",
+  trabajo: "bg-block-work text-cream ring-1 ring-inset ring-line",
+  gym: "bg-block-gym text-cream",
+  comida: "bg-block-meal text-cream ring-1 ring-inset ring-line",
 };
 
 function itemEnd(item: TimelineItem): number {
@@ -62,49 +62,64 @@ export function WeekGrid({
   days,
   kinds,
   selected,
+  today,
+  onSelect,
 }: {
   days: Date[];
   kinds: Record<Kind, boolean>;
   selected: Date;
+  today: Date;
+  onSelect: (date: Date) => void;
 }) {
   const height = HOURS.length * HOUR_PX;
 
   return (
-    <div className="overflow-x-auto rounded-[var(--radius-row)] ring-1 ring-white/10">
+    <div className="overflow-x-auto rounded-row border border-line bg-ink">
       <div className="min-w-[760px]">
-        <div className="grid grid-cols-[3rem_repeat(7,minmax(0,1fr))] border-b border-line bg-ink">
+        <div className="sticky top-0 z-10 grid grid-cols-[3.25rem_repeat(7,minmax(0,1fr))] border-b border-line bg-ink">
           <div />
           {days.map((date) => {
             const inside = isInRange(date);
             const active = isSameDay(date, selected);
+            const isToday = isSameDay(date, today);
             return (
-              <div
+              <button
                 key={toIso(date)}
+                type="button"
+                disabled={!inside}
+                onClick={() => onSelect(date)}
                 className={cn(
-                  "border-l border-line px-1 py-1.5 text-center",
-                  active && "bg-white/8",
+                  "border-l border-line px-1 py-2 text-center",
+                  active && "bg-wash",
                   !inside && "opacity-35",
                 )}
               >
-                <p className="text-[0.62rem] font-medium uppercase tracking-wide text-muted">
+                <span className="block text-[0.62rem] font-medium uppercase tracking-wide text-muted">
                   {WEEK_LETTERS[(date.getDay() + 6) % 7]}
-                </p>
-                <p className={cn("font-display text-lg leading-none", active ? "text-cream" : "text-cream/80")}>
+                </span>
+                <span
+                  className={cn(
+                    "mx-auto mt-1 grid size-7 place-items-center font-display text-base leading-none",
+                    active && "rounded-full bg-cream text-ink",
+                    !active && isToday && "rounded-full ring-1 ring-cream text-cream",
+                    !active && !isToday && "text-cream/80",
+                  )}
+                >
                   {date.getDate()}
-                </p>
-              </div>
+                </span>
+              </button>
             );
           })}
         </div>
-        <div className="relative grid grid-cols-[3rem_repeat(7,minmax(0,1fr))]" style={{ height }}>
+        <div className="relative grid grid-cols-[3.25rem_repeat(7,minmax(0,1fr))]" style={{ height }}>
           <div className="relative border-r border-line bg-ink">
             {HOURS.map((hour) => (
               <div
                 key={hour}
-                className="absolute right-1 -translate-y-1/2 text-[0.62rem] tabular-nums text-muted"
-                style={{ top: (hour - START_HOUR) * HOUR_PX }}
+                className="absolute inset-x-0 pr-1.5 text-right text-[0.62rem] tabular-nums leading-none text-muted"
+                style={{ top: (hour - START_HOUR) * HOUR_PX + 4 }}
               >
-                {formatClock(hour * 60).slice(0, 5)}
+                {formatClock(hour * 60)}
               </div>
             ))}
           </div>
@@ -137,33 +152,33 @@ function DayColumn({
 
   return (
     <div
-      className={cn("relative border-l border-line", selected && "bg-white/[0.03]", !inside && "bg-white/[0.02]")}
+      className={cn("relative border-l border-line", selected && "bg-wash", !inside && "opacity-40")}
       style={{
         height,
-        backgroundImage: "linear-gradient(to bottom, transparent 51px, var(--color-line) 52px)",
+        backgroundImage: "linear-gradient(to bottom, transparent calc(100% - 1px), var(--color-line) calc(100% - 1px))",
         backgroundSize: `100% ${HOUR_PX}px`,
       }}
     >
       {plan?.holiday ? <span className="sr-only">{plan.holiday}</span> : null}
-      {placed.map(({ item, lane, end }) => {
+      {placed.map(({ item, lane, end }, index) => {
         const top = ((item.start - origin) / 60) * HOUR_PX;
         const blockHeight = Math.max(16, ((end - item.start) / 60) * HOUR_PX - 2);
         const width = `calc(${100 / lanes}% - 3px)`;
         const left = `calc(${(100 / lanes) * lane}% + 1px)`;
         return (
           <button
-            key={`${item.kind}-${item.start}-${lane}`}
+            key={`${item.kind}-${item.start}-${index}`}
             type="button"
             onClick={() => openItem(modals, plan!.iso, plan!, item)}
             className={cn(
-              "absolute overflow-hidden rounded-[var(--radius-block)] px-1 py-0.5 text-left",
+              "absolute overflow-hidden rounded-block px-1 py-0.5 text-left",
               KIND_CLASS[item.kind],
             )}
             style={{ top: top + 1, height: blockHeight, width, left }}
           >
             <span className="block truncate text-[10px] font-medium leading-tight">{itemLabel(item)}</span>
             {blockHeight >= 32 ? (
-              <span className="block truncate text-[9px] leading-tight text-cream/70">{itemMeta(item)}</span>
+              <span className="block truncate text-[9px] leading-tight text-muted">{itemMeta(item)}</span>
             ) : null}
           </button>
         );

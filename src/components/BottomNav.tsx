@@ -12,8 +12,8 @@ const LINKS = [
 
 export function BottomNav() {
   return (
-    <nav aria-label="Secciones" className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.7rem,env(safe-area-inset-bottom))]">
-      <ul className="mx-auto grid max-w-lg grid-cols-5 gap-1 rounded-[1.8rem] bg-[#07080a]/95 p-1.5 shadow-[0_16px_50px_rgb(0_0_0/0.55)] ring-1 ring-white/10 backdrop-blur-xl">
+    <nav aria-label="Secciones" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-ink/95 backdrop-blur pb-[max(0.35rem,env(safe-area-inset-bottom))]">
+      <ul className="mx-auto grid max-w-6xl grid-cols-5">
         {LINKS.map((link) => (
           <li key={link.to}>
             <NavLink
@@ -21,8 +21,8 @@ export function BottomNav() {
               end={link.end}
               className={({ isActive }) =>
                 cn(
-                  "flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-[1.25rem] px-0.5 text-center text-[0.62rem] font-semibold leading-tight",
-                  isActive ? "bg-accent text-ink" : "text-muted",
+                  "flex min-h-14 flex-col items-center justify-center gap-0.5 px-0.5 text-center text-[0.62rem] font-medium leading-tight",
+                  isActive ? "text-cream" : "text-muted",
                 )
               }
             >

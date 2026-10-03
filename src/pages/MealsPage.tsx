@@ -45,17 +45,17 @@ export function MealsPage() {
       </p>
 
       <dl className="mt-5 grid grid-cols-3 gap-2">
-        <div className="rounded-[1.4rem] bg-accent px-3 py-4 text-ink">
-          <dt className="text-sm font-semibold">Kcal</dt>
-          <dd className="font-display text-3xl leading-none">{PROFILE.kcal}</dd>
+        <div className="rounded-row border border-line bg-panel px-3 py-3">
+          <dt className="text-xs text-muted">Kcal</dt>
+          <dd className="mt-1 font-display text-2xl leading-none">{PROFILE.kcal}</dd>
         </div>
-        <div className="rounded-[1.4rem] bg-panel px-3 py-4 ring-1 ring-white/8">
-          <dt className="text-sm text-muted">Proteína</dt>
-          <dd className="font-display text-3xl leading-none">{PROFILE.protein} g</dd>
+        <div className="rounded-row border border-line bg-panel px-3 py-3">
+          <dt className="text-xs text-muted">Proteína</dt>
+          <dd className="mt-1 font-display text-2xl leading-none">{PROFILE.protein} g</dd>
         </div>
-        <div className="rounded-[1.4rem] bg-panel px-3 py-4 ring-1 ring-white/8">
-          <dt className="text-sm text-muted">IMC</dt>
-          <dd className="font-display text-3xl leading-none">~{PROFILE.bmi}</dd>
+        <div className="rounded-row border border-line bg-panel px-3 py-3">
+          <dt className="text-xs text-muted">IMC</dt>
+          <dd className="mt-1 font-display text-2xl leading-none">~{PROFILE.bmi}</dd>
         </div>
       </dl>
 
@@ -72,8 +72,8 @@ export function MealsPage() {
               aria-pressed={dow === value}
               onClick={() => setDow(value)}
               className={cn(
-                "min-h-12 rounded-2xl text-xs font-semibold",
-                dow === value ? "bg-accent text-ink" : "bg-panel text-cream",
+                "min-h-10 rounded-row text-xs font-medium",
+                dow === value ? "bg-panel-2 text-cream ring-1 ring-line" : "text-muted",
               )}
             >
               {LABELS[index]}
@@ -127,9 +127,9 @@ export function MealsPage() {
         <p className="mt-1 text-sm text-muted">
           {SHOPPING_NOTE} {done} de {SHOPPING.length} marcados.
         </p>
-        <ul className="mt-3 overflow-hidden rounded-[1.4rem] bg-panel">
+        <ul className="mt-3 overflow-hidden rounded-row border border-line bg-panel">
           {SHOPPING.map((row, index) => (
-            <li key={row.item} className="border-b border-white/8 last:border-0">
+            <li key={row.item} className="border-b border-line last:border-0">
               <label className="flex min-h-14 items-center gap-3 px-3">
                 <input
                   type="checkbox"
