@@ -14,7 +14,6 @@ const CC_BY_4 = "https://creativecommons.org/licenses/by/4.0/";
 const CC_BY_SA_2 = "https://creativecommons.org/licenses/by-sa/2.0/";
 const CC_BY_SA_3 = "https://creativecommons.org/licenses/by-sa/3.0/";
 const CC_BY_SA_4 = "https://creativecommons.org/licenses/by-sa/4.0/";
-const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
 const PD = "https://creativecommons.org/publicdomain/mark/1.0/";
 
 function shot(
@@ -184,7 +183,7 @@ const meals = {
 };
 
 const exercises: Record<PoseId, Photo> = {
-  bench: shot("exercises/bench.jpg", "Press de banca con barra", "Aditya Oberai", "CC BY-SA 4.0", CC_BY_SA_4, "Bench Press.jpg"),
+  bench: shot("exercises/bench.jpg", "Press de banca con barra", "Lance Cpl. Ronald W. Stauffer", "Dominio público", PD, "Bench press 1.jpg"),
   incline: shot(
     "exercises/incline.jpg",
     "Press inclinado con mancuernas",
@@ -195,13 +194,13 @@ const exercises: Record<PoseId, Photo> = {
   ),
   fly: shot(
     "exercises/fly-cable.jpg",
-    "Aperturas en polea",
+    "Cruces en polea",
     "Nenad Stojkovic",
     "CC BY 2.0",
     CC_BY,
-    "Attractive beautiful girl working on cross machine in the gym.jpg",
+    "Chest flies with cable machine - cable crossover flies.jpg",
   ),
-  dip: shot("exercises/dip.jpg", "Fondos en banco", "PTPioneer", "CC BY 2.0", CC_BY, "Girl doing dips Exercise.jpg"),
+  dip: shot("exercises/dip.jpg", "Fondos en paralelas", "Cpl. Colby Brown", "Dominio público", PD, "Barbells, Dumbbells, Kettlebells, Oh My! 110823-M-ED643-008.jpg"),
   pushdown: shot(
     "exercises/pushdown.jpg",
     "Extensión de tríceps en polea",
@@ -221,10 +220,10 @@ const exercises: Record<PoseId, Photo> = {
   squat: shot(
     "exercises/squat.jpg",
     "Sentadilla con barra",
-    "RickyBennison",
-    "CC0",
-    CC0,
-    "Barbell pad back squat.jpg",
+    "Nenad Stojkovic",
+    "CC BY 2.0",
+    CC_BY,
+    "Young attractive man athlete doing exercise with the barbell in the gym.jpg",
   ),
   press: shot(
     "exercises/press.jpg",
@@ -279,34 +278,34 @@ const exercises: Record<PoseId, Photo> = {
   pulldown: shot(
     "exercises/pulldown.jpg",
     "Jalón al pecho",
-    "George Stepanek",
-    "CC BY-SA 3.0",
-    CC_BY_SA_3,
-    "PulldownMachineExercise.JPG",
+    "Abooyeah",
+    "CC BY-SA 4.0",
+    CC_BY_SA_4,
+    "Amer-Lat-Pulldown.jpg",
   ),
   row: shot(
     "exercises/row.jpg",
-    "Remo con mancuerna",
-    "George Stepanek",
-    "CC BY-SA 3.0",
-    CC_BY_SA_3,
-    "DumbbellBentOverRow.JPG",
+    "Remo landmine",
+    "Eric Astrauskas",
+    "CC BY 2.0",
+    CC_BY,
+    "Landmine Bent-Over Rows.jpg",
   ),
   "cable-row": shot(
     "exercises/cable-row.jpg",
-    "Remo en polea sentado",
-    "Miguel Angel Omaña Rojas",
-    "CC0",
-    CC0,
-    "Woman using a seated cable row machine at the gym.jpg",
+    "Remo con barra anclada",
+    "Eric Astrauskas",
+    "CC BY 2.0",
+    CC_BY,
+    "Landmine Bent-Over Rows.jpg",
   ),
   face: shot(
     "exercises/cable-row.jpg",
-    "Tiro en polea sentado",
-    "Miguel Angel Omaña Rojas",
-    "CC0",
-    CC0,
-    "Woman using a seated cable row machine at the gym.jpg",
+    "Remo con barra anclada",
+    "Eric Astrauskas",
+    "CC BY 2.0",
+    CC_BY,
+    "Landmine Bent-Over Rows.jpg",
   ),
   curl: shot(
     "exercises/curl.jpg",
@@ -318,27 +317,27 @@ const exercises: Record<PoseId, Photo> = {
   ),
   hammer: shot(
     "exercises/curl-one.jpg",
-    "Curl con mancuerna",
-    "PTPioneer",
-    "CC BY 2.0",
-    CC_BY,
-    "Girl doing one arm dumbbell curl exercise.jpg",
+    "Curl de bíceps",
+    "Scoobytrash",
+    "CC BY-SA 3.0",
+    CC_BY_SA_3,
+    "StandingBarbellCurl.jpg",
   ),
   ohp: shot(
     "exercises/ohp.jpg",
-    "Press militar con mancuernas",
-    "Tyler Read",
-    "CC BY 2.0",
-    CC_BY,
-    "Girl doing dumbbell shoulder press 02.jpg",
+    "Press de hombro con mancuernas",
+    "Cpl. Adam T. Leyendecker",
+    "Dominio público",
+    PD,
+    "USMC-110825-M-SM240-085.jpg",
   ),
   rear: shot(
     "exercises/row.jpg",
-    "Tronco inclinado con mancuernas",
-    "George Stepanek",
-    "CC BY-SA 3.0",
-    CC_BY_SA_3,
-    "DumbbellBentOverRow.JPG",
+    "Remo landmine",
+    "Eric Astrauskas",
+    "CC BY 2.0",
+    CC_BY,
+    "Landmine Bent-Over Rows.jpg",
   ),
   overhead: shot(
     "exercises/overhead-2.jpg",
@@ -358,11 +357,11 @@ const exercises: Record<PoseId, Photo> = {
   ),
   "incline-curl": shot(
     "exercises/curl-one.jpg",
-    "Curl con mancuerna",
-    "PTPioneer",
-    "CC BY 2.0",
-    CC_BY,
-    "Girl doing one arm dumbbell curl exercise.jpg",
+    "Curl de bíceps",
+    "Scoobytrash",
+    "CC BY-SA 3.0",
+    CC_BY_SA_3,
+    "StandingBarbellCurl.jpg",
   ),
   thrust: shot("exercises/bridge.jpg", "Puente de cadera", "Sasha Kargaltsev", "CC BY 2.0", CC_BY, "Bridge pose.jpg"),
   deadbug: shot(
@@ -496,7 +495,27 @@ export function mealPhoto(ingredients: readonly string[]): Photo {
   return meals.porridge;
 }
 
-export function exercisePhoto(pose: PoseId): Photo {
+const BY_NAME: Record<string, Photo> = {
+  "Extensión de cuádriceps": shot(
+    "exercises/leg-ext.jpg",
+    "Extensión de cuádriceps en máquina",
+    "Nenad Stojkovic",
+    "CC BY 2.0",
+    CC_BY,
+    "Young attractive man doing leg with machine in gym. Back view closeup.jpg",
+  ),
+  "Sentadilla hack": shot(
+    "exercises/hack.jpg",
+    "Sentadilla hack en máquina",
+    "brett jordan",
+    "CC BY 2.0",
+    CC_BY,
+    "David Jobson & Ziggy Chima; machine hack squat.jpg",
+  ),
+};
+
+export function exercisePhoto(pose: PoseId, name?: string): Photo {
+  if (name && BY_NAME[name]) return BY_NAME[name];
   return exercises[pose];
 }
 
@@ -504,4 +523,4 @@ export function photoCredit(photo: Photo): string {
   return `${photo.author} · ${photo.license}`;
 }
 
-export const ALL_PHOTOS: Photo[] = [...Object.values(meals), ...Object.values(exercises)];
+export const ALL_PHOTOS: Photo[] = [...Object.values(meals), ...Object.values(exercises), ...Object.values(BY_NAME)];

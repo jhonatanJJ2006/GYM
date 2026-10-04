@@ -6,6 +6,7 @@ import { cycleWeek, isInTerm, toIso } from "./dates.ts";
 import { classInterval, parseClock, spanInterval, type Interval } from "./time.ts";
 
 const DAY_START = 7 * 60;
+const AFTERNOON = 12 * 60;
 const DAY_END = 23 * 60;
 const MIN_TOTAL = 5 * 60;
 const MAX_TOTAL = 6 * 60;
@@ -53,7 +54,7 @@ function mergeIntervals(list: Interval[]): Interval[] {
   return merged;
 }
 
-function freeGaps(busy: Interval[]): Interval[] {
+function freeGaps(busy: Interval[], windowStart = DAY_START): Interval[] {
   const clipped = mergeIntervals(
     busy
       .map((interval) => ({
@@ -63,7 +64,7 @@ function freeGaps(busy: Interval[]): Interval[] {
       .filter((interval) => interval.end > interval.start),
   );
   const gaps: Interval[] = [];
-  let cursor = DAY_START;
+  let cursor = windowStart;
   for (const block of clipped) {
     if (block.start > cursor) gaps.push({ start: cursor, end: block.start });
     cursor = Math.max(cursor, block.end);
@@ -73,7 +74,7 @@ function freeGaps(busy: Interval[]): Interval[] {
 }
 
 /**
- * Entre semana, 5 a 6 horas en huecos que no pisan clases, gym ni el rato de cada comida.
+ * Entre semana, 5 a 6 horas solo por la tarde (desde las 12:00), sin pisar clases, gym ni comidas.
  * Sábado y domingo no tienen trabajo.
  */
 export function workBlocksFor(date: Date): Interval[] {
@@ -88,7 +89,7 @@ export function workBlocksFor(date: Date): Interval[] {
 
   const blocks: Interval[] = [];
   let total = 0;
-  for (const gap of freeGaps(busy)) {
+  for (const gap of freeGaps(busy, AFTERNOON)) {
     const room = MAX_TOTAL - total;
     if (room < MIN_BLOCK) break;
     let want = Math.min(gap.end - gap.start, room);
@@ -120,13 +121,13 @@ function bannersFor(date: Date, holiday: string | null): string[] {
   }
 
   if (weekend) {
-    notes.push("Fin de semana: sin clases y sin trabajo. Solo abdomen por la mañana.");
+    notes.push("Fin de semana: sin clases y sin trabajo. Abdomen 09:15–11:15, para no pisar el post-entreno de las 11:15.");
   } else if (dow === 4 && inTerm) {
     notes.push(
-      "El jueves el gym no es a las 18:00. A esa hora es la tutoría virtual de Lógica Digital (18:00–18:59). Entrenas 19:15–20:30.",
+      "El jueves no se entrena a las 19:15. De 17:00 a 18:59 hay tutorías y el trabajo de la tarde necesita el hueco de las 19:00. El gym es 22:25–24:25.",
     );
   } else if (dow === 4) {
-    notes.push("El jueves el gym sigue a las 19:15–20:30. El ciclo de hombro no se corta al terminar las clases.");
+    notes.push("El jueves el gym sigue a las 22:25–24:25. El ciclo de hombro no se corta al terminar las clases.");
   }
 
   if (holiday) {

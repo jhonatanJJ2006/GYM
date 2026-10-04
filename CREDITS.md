@@ -20,25 +20,25 @@ Las fotografías están en Wikimedia Commons y se pueden usar con la licencia in
 - Pan con queso y manzana — Kitchen Life of a Navy Wife, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Rosemary_Apple_Butter_Grilled_Cheese_Sandwich.jpg
 - Huevo duro — Marc-Lautenbacher, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Hard_boiled_egg_on_breakfast_table.jpg
 - Pan con plátano — Navin75, CC BY-SA 2.0. https://commons.wikimedia.org/wiki/File:Bananas_Foster_French_Toast_(15288002250).jpg
-- Press de banca con barra — Aditya Oberai, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Bench_Press.jpg
+- Press de banca con barra — Lance Cpl. Ronald W. Stauffer, dominio público. https://commons.wikimedia.org/wiki/File:Bench_press_1.jpg
 - Press inclinado con mancuernas — Jeffery J. Gabriel Jr., U.S. Navy, Dominio público. https://commons.wikimedia.org/wiki/File:US_Navy_070227-N-0998G-003_Operations_Specialist_3rd_Class_Greg_Ivy,_a_native_of_Sacramento,_Calif.,_incline_presses_two_30-pound_dumbbells_as_Quartermaster_Seaman_Julian_Marulanda,_a_native_of_Bridgeport,_Conn.,_acts_as_spotte.jpg
-- Aperturas en polea — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Attractive_beautiful_girl_working_on_cross_machine_in_the_gym.jpg
-- Fondos en banco — PTPioneer, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_dips_Exercise.jpg
+- Cruces en polea — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Chest_flies_with_cable_machine_-_cable_crossover_flies.jpg
+- Fondos — Cpl. Colby Brown, dominio público. https://commons.wikimedia.org/wiki/File:Barbells,_Dumbbells,_Kettlebells,_Oh_My!_110823-M-ED643-008.jpg
 - Extensión de tríceps en polea — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:CableMachinePushdown.JPG
 - Elevaciones laterales con mancuernas — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellLateralRaise.JPG
-- Sentadilla con barra — RickyBennison, CC0. https://commons.wikimedia.org/wiki/File:Barbell_pad_back_squat.jpg
+- Sentadilla con barra — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_attractive_man_athlete_doing_exercise_with_the_barbell_in_the_gym.jpg
 - Prensa de piernas — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_man_using_a_leg_press_machine_at_the_gym.jpg
 - Peso muerto con mancuernas, cadera atrás — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellDeadlift.JPG
 - Zancada con mancuernas — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Dumbbell_lunges.jpg
 - Curl femoral acostado — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:LyingLegCurlMachineExercise.JPG
 - Gemelos de pie con mancuernas — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellStandingCalfRaise.JPG
 - Gemelos sentado — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:SeatedCalfRaiseMachineExercise.JPG
-- Jalón al pecho — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:PulldownMachineExercise.JPG
-- Remo con mancuerna — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellBentOverRow.JPG
-- Remo en polea sentado — Miguel Angel Omaña Rojas, CC0. https://commons.wikimedia.org/wiki/File:Woman_using_a_seated_cable_row_machine_at_the_gym.jpg
+- Jalón al pecho — Abooyeah, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Amer-Lat-Pulldown.jpg
+- Remo landmine — Eric Astrauskas, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Landmine_Bent-Over_Rows.jpg
+- Remo con barra anclada — Eric Astrauskas, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Landmine_Bent-Over_Rows.jpg
 - Curl de bíceps con barra — Scoobytrash, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:StandingBarbellCurl.jpg
-- Curl con mancuerna — PTPioneer, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_one_arm_dumbbell_curl_exercise.jpg
-- Press militar con mancuernas — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_dumbbell_shoulder_press_02.jpg
+- Curl de bíceps (miniatura que antes era de una mujer) — Scoobytrash, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:StandingBarbellCurl.jpg
+- Press de hombro con mancuernas — Cpl. Adam T. Leyendecker, dominio público. https://commons.wikimedia.org/wiki/File:USMC-110825-M-SM240-085.jpg
 - Extensión de tríceps sobre la cabeza — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_double_dumbbell_tricep_extension.jpg
 - Puente de cadera — Sasha Kargaltsev, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Bridge_pose.jpg
 - Dead bug, brazo y pierna contrarios — Jaykayfit, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Alternating_upper_and_lower_extremities.jpg
@@ -56,3 +56,5 @@ Las fotografías están en Wikimedia Commons y se pueden usar con la licencia in
 - Caminata en la caminadora — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Fit_woman_wearing_sportswear_doing_cardio_in_gym_on_a_treadmill.jpg
 - Hombro con banda elástica — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_lateral_raises_with_bands.jpg
 - Brazos abiertos a la altura del hombro — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:The_gym_girl_is_stretching_her_arms.jpg
+- Extensión de cuádriceps — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_attractive_man_doing_leg_with_machine_in_gym._Back_view_closeup.jpg
+- Sentadilla hack — brett jordan, CC BY 2.0. https://commons.wikimedia.org/wiki/File:David_Jobson_%26_Ziggy_Chima;_machine_hack_squat.jpg

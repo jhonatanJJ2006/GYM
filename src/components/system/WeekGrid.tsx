@@ -9,7 +9,7 @@ import { cn } from "../../lib/utils.ts";
 import { useModals } from "../Modals.tsx";
 
 const START_HOUR = 5;
-const END_HOUR = 23;
+const END_HOUR = 25;
 const HOUR_PX = 52;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, index) => START_HOUR + index);
 
@@ -40,7 +40,7 @@ function itemThumb(item: TimelineItem): string | null {
   if (item.kind === "comida") return mealPhoto(item.meal.ingredients).src;
   if (item.kind === "gym") {
     const exercise = item.session.exercises.find((entry) => entry.name !== "Calentamiento") ?? item.session.exercises[0];
-    return exercise ? exercisePhoto(exercise.pose).src : null;
+    return exercise ? exercisePhoto(exercise.pose, exercise.name).src : null;
   }
   return null;
 }

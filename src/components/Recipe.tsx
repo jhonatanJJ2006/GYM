@@ -17,7 +17,7 @@ export function ExerciseList({
           <CompactRow
             title={exercise.name}
             meta={exercise.reps}
-            thumb={<ExerciseThumb pose={exercise.pose} />}
+            thumb={<ExerciseThumb pose={exercise.pose} name={exercise.name} />}
             onClick={() => onOpen(index)}
           />
         </li>

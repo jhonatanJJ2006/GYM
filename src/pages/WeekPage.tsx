@@ -24,8 +24,7 @@ export function WeekPage() {
   return (
     <div>
       <PageIntro title="Semana tipo">
-        La misma malla del 6 de octubre de 2026 al 2 de febrero de 2027. El jueves el gym es a las 19:15 porque a las
-        18:00 es la tutoría virtual de Lógica Digital.
+        La misma malla del 6 de octubre de 2026 al 2 de febrero de 2027. El jueves el gym es a las 22:25: antes hay tutorías y el trabajo ocupa la tarde.
       </PageIntro>
 
       <div className="mt-5 grid grid-cols-4 gap-1 rounded-row border border-line bg-ink-2 p-1" role="group" aria-label="Semana del ciclo">
@@ -97,12 +96,12 @@ export function WeekPage() {
         <p className="text-sm text-cream/75">{session.time}</p>
         {dow === 4 ? (
           <p className="mt-3 text-sm leading-relaxed text-muted">
-            No se entrena a las 18:00. Esa hora es la tutoría virtual de Lógica Digital.
+            El gym es 22:25–24:25. De 17:00 a 18:59 hay tutorías y el trabajo se queda por la tarde.
           </p>
         ) : null}
         {classes.length === 0 ? (
           <p className="mt-4 text-sm leading-relaxed text-muted">
-            Fin de semana: sin clases y sin trabajo. Solo abdomen por la mañana.
+            Fin de semana: sin clases y sin trabajo. Abdomen 09:15–11:15.
           </p>
         ) : (
           <ul className="mt-4 space-y-1">
