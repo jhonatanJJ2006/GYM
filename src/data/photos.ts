@@ -15,6 +15,7 @@ const CC_BY_SA_2 = "https://creativecommons.org/licenses/by-sa/2.0/";
 const CC_BY_SA_3 = "https://creativecommons.org/licenses/by-sa/3.0/";
 const CC_BY_SA_4 = "https://creativecommons.org/licenses/by-sa/4.0/";
 const PD = "https://creativecommons.org/publicdomain/mark/1.0/";
+const PEXELS = "https://www.pexels.com/license/";
 
 function shot(
   file: string,
@@ -23,6 +24,7 @@ function shot(
   license: string,
   licenseUrl: string,
   commons: string,
+  sourceUrl?: string,
 ): Photo {
   const page = commons.replace(/ /g, "_");
   return {
@@ -31,7 +33,7 @@ function shot(
     author,
     license,
     licenseUrl,
-    source: `https://commons.wikimedia.org/wiki/File:${page}`,
+    source: sourceUrl ?? `https://commons.wikimedia.org/wiki/File:${page}`,
   };
 }
 
@@ -203,11 +205,12 @@ const exercises: Record<PoseId, Photo> = {
   dip: shot("exercises/dip.jpg", "Fondos en paralelas", "Cpl. Colby Brown", "Dominio público", PD, "Barbells, Dumbbells, Kettlebells, Oh My! 110823-M-ED643-008.jpg"),
   pushdown: shot(
     "exercises/pushdown.jpg",
-    "Extensión de tríceps en polea",
-    "George Stepanek",
-    "CC BY-SA 3.0",
-    CC_BY_SA_3,
-    "CableMachinePushdown.JPG",
+    "Hombre en extensión de tríceps con cuerda",
+    "foad shariyati",
+    "Licencia Pexels",
+    PEXELS,
+    "",
+    "https://www.pexels.com/photo/young-man-exercising-with-cable-machine-in-gym-30672398/",
   ),
   lateral: shot(
     "exercises/lateral.jpg",
@@ -227,19 +230,19 @@ const exercises: Record<PoseId, Photo> = {
   ),
   press: shot(
     "exercises/press.jpg",
-    "Prensa de piernas",
-    "Nenad Stojkovic",
-    "CC BY 2.0",
-    CC_BY,
-    "Young man using a leg press machine at the gym.jpg",
+    "Hombre en prensa de piernas",
+    "Abooyeah",
+    "CC BY-SA 4.0",
+    CC_BY_SA_4,
+    "Marian-Leg-Press.jpg",
   ),
   "press-high": shot(
     "exercises/press.jpg",
-    "Prensa de piernas",
-    "Nenad Stojkovic",
-    "CC BY 2.0",
-    CC_BY,
-    "Young man using a leg press machine at the gym.jpg",
+    "Hombre en prensa de piernas",
+    "Abooyeah",
+    "CC BY-SA 4.0",
+    CC_BY_SA_4,
+    "Marian-Leg-Press.jpg",
   ),
   rdl: shot(
     "exercises/rdl.jpg",
@@ -253,11 +256,12 @@ const exercises: Record<PoseId, Photo> = {
   bulgarian: shot("exercises/lunge.jpg", "Zancada con mancuernas", "Tyler Read", "CC BY 2.0", CC_BY, "Dumbbell lunges.jpg"),
   "leg-curl": shot(
     "exercises/leg-curl.jpg",
-    "Curl femoral acostado",
-    "George Stepanek",
-    "CC BY-SA 3.0",
-    CC_BY_SA_3,
-    "LyingLegCurlMachineExercise.JPG",
+    "Hombre en curl femoral sentado",
+    "Gustavo Gimenez",
+    "Licencia Pexels",
+    PEXELS,
+    "",
+    "https://www.pexels.com/photo/man-in-gray-shirt-and-orange-shorts-doing-leg-exercise-9152547/",
   ),
   calf: shot(
     "exercises/calf.jpg",
@@ -293,15 +297,15 @@ const exercises: Record<PoseId, Photo> = {
   ),
   "cable-row": shot(
     "exercises/cable-row.jpg",
-    "Remo con barra anclada",
-    "Eric Astrauskas",
-    "CC BY 2.0",
-    CC_BY,
-    "Landmine Bent-Over Rows.jpg",
+    "Hombre en remo sentado en polea",
+    "Abooyeah",
+    "CC BY-SA 4.0",
+    CC_BY_SA_4,
+    "Marian-Rows.jpg",
   ),
   face: shot(
-    "exercises/cable-row.jpg",
-    "Remo con barra anclada",
+    "exercises/row.jpg",
+    "Remo landmine",
     "Eric Astrauskas",
     "CC BY 2.0",
     CC_BY,
@@ -384,11 +388,11 @@ const exercises: Record<PoseId, Photo> = {
   crunch: shot("exercises/crunch.jpg", "Crunch en el suelo", "George Stepanek", "CC BY-SA 3.0", CC_BY_SA_3, "FloorCrunch.JPG"),
   pallof: shot(
     "exercises/fly-cable.jpg",
-    "De pie en la polea",
+    "Hombre en cruces de polea",
     "Nenad Stojkovic",
     "CC BY 2.0",
     CC_BY,
-    "Attractive beautiful girl working on cross machine in the gym.jpg",
+    "Chest flies with cable machine - cable crossover flies.jpg",
   ),
   "leg-raise": shot(
     "exercises/leg-raise.jpg",
@@ -511,6 +515,33 @@ const BY_NAME: Record<string, Photo> = {
     "CC BY 2.0",
     CC_BY,
     "David Jobson & Ziggy Chima; machine hack squat.jpg",
+  ),
+  "Press de pecho en máquina": shot(
+    "exercises/chest-press.jpg",
+    "Hombre en press de pecho en máquina",
+    "Pexels",
+    "Licencia Pexels",
+    PEXELS,
+    "",
+    "https://www.pexels.com/photo/muscular-man-exercising-with-shoulder-press-machine-in-gym-3837293/",
+  ),
+  "Aperturas en pec deck": shot(
+    "exercises/pec-deck.jpg",
+    "Hombre en aperturas en pec deck",
+    "Pexels",
+    "Licencia Pexels",
+    PEXELS,
+    "",
+    "https://www.pexels.com/photo/man-training-at-gym-on-chest-fly-machine-14616295/",
+  ),
+  "Elevación de piernas en silla romana": shot(
+    "exercises/roman-chair.jpg",
+    "Hombre en silla romana",
+    "Julia Larson",
+    "Licencia Pexels",
+    PEXELS,
+    "",
+    "https://www.pexels.com/photo/black-sportsman-doing-abs-exercises-on-machine-6455947/",
   ),
 };
 

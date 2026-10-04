@@ -1,6 +1,6 @@
 # Créditos de las fotos
 
-Las fotografías están en Wikimedia Commons y se pueden usar con la licencia indicada. Cada imagen también lleva el autor y la licencia en la propia pantalla.
+Las fotografías de comida están en Wikimedia Commons. Algunas de ejercicio vienen de Pexels (licencia Pexels, uso libre). Cada imagen lleva el autor y la licencia en la propia pantalla.
 
 - Tazón de avena — Keypunch, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Bowl_of_porridge_with_spoon.jpg
 - Huevos revueltos — OmegaFallon, CC BY 4.0. https://commons.wikimedia.org/wiki/File:Scrambled_eggs_with_basil.jpg
@@ -24,18 +24,18 @@ Las fotografías están en Wikimedia Commons y se pueden usar con la licencia in
 - Press inclinado con mancuernas — Jeffery J. Gabriel Jr., U.S. Navy, Dominio público. https://commons.wikimedia.org/wiki/File:US_Navy_070227-N-0998G-003_Operations_Specialist_3rd_Class_Greg_Ivy,_a_native_of_Sacramento,_Calif.,_incline_presses_two_30-pound_dumbbells_as_Quartermaster_Seaman_Julian_Marulanda,_a_native_of_Bridgeport,_Conn.,_acts_as_spotte.jpg
 - Cruces en polea — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Chest_flies_with_cable_machine_-_cable_crossover_flies.jpg
 - Fondos — Cpl. Colby Brown, dominio público. https://commons.wikimedia.org/wiki/File:Barbells,_Dumbbells,_Kettlebells,_Oh_My!_110823-M-ED643-008.jpg
-- Extensión de tríceps en polea — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:CableMachinePushdown.JPG
+- Extensión de tríceps con cuerda — foad shariyati, Licencia Pexels. https://www.pexels.com/photo/young-man-exercising-with-cable-machine-in-gym-30672398/
 - Elevaciones laterales con mancuernas — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellLateralRaise.JPG
 - Sentadilla con barra — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_attractive_man_athlete_doing_exercise_with_the_barbell_in_the_gym.jpg
-- Prensa de piernas — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_man_using_a_leg_press_machine_at_the_gym.jpg
+- Prensa de piernas — Abooyeah, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Marian-Leg-Press.jpg
 - Peso muerto con mancuernas, cadera atrás — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellDeadlift.JPG
 - Zancada con mancuernas — Tyler Read, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Dumbbell_lunges.jpg
-- Curl femoral acostado — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:LyingLegCurlMachineExercise.JPG
+- Curl femoral sentado — Gustavo Gimenez, Licencia Pexels. https://www.pexels.com/photo/man-in-gray-shirt-and-orange-shorts-doing-leg-exercise-9152547/
 - Gemelos de pie con mancuernas — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellStandingCalfRaise.JPG
 - Gemelos sentado — George Stepanek, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:SeatedCalfRaiseMachineExercise.JPG
 - Jalón al pecho — Abooyeah, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Amer-Lat-Pulldown.jpg
 - Remo landmine — Eric Astrauskas, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Landmine_Bent-Over_Rows.jpg
-- Remo con barra anclada — Eric Astrauskas, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Landmine_Bent-Over_Rows.jpg
+- Remo en polea sentado — Abooyeah, CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Marian-Rows.jpg
 - Curl de bíceps con barra — Scoobytrash, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:StandingBarbellCurl.jpg
 - Curl de bíceps (miniatura que antes era de una mujer) — Scoobytrash, CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:StandingBarbellCurl.jpg
 - Press de hombro con mancuernas — Cpl. Adam T. Leyendecker, dominio público. https://commons.wikimedia.org/wiki/File:USMC-110825-M-SM240-085.jpg
@@ -58,3 +58,6 @@ Las fotografías están en Wikimedia Commons y se pueden usar con la licencia in
 - Brazos abiertos a la altura del hombro — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:The_gym_girl_is_stretching_her_arms.jpg
 - Extensión de cuádriceps — Nenad Stojkovic, CC BY 2.0. https://commons.wikimedia.org/wiki/File:Young_attractive_man_doing_leg_with_machine_in_gym._Back_view_closeup.jpg
 - Sentadilla hack — brett jordan, CC BY 2.0. https://commons.wikimedia.org/wiki/File:David_Jobson_%26_Ziggy_Chima;_machine_hack_squat.jpg
+- Press de pecho en máquina — Pexels, Licencia Pexels. https://www.pexels.com/photo/muscular-man-exercising-with-shoulder-press-machine-in-gym-3837293/
+- Aperturas en pec deck — Pexels, Licencia Pexels. https://www.pexels.com/photo/man-training-at-gym-on-chest-fly-machine-14616295/
+- Silla romana — Julia Larson, Licencia Pexels. https://www.pexels.com/photo/black-sportsman-doing-abs-exercises-on-machine-6455947/
