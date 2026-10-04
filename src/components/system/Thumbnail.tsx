@@ -1,6 +1,6 @@
 import { exercisePhoto, mealPhoto, type Photo } from "../../data/photos.ts";
 import type { PoseId } from "../../data/poses.ts";
-import { ExerciseGlyph } from "../ExerciseGlyph.tsx";
+import { CoachView } from "../CoachView.tsx";
 import { useExerciseView } from "../../lib/exerciseView.ts";
 
 /** Miniatura de lista. La foto grande vive en el modal, no aquí. */
@@ -23,8 +23,8 @@ export function ExerciseThumb({ pose }: { pose: PoseId }) {
   const { mode } = useExerciseView();
   if (mode === "figures") {
     return (
-      <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-row bg-ink text-cream">
-        <ExerciseGlyph pose={pose} label="" decorative className="size-10" />
+      <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-row bg-ink">
+        <CoachView pose={pose} decorative className="size-10" />
       </span>
     );
   }
