@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageIntro } from "../components/Brand.tsx";
 import { ExerciseViewSwitch } from "../components/ExerciseView.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { CompactRow } from "../components/system/CompactRow.tsx";
@@ -45,12 +46,10 @@ export function TrainingPage() {
 
   return (
     <div>
-      <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
-      <h1 className="font-display text-4xl leading-none tracking-tight">Entreno</h1>
-      <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted">
+      <PageIntro title="Entreno">
         El ciclo abre el lunes 5 de octubre de 2026. Semanas 1 y 3, el jueves es hombro + tríceps. Semanas 2 y 4,
         hombro + bíceps. El primer jueves, el 8 de octubre, es hombro y tríceps. En febrero el jueves sigue igual.
-      </p>
+      </PageIntro>
       <ExerciseViewSwitch className="mt-4 max-w-sm" />
       {isInRange(today) ? (
         <div className="mt-5">
@@ -63,7 +62,7 @@ export function TrainingPage() {
         </div>
       ) : null}
 
-      <div className="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
+      <div data-rise className="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
         {[1, 2, 3, 4].map((week) => {
           const thursday = addDays(ANCHOR_MON, (week - 1) * 7 + 3);
           const focus = shoulderFocus(week);
@@ -73,7 +72,7 @@ export function TrainingPage() {
               className="w-[82%] shrink-0 snap-start rounded-[1.6rem] bg-panel p-4 ring-1 ring-white/10 sm:w-[46%]"
             >
               <p className="text-sm font-semibold text-cream">Semana {week}</p>
-              <h2 className="mt-2 font-display text-3xl leading-none tracking-tight">Hombro + {focus}</h2>
+              <h2 className="mt-2 font-display text-3xl leading-none tracking-tight text-[var(--color-mark)]">Hombro + {focus}</h2>
               <p className="mt-2 text-sm text-muted">
                 Jueves {thursday.getDate()} de octubre · {sessionFor(thursday).time}
               </p>
@@ -95,7 +94,7 @@ export function TrainingPage() {
         })}
       </div>
 
-      <h2 className="mb-2 mt-8 font-display text-2xl tracking-tight">Cada día</h2>
+      <h2 data-rise className="mb-2 mt-8 font-display text-2xl tracking-tight text-[var(--color-mark)]">Cada día</h2>
       <ul className="overflow-hidden rounded-[1.4rem] bg-panel">
         {PATTERN.map(([day, title, time], index) => {
           const session = [
@@ -122,7 +121,7 @@ export function TrainingPage() {
         })}
       </ul>
 
-      <h2 className="mb-1 mt-8 font-display text-2xl tracking-tight">Qué semana toca</h2>
+      <h2 data-rise className="mb-1 mt-8 font-display text-2xl tracking-tight text-[var(--color-mark)]">Qué semana toca</h2>
       <p className="mb-3 text-sm text-muted">
         Del 1 de octubre de 2026 al 28 de febrero de 2027. HT es hombro + tríceps. HB es hombro + bíceps.
       </p>
@@ -162,7 +161,7 @@ export function TrainingPage() {
         })}
       </div>
 
-      <h2 className="mb-2 mt-8 font-display text-2xl tracking-tight">Rutinas</h2>
+      <h2 data-rise className="mb-2 mt-8 font-display text-2xl tracking-tight text-[var(--color-mark)]">Rutinas</h2>
       <p className="mb-3 text-sm text-muted">Abre una sesión. La foto grande está en el modal; aquí solo hay una miniatura.</p>
       <ul className="space-y-1">
         {ROUTINES.map((session) => (

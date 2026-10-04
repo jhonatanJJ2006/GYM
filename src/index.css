@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Syne", ui-sans-serif, system-ui, sans-serif;
   --color-ink: #0a0a0a;
   --color-ink-2: #111111;
   --color-panel: #171717;
@@ -88,6 +88,31 @@
   .modal-sheet {
     animation: sheet-in 180ms ease-out;
   }
+
+  [data-rise] {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  [data-rise].rise-in {
+    animation: rise-in 420ms ease-out forwards;
+  }
+
+  .week-block[data-rise]:nth-child(2) { animation-delay: 30ms; }
+  .week-block[data-rise]:nth-child(3) { animation-delay: 60ms; }
+  .week-block[data-rise]:nth-child(4) { animation-delay: 90ms; }
+  .week-block[data-rise]:nth-child(n + 5) { animation-delay: 120ms; }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes sheet-in {
@@ -119,6 +144,8 @@
 .page-root {
   --page-glow: rgb(169 208 242 / 0.22);
   --color-mark: var(--color-mark-cal);
+  position: relative;
+  isolation: isolate;
   min-height: 100dvh;
   background:
     radial-gradient(880px 220px at 50% -90px, var(--page-glow), transparent 70%),

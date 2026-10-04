@@ -1,4 +1,5 @@
 import { useState, type KeyboardEvent } from "react";
+import { PageIntro } from "../components/Brand.tsx";
 import { Legend } from "../components/Legend.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { CLASSES, classKey, type Weekday } from "../data/courses.ts";
@@ -22,12 +23,10 @@ export function WeekPage() {
 
   return (
     <div>
-      <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
-      <h1 className="font-display text-4xl leading-none tracking-tight">Semana tipo</h1>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
+      <PageIntro title="Semana tipo">
         La misma malla del 6 de octubre de 2026 al 2 de febrero de 2027. El jueves el gym es a las 19:15 porque a las
         18:00 es la tutoría virtual de Lógica Digital.
-      </p>
+      </PageIntro>
 
       <div className="mt-5 grid grid-cols-4 gap-1 rounded-row border border-line bg-ink-2 p-1" role="group" aria-label="Semana del ciclo">
         {[1, 2, 3, 4].map((value) => (
@@ -42,7 +41,7 @@ export function WeekPage() {
             )}
           >
             <span className="block text-[0.68rem] font-medium">Semana</span>
-            <span className="font-display text-xl leading-none">{value}</span>
+            <span className="font-display text-xl leading-none text-[var(--color-mark)]">{value}</span>
           </button>
         ))}
       </div>
@@ -90,8 +89,8 @@ export function WeekPage() {
         ))}
       </div>
 
-      <article id="panel-dia-semana" role="tabpanel" aria-labelledby={`dia-semana-${dayIndex}`} className="mt-4 rounded-row border border-line bg-panel p-4">
-        <h2 className="font-display text-3xl capitalize tracking-tight">{DOW_LONG[dow]}</h2>
+      <article data-rise id="panel-dia-semana" role="tabpanel" aria-labelledby={`dia-semana-${dayIndex}`} className="mt-4 rounded-row border border-line bg-panel p-4">
+        <h2 className="font-display text-3xl capitalize tracking-tight text-[var(--color-mark)]">{DOW_LONG[dow]}</h2>
         <p className="mt-1 text-lg font-semibold text-cream">
           {session.title}
         </p>
