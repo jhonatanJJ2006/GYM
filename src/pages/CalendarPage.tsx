@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PageIntro } from "../components/Brand.tsx";
 import { Legend } from "../components/Legend.tsx";
-import { WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
+import { DayAgenda, WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
 import { Button } from "../components/ui/button.tsx";
 import {
   MONTHS,
@@ -213,9 +213,7 @@ export function CalendarPage() {
         </Button>
       </div>
 
-      {view === "dia" ? (
-        <WeekGrid days={[cursor]} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
-      ) : null}
+      {view === "dia" ? <DayAgenda day={cursor} kinds={kinds} /> : null}
 
       {view === "semana" && narrow ? (
         <WeekAgenda days={week} kinds={kinds} selected={cursor} onSelect={choose} />
