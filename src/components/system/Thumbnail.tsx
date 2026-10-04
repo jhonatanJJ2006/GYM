@@ -19,7 +19,7 @@ export function MealThumb({ ingredients }: { ingredients: readonly string[] }) {
   return <Thumbnail photo={mealPhoto(ingredients)} />;
 }
 
-export function ExerciseThumb({ pose }: { pose: PoseId }) {
+export function ExerciseThumb({ pose, name }: { pose: PoseId; name?: string }) {
   const { mode } = useExerciseView();
   if (mode === "figures") {
     return (
@@ -28,5 +28,5 @@ export function ExerciseThumb({ pose }: { pose: PoseId }) {
       </span>
     );
   }
-  return <Thumbnail photo={exercisePhoto(pose)} />;
+  return <Thumbnail photo={exercisePhoto(pose, name)} />;
 }

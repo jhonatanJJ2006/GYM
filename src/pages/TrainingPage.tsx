@@ -4,177 +4,149 @@ import { ExerciseViewSwitch } from "../components/ExerciseView.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { CompactRow } from "../components/system/CompactRow.tsx";
 import { ExerciseThumb } from "../components/system/Thumbnail.tsx";
-import { SESSIONS, sessionFor, shoulderFocus, type Session } from "../data/sessions.ts";
-import {
-  ANCHOR_MON,
-  WEEK_LETTERS,
-  addDays,
-  cycleWeek,
-  formatWeekSpan,
-  isInRange,
-  isSameDay,
-  toIso,
-  weeksCoveringRange,
-} from "../lib/dates.ts";
+import { sessionFor, type SessionId } from "../data/sessions.ts";
+import { DOW_LONG, RANGE_END, RANGE_START, addDays, dateOnly, formatLong, isInRange, toIso } from "../lib/dates.ts";
 import { cn } from "../lib/utils.ts";
 
-const ROUTINES: Session[] = [
-  SESSIONS.push,
-  SESSIONS.legs,
-  SESSIONS.pull,
-  SESSIONS.tri,
-  SESSIONS.bi,
-  SESSIONS.legsB,
-  SESSIONS.absA,
-  SESSIONS.absB,
-];
+const STORAGE_KEY = "hierro.entreno.checks";
 
-const PATTERN = [
-  ["Lunes", "Empuje · pecho y tríceps", "18:00–19:15"],
-  ["Martes", "Pierna", "18:00–19:15"],
-  ["Miércoles", "Jalón · espalda", "18:00–19:15"],
-  ["Jueves", "Hombro, alterna tríceps y bíceps", "19:15–20:30"],
-  ["Viernes", "Pierna B · posterior", "18:00–19:15"],
-  ["Sábado", "Abdomen", "10:00–11:00"],
-  ["Domingo", "Abdomen · oblicuos", "10:00–11:00"],
-] as const;
+const GROUPS: Record<SessionId, readonly string[]> = {
+  push: ["Pecho", "Tríceps"],
+  legs: ["Cuádriceps", "Isquiotibiales"],
+  pull: ["Espalda", "Bíceps"],
+  tri: ["Hombro", "Tríceps"],
+  bi: ["Hombro", "Bíceps"],
+  legsB: ["Isquiotibiales", "Glúteo"],
+  absA: ["Abdomen"],
+  absB: ["Oblicuos"],
+};
+
+function readChecks(): Record<string, boolean> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") return {};
+    const checks: Record<string, boolean> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === "boolean") checks[key] = value;
+    }
+    return checks;
+  } catch {
+    return {};
+  }
+}
+
+function initialDay(): Date {
+  const today = dateOnly(new Date());
+  return isInRange(today) ? today : dateOnly(RANGE_START);
+}
 
 export function TrainingPage() {
   const modals = useModals();
-  const weeks = weeksCoveringRange();
-  const [today] = useState(() => new Date());
+  const [day, setDay] = useState(initialDay);
+  const [checks, setChecks] = useState(readChecks);
+  const session = sessionFor(day);
+  const iso = toIso(day);
+  const groups = GROUPS[session.id];
+  const slice = Math.ceil(session.exercises.length / groups.length);
+  const doneCount = session.exercises.filter((exercise) => checks[`${iso}:${exercise.id}`]).length;
+  const atStart = day.getTime() <= dateOnly(RANGE_START).getTime();
+  const atEnd = day.getTime() >= dateOnly(RANGE_END).getTime();
+
+  function shift(delta: number) {
+    const next = addDays(day, delta);
+    if (!isInRange(next)) return;
+    setDay(next);
+  }
+
+  function toggle(id: string) {
+    const key = `${iso}:${id}`;
+    setChecks((current) => {
+      const next = { ...current, [key]: !current[key] };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
 
   return (
     <div>
       <PageIntro title="Entreno">
-        El ciclo abre el lunes 5 de octubre de 2026. Semanas 1 y 3, el jueves es hombro + tríceps. Semanas 2 y 4,
-        hombro + bíceps. El primer jueves, el 8 de octubre, es hombro y tríceps. En febrero el jueves sigue igual.
+        Un solo día. El ciclo sigue anclado al lunes 5 de octubre de 2026; la semana completa está en Semana y en el
+        calendario.
       </PageIntro>
-      <ExerciseViewSwitch className="mt-4 max-w-sm" />
-      {isInRange(today) ? (
-        <div className="mt-5">
-          <CompactRow
-            title={sessionFor(today).title}
-            meta={sessionFor(today).time}
-            thumb={<ExerciseThumb pose={sessionFor(today).exercises[0].pose} />}
-            onClick={() => modals.openGym(toIso(today))}
-          />
+
+      <div className="mt-4 flex items-center gap-2" role="group" aria-label="Cambiar el día de entreno">
+        <button
+          type="button"
+          onClick={() => shift(-1)}
+          disabled={atStart}
+          className="min-h-12 shrink-0 rounded-row border border-line px-3 text-sm font-semibold disabled:opacity-40"
+        >
+          Anterior
+        </button>
+        <div className="min-w-0 flex-1 text-center">
+          <p className="font-display text-2xl capitalize tracking-tight text-[var(--color-mark)]">{DOW_LONG[day.getDay()]}</p>
+          <p className="text-sm text-muted">{formatLong(day)}</p>
         </div>
-      ) : null}
-
-      <div data-rise className="-mx-4 mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
-        {[1, 2, 3, 4].map((week) => {
-          const thursday = addDays(ANCHOR_MON, (week - 1) * 7 + 3);
-          const focus = shoulderFocus(week);
-          return (
-            <article
-              key={week}
-              className="w-[82%] shrink-0 snap-start rounded-[1.6rem] bg-panel p-4 ring-1 ring-white/10 sm:w-[46%]"
-            >
-              <p className="text-sm font-semibold text-cream">Semana {week}</p>
-              <h2 className="mt-2 font-display text-3xl leading-none tracking-tight text-[var(--color-mark)]">Hombro + {focus}</h2>
-              <p className="mt-2 text-sm text-muted">
-                Jueves {thursday.getDate()} de octubre · {sessionFor(thursday).time}
-              </p>
-              <ol className="mt-4 grid grid-cols-7 gap-1">
-                {Array.from({ length: 7 }, (_, index) => addDays(ANCHOR_MON, (week - 1) * 7 + index)).map((date) => {
-                  const session = sessionFor(date);
-                  return (
-                    <li key={toIso(date)} className="rounded-xl bg-ink px-0.5 py-1.5 text-center">
-                      <span className="block text-[0.58rem] text-muted">{WEEK_LETTERS[(date.getDay() + 6) % 7]}</span>
-                      <span className="mt-1 block text-[0.68rem] font-semibold text-cream">
-                        {session.short}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </article>
-          );
-        })}
+        <button
+          type="button"
+          onClick={() => shift(1)}
+          disabled={atEnd}
+          className="min-h-12 shrink-0 rounded-row border border-line px-3 text-sm font-semibold disabled:opacity-40"
+        >
+          Siguiente
+        </button>
       </div>
 
-      <h2 data-rise className="mb-2 mt-8 font-display text-2xl tracking-tight text-[var(--color-mark)]">Cada día</h2>
-      <ul className="overflow-hidden rounded-[1.4rem] bg-panel">
-        {PATTERN.map(([day, title, time], index) => {
-          const session = [
-            SESSIONS.push,
-            SESSIONS.legs,
-            SESSIONS.pull,
-            SESSIONS.tri,
-            SESSIONS.legsB,
-            SESSIONS.absA,
-            SESSIONS.absB,
-          ][index];
-          return (
-            <li key={day} className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3 last:border-0">
-              <span className="flex min-w-0 items-center gap-3">
-                <ExerciseThumb pose={session.exercises[0].pose} />
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold">{day}</span>
-                  <span className="text-sm text-muted">{title}</span>
-                </span>
-              </span>
-              <span className="shrink-0 text-sm font-semibold tabular-nums text-cream/80">{time}</span>
-            </li>
-          );
-        })}
-      </ul>
+      <article className="mt-4 rounded-row border border-line bg-panel p-4">
+        <h2 className="font-display text-3xl tracking-tight">{session.title}</h2>
+        <p className="mt-1 text-sm font-semibold tabular-nums text-cream/80">
+          {session.time} · {session.minutesLabel}
+        </p>
+        <p className="mt-3 text-sm leading-relaxed text-muted">{session.note}</p>
+        <p className="mt-3 text-sm font-semibold">
+          Hechos {doneCount} de {session.exercises.length}
+        </p>
+      </article>
 
-      <h2 data-rise className="mb-1 mt-8 font-display text-2xl tracking-tight text-[var(--color-mark)]">Qué semana toca</h2>
-      <p className="mb-3 text-sm text-muted">
-        Del 1 de octubre de 2026 al 28 de febrero de 2027. HT es hombro + tríceps. HB es hombro + bíceps.
-      </p>
-      <div className="space-y-3">
-        {weeks.map((week) => {
-          const inside = week.filter((date) => isInRange(date));
-          const sample = inside[0];
-          if (!sample) return null;
-          return (
-            <article key={toIso(sample)} className="rounded-2xl bg-ink-2 p-3">
-              <p className="text-sm font-semibold">
-                Ciclo {cycleWeek(sample)}
-                <span className="ml-2 font-medium text-muted">{formatWeekSpan(inside)}</span>
-              </p>
-              <ol className="mt-2 grid grid-cols-7 gap-1">
-                {week.map((date) => {
-                  if (!isInRange(date)) return <li key={toIso(date)} />;
-                  const session = sessionFor(date);
-                  return (
-                    <li
-                      key={toIso(date)}
-                      className={cn(
-                        "rounded-xl bg-panel px-0.5 py-1.5 text-center",
-                        isSameDay(date, today) && "ring-1 ring-cream/60",
-                      )}
-                    >
-                      <span className="block font-display text-base leading-none">{date.getDate()}</span>
-                      <span className="mt-1 block text-[0.62rem] font-semibold text-cream">
-                        {session.short}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-            </article>
-          );
-        })}
-      </div>
+      <ExerciseViewSwitch className="mt-4 max-w-sm" />
 
-      <h2 data-rise className="mb-2 mt-8 font-display text-2xl tracking-tight text-[var(--color-mark)]">Rutinas</h2>
-      <p className="mb-3 text-sm text-muted">Abre una sesión. La foto grande está en el modal; aquí solo hay una miniatura.</p>
-      <ul className="space-y-1">
-        {ROUTINES.map((session) => (
-          <li key={session.id}>
-            <CompactRow
-              title={session.title}
-              meta={session.time}
-              thumb={<ExerciseThumb pose={session.exercises[0].pose} />}
-              onClick={() => modals.openSession(session.id)}
-            />
-          </li>
-        ))}
-      </ul>
+      {groups.map((group, groupIndex) => {
+        const exercises = session.exercises.slice(groupIndex * slice, (groupIndex + 1) * slice);
+        return (
+          <section key={group} className="mt-6">
+            <h3 className="mb-2 font-display text-2xl tracking-tight text-[var(--color-mark)]">{group}</h3>
+            <ul className="space-y-1">
+              {exercises.map((exercise) => {
+                const index = session.exercises.indexOf(exercise);
+                const checked = Boolean(checks[`${iso}:${exercise.id}`]);
+                return (
+                  <li key={exercise.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(exercise.id)}
+                      aria-label={checked ? `Desmarcar ${exercise.name}` : `Marcar ${exercise.name} como hecho`}
+                      className="size-5 shrink-0 accent-[var(--color-mark)]"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <CompactRow
+                        title={exercise.name}
+                        meta={exercise.reps}
+                        wrap
+                        className={cn(checked && "opacity-60")}
+                        thumb={<ExerciseThumb pose={exercise.pose} name={exercise.name} />}
+                        onClick={() => modals.openExercise(session.id, index)}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }

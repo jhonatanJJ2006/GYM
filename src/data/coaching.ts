@@ -10,7 +10,8 @@ export type Coach = {
 const BODY = "Peso corporal, sin carga extra";
 
 function load(pose: PoseId, weight: string, how: string, suggested = true): Coach {
-  return { pose, weight, suggested, how };
+  const labeled = suggested && !/punto de partida/i.test(weight) ? `${weight}, punto de partida` : weight;
+  return { pose, weight: labeled, suggested, how };
 }
 
 function body(pose: PoseId, how: string): Coach {
@@ -220,6 +221,56 @@ const BY_NAME: Record<string, Coach> = {
     "8 kg en la polea",
     "De rodillas, lleva un codo hacia la rodilla contraria. El giro sale del tronco, no del brazo.",
   ),
+  "Cruces en polea baja": load(
+    "fly",
+    "8 kg por lado",
+    "Poleas abajo. Sube las manos en arco hasta que se junten delante del pecho, con los codos blandos.",
+  ),
+  "Extensión de tríceps a un brazo en polea": load(
+    "pushdown",
+    "6 kg en la polea",
+    "Un brazo, codo pegado al costado. Estira solo el antebrazo y vuelve en dos segundos.",
+  ),
+  "Sentadilla en Smith": load(
+    "squat",
+    "30 kg en la barra guiada",
+    "Pies un poco adelante de la barra. Baja hasta el muslo casi paralelo y sube sin bloquear las rodillas.",
+  ),
+  "Curl femoral en polea": load(
+    "leg-curl",
+    "8 kg en la polea",
+    "Tobillo en el agarre bajo. Lleva el talón al glúteo sin arquear la lumbar.",
+  ),
+  "Pullover en polea": load(
+    "pulldown",
+    "15 kg en la polea",
+    "De frente a la polea alta, brazos casi estirados. Baja la barra en arco hasta los muslos, sin doblar los codos de golpe.",
+  ),
+  "Curl predicador en máquina": load(
+    "curl",
+    "12 kg en la máquina",
+    "Brazos apoyados en el cojín inclinado. Sube las manijas y baja hasta estirar casi del todo.",
+  ),
+  "Face pull en polea": load(
+    "face",
+    "8 kg en la cuerda",
+    "Cuerda a la altura de la cara. Tira hacia la frente con los codos altos y abre las manos al final.",
+  ),
+  "Abducción de cadera en máquina": load(
+    "thrust",
+    "25 kg en la máquina",
+    "Sentado, rodillas en las almohadillas. Ábrelas sin echar el tronco atrás y vuelve despacio.",
+  ),
+  "Elevación de rodillas en polea": load(
+    "leg-raise",
+    "8 kg en la polea",
+    "De espaldas a la polea baja, el agarre entre los pies o en los tobillos. Sube las rodillas al pecho.",
+  ),
+  "Leñador en polea": load(
+    "twist",
+    "8 kg en la polea",
+    "Polea alta, al lado. Lleva el agarre en diagonal hasta la cadera contraria. El giro sale del tronco.",
+  ),
   "Press banca con barra o mancuernas": load(
     "bench",
     "20 kg en la barra, o 12 kg por mancuerna",
@@ -357,18 +408,72 @@ const WARMUPS: { test: (detail: string) => boolean; coach: Coach }[] = [
   },
 ];
 
+
+const PROGRAM_HOW: Record<string, string> = {
+  "Press de pecho en máquina": "Posición: sentado, pies en el suelo, manijas a la altura del pecho. Recorrido: empuja hasta casi estirar los codos, sin bloquearlos, y baja hasta que el codo quede cerca de 90°. Error común: despegar la espalda o encoger los hombros.",
+  "Press inclinado en máquina": "Posición: respaldo inclinado, espalda pegada al asiento. Recorrido: empuja las manijas hacia arriba y adelante hasta casi estirar. Error común: rebotar abajo o que el codo se abra de más.",
+  "Aperturas en pec deck": "Posición: sentado, brazos abiertos con los codos levemente flexionados. Recorrido: junta las almohadillas delante del pecho y vuelve hasta sentir el pectoral, sin pasar el dolor del hombro. Error común: empujar con los hombros.",
+  "Cruces en polea": "Posición: de pie, un pie adelante, poleas altas. Recorrido: cruza las manos delante del pecho con los codos blandos. Error común: doblar los codos como si fuera un press.",
+  "Cruces en polea baja": "Posición: de pie, poleas abajo, torso levemente inclinado. Recorrido: sube las manos en arco hasta juntarlas a la altura del pecho. Error común: balancear el cuerpo.",
+  "Extensión de tríceps en polea": "Posición: de pie, codos pegados a las costillas. Recorrido: solo se mueve el antebrazo, de 90° hasta casi estirar. Error común: bajar los hombros empujando el torso.",
+  "Extensión de tríceps con cuerda": "Posición: igual que el jalón, cuerda en la polea alta. Recorrido: estira y al final separa un poco los extremos, sin abrir los codos. Error común: separar los codos del cuerpo.",
+  "Extensión de tríceps sobre la cabeza en polea": "Posición: de espaldas a la polea baja, cuerda detrás de la cabeza. Recorrido: estira los codos hacia el techo sin abrirlos. Error común: arquear la lumbar.",
+  "Fondos en máquina asistida": "Posición: rodillas o pies en el apoyo, hombros abajo. Recorrido: baja hasta que el codo pase de 90° y empuja. Error común: encoger los hombros o rebotar abajo. El peso es la asistencia, punto de partida, no una carga medida.",
+  "Extensión de tríceps a un brazo en polea": "Posición: de lado a la polea, un codo quieto junto al costado. Recorrido: estira ese antebrazo y vuelve en dos segundos. Error común: girar el torso para ayudar.",
+  "Prensa de piernas": "Posición: espalda y cabeza en el respaldo, pies al ancho de cadera. Recorrido: baja hasta cerca de 90° de rodilla y empuja sin bloquear. Error común: despegar la cadera del asiento.",
+  "Sentadilla hack": "Posición: espalda en el respaldo, pies bajos en la plataforma. Recorrido: baja hasta el muslo casi paralelo y sube. Error común: que las rodillas se metan hacia dentro.",
+  "Extensión de cuádriceps": "Posición: sentado, rodilla alineada con el eje de la máquina. Recorrido: estira la rodilla y baja el rodillo en dos segundos. Error común: despegar la cadera para levantar más.",
+  "Prensa unilateral": "Posición: un pie en la plataforma, cadera quieta. Recorrido: el mismo de la prensa, sin rotar la pelvis. Error común: empujar con la pierna que está libre.",
+  "Sentadilla en Smith": "Posición: barra guiada sobre los trapecios, pies un poco adelante. Recorrido: baja hasta el muslo casi paralelo y sube sin bloquear. Error común: dejar que la barra se vaya delante de la punta del pie.",
+  "Curl femoral acostado": "Posición: boca abajo, rodilla justo al borde del banco. Recorrido: talones hacia el glúteo y bajada lenta. Error común: levantar la cadera.",
+  "Curl femoral sentado": "Posición: sentado, rodillo sobre los tobillos, espalda en el respaldo. Recorrido: flexiona la rodilla y vuelve lento. Error común: despegar la espalda.",
+  "Curl femoral de pie": "Posición: de pie, una pierna, el torso apoyado. Recorrido: talón al glúteo sin mover la cadera. Error común: arquear la lumbar.",
+  "Peso muerto rumano en Smith": "Posición: rodillas blandas, barra guiada pegada a las piernas. Recorrido: cadera atrás hasta sentir el femoral, espalda recta, y vuelves. Error común: redondear la zona lumbar.",
+  "Curl femoral en polea": "Posición: de pie, tobillo en el agarre de la polea baja. Recorrido: talón al glúteo. Error común: balancear la pierna.",
+  "Jalón al pecho en máquina": "Posición: sentado, muslos bajo los rodillos, agarre un poco más ancho que los hombros. Recorrido: barra hacia la parte alta del pecho, codos hacia abajo. Error común: echar el torso atrás de golpe.",
+  "Jalón agarre cerrado": "Posición: agarre estrecho, pecho alto. Recorrido: tira hacia el pecho sin encoger el cuello. Error común: terminar el tirón con la espalda baja.",
+  "Remo en polea sentado": "Posición: sentado, rodillas blandas, pecho alto. Recorrido: agarre al abdomen, escápulas atrás, y estiras los brazos sin soltar el torso. Error común: balancear el cuerpo.",
+  "Remo en máquina": "Posición: pecho apoyado en el cojín. Recorrido: manijas hacia la cadera, pausa corta atrás. Error común: subir los hombros.",
+  "Pullover en polea": "Posición: de frente a la polea alta, brazos casi estirados. Recorrido: arco hasta los muslos, codos fijos. Error común: convertirlo en un jalón doblando mucho los codos.",
+  "Curl de bíceps en máquina": "Posición: brazos en el cojín, codos quietos. Recorrido: sube las manijas y baja en dos segundos. Error común: despegar los codos del apoyo.",
+  "Curl en polea baja": "Posición: de pie, codos al lado del torso. Recorrido: sube la barra y controla la bajada hasta casi estirar. Error común: adelantar los codos.",
+  "Curl martillo en polea": "Posición: cuerda, palmas enfrentadas. Recorrido: igual que el curl, sin girar la muñeca. Error común: balancear el tronco.",
+  "Curl en polea alta": "Posición: de frente a las poleas altas, brazos abiertos. Recorrido: dobla los codos y lleva las manos hacia la sien. Error común: bajar los codos por debajo del hombro.",
+  "Curl predicador en máquina": "Posición: axilas en el borde del cojín, brazos apoyados. Recorrido: sube y baja hasta casi estirar, sin soltar de golpe. Error común: despegar el brazo del cojín.",
+  "Press de hombro en máquina": "Posición: asiento alto, manijas a la altura de los hombros, espalda en el respaldo. Recorrido: empuja arriba sin arquear. Error común: encoger el trapecio al final.",
+  "Elevaciones laterales en máquina": "Posición: codos en las almohadillas, torso quieto. Recorrido: sube hasta la altura de los hombros. Error común: pasar de esa altura encogiendo el cuello.",
+  "Elevaciones laterales en polea": "Posición: de lado a la polea baja, codo levemente flexionado. Recorrido: sube el brazo hasta el hombro. Error común: tirar con el trapecio.",
+  "Deltoides posterior en máquina": "Posición: de frente al respaldo, pecho apoyado. Recorrido: abre los brazos hacia atrás hasta la línea del torso. Error común: usar la espalda baja.",
+  "Face pull en polea": "Posición: cuerda a la altura de la cara, un pie atrás. Recorrido: tira hacia la frente y abre las manos. Error común: bajar los codos y hacerlo un remo.",
+  "Hip thrust en máquina": "Posición: espalda en el apoyo, pies bajo las rodillas. Recorrido: empuja con los talones hasta alinear rodilla, cadera y hombro, y pausa un segundo. Error común: arquear la lumbar arriba.",
+  "Patada de glúteo en polea": "Posición: de pie, tobillo en el agarre bajo, torso levemente adelante. Recorrido: talón atrás, sin subir la lumbar. Error común: abrir la pierna de lado.",
+  "Puente de glúteo en máquina": "Posición: igual que el hip thrust, con el recorrido que permita la máquina. Recorrido: aprieta arriba un segundo. Error común: empujar con la punta del pie.",
+  "Prensa con pies altos": "Posición: pies altos en la plataforma, cadera pegada. Recorrido: baja y empuja sin bloquear las rodillas. Error común: despegar la cadera.",
+  "Abducción de cadera en máquina": "Posición: sentado, rodillas en las almohadillas, espalda en el respaldo. Recorrido: abre las rodillas y vuelve despacio. Error común: echar el tronco atrás.",
+  "Crunch en máquina": "Posición: sentado, pecho en el cojín. Recorrido: acerca el pecho a la pelvis, rango corto. Error común: tirar del cuello.",
+  "Crunch en polea": "Posición: de rodillas, frente a la polea alta. Recorrido: flexiona el tronco, codos hacia las rodillas. Error común: doblar solo las caderas.",
+  "Elevación de piernas en silla romana": "Posición: antebrazos en los apoyos, hombros abajo. Recorrido: sube las rodillas y bájalas sin balancear. Error común: columpiar el cuerpo.",
+  "Encogimiento en máquina declinada": "Posición: sujeto a los apoyos, lumbar controlada. Recorrido: enrolla el tronco y baja solo hasta donde sigas el abdomen. Error común: dejarte caer.",
+  "Elevación de rodillas en polea": "Posición: de espaldas a la polea baja, agarre en los tobillos. Recorrido: rodillas al pecho y bajada lenta. Error común: arquear la espalda al bajar.",
+  "Giros en máquina de torso": "Posición: sentado, caderas quietas en el asiento. Recorrido: gira el torso de un lado al otro. Error común: mover las rodillas.",
+  "Pallof en polea": "Posición: de lado a la polea, pies firmes. Recorrido: empuja el agarre al frente y aguanta sin que te rote. Error común: girar los hombros hacia la polea.",
+  "Flexión lateral en polea": "Posición: de lado a la polea baja. Recorrido: inclina el tronco al lado contrario y vuelve. Error común: tirar solo con el brazo.",
+  "Crunch oblicuo en polea": "Posición: de rodillas, polea alta. Recorrido: un codo hacia la rodilla contraria, el giro sale del tronco. Error común: jalar con el brazo.",
+  "Leñador en polea": "Posición: polea alta al lado, pies separados. Recorrido: diagonal desde arriba hasta la cadera contraria. Error común: doblar los brazos y perder el giro.",
+};
+
 export function coachFor(name: string, detail: string): Coach {
   if (name === "Calentamiento") {
     return WARMUPS.find((item) => item.test(detail))?.coach ?? body("circles", detail);
   }
-  return (
+  const found =
     BY_NAME[name] ?? {
-      pose: "circles",
+      pose: "circles" as const,
       weight: BODY,
       suggested: false,
       how: detail,
-    }
-  );
+    };
+  return { ...found, how: PROGRAM_HOW[name] ?? found.how };
 }
 
 export function describeReps(detail: string): string {

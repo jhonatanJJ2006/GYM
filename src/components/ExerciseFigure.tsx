@@ -13,6 +13,6 @@ export function ExerciseFigure({ pose, label }: { pose: PoseId; label: string })
       </figure>
     );
   }
-  const photo = exercisePhoto(pose);
+  const photo = exercisePhoto(pose, label);
   return <PhotoHero photo={{ ...photo, alt: `${label}. ${photo.alt}` }} />;
 }

@@ -438,7 +438,7 @@ function ExerciseBody({
           <dd className="mt-1 font-semibold leading-snug">{exercise.weight}</dd>
           <dd className="mt-2 text-xs leading-relaxed">
             {exercise.weightSuggested
-              ? `Sugerido para arrancar con ${PROFILE.weightKg} kg. No es un peso medido.`
+              ? `Punto de partida para arrancar con ${PROFILE.weightKg} kg. No es un peso medido.`
               : "Sin número inventado: este movimiento va con el peso del cuerpo."}
           </dd>
         </div>
