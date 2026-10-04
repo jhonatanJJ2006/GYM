@@ -1,4 +1,5 @@
 import {
+  Bone,
   Box3,
   CanvasTexture,
   CircleGeometry,
@@ -7,10 +8,12 @@ import {
   HemisphereLight,
   Mesh,
   MeshBasicMaterial,
-  MeshStandardMaterial,
   Object3D,
   PerspectiveCamera,
+  Quaternion,
   Scene,
+  SkinnedMesh,
+  Skeleton,
   SRGBColorSpace,
   Vector3,
   WebGLRenderer,
@@ -19,19 +22,34 @@ import {
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import type { Joints, Layout } from "../data/figureMotions.ts";
 import type { PoseId } from "../data/poses.ts";
+import { loadGear, type GearAnchors, type GearKit } from "./coachGear.ts";
 import { motionFor, sampleMotion } from "./coachSample.ts";
 
 const DEG = Math.PI / 180;
-const REST_FOOT = -78;
 const MODEL_URL = `${import.meta.env.BASE_URL}models/coach.glb`;
+const RED_SHIRT = "Oliver";
+const RED_MESH = "Oliver_body_Oliver_0";
 
-const FRAMING: Record<Layout, { position: Vector3; lookY: number }> = {
-  stand: { position: new Vector3(1.25, 1.28, 4.05), lookY: 0.94 },
-  sit: { position: new Vector3(1.35, 1.22, 4.15), lookY: 0.78 },
-  kneel: { position: new Vector3(1.35, 1.12, 4.05), lookY: 0.7 },
-  supine: { position: new Vector3(2.85, 2.05, 2.55), lookY: 0.38 },
-  prone: { position: new Vector3(2.85, 2.05, 2.55), lookY: 0.38 },
-};
+const BONE = {
+  hips: "Hips_01",
+  spine: "Spine_012",
+  chest: "Spine2_014",
+  head: "Head_040",
+  shoulderL: "LeftShoulder_015",
+  shoulderR: "RightShoulder_042",
+  armL: "LeftArm_016",
+  foreL: "LeftForeArm_017",
+  handL: "LeftHand_018",
+  armR: "RightArm_043",
+  foreR: "RightForeArm_044",
+  handR: "RightHand_045",
+  thighL: "LeftUpLeg_02",
+  kneeL: "LeftLeg_03",
+  footL: "LeftFoot_04",
+  thighR: "RightUpLeg_07",
+  kneeR: "RightLeg_08",
+  footR: "RightFoot_09",
+} as const;
 
 type View = {
   canvas: HTMLCanvasElement;
@@ -44,29 +62,16 @@ type View = {
   visible: boolean;
 };
 
-type Limb = {
-  pivot: Group;
-  scaler: Group;
-  hip: Vector3;
-  l1: number;
-  l2: number;
-  bind: number;
-  sneaker: Mesh;
-};
-
-type Arm = {
-  pivot: Group;
-};
-
 type Rig = {
-  fit: Group;
-  layout: Group;
-  pose: Group;
-  lean: Group;
-  armL: Arm;
-  armR: Arm;
-  legL: Limb;
-  legR: Limb;
+  stage: Group;
+  poseRoot: Group;
+  skeleton: Skeleton;
+  bones: Record<keyof typeof BONE, Bone>;
+  rests: Map<Bone, Quaternion>;
+  localRight: Vector3;
+  localUp: Vector3;
+  localForward: Vector3;
+  gear: GearKit;
   shadow: Mesh;
 };
 
@@ -81,24 +86,86 @@ let raf = 0;
 let dirty = true;
 let users = 0;
 let disposeTimer = 0;
-const box = new Box3();
+
+const worldUp = new Vector3();
+const worldForward = new Vector3();
+const worldRight = new Vector3();
+const leanedUp = new Vector3();
+const leanedForward = new Vector3();
+const dir = new Vector3();
+const parentQ = new Quaternion();
+const deltaQ = new Quaternion();
+const leanQ = new Quaternion();
+const basisQ = new Quaternion();
+const restDir = new Vector3();
+const desiredLocal = new Vector3();
+const rightLocal = new Vector3();
+const anchor = {
+  hips: new Vector3(),
+  head: new Vector3(),
+  shoulder: new Vector3(),
+  handL: new Vector3(),
+  handR: new Vector3(),
+  footL: new Vector3(),
+  footR: new Vector3(),
+};
+const scratch = new Vector3();
+const gearBox = new Box3();
+const meshBox = new Box3();
+const flat = new Vector3();
 
 function materialsOf(mesh: Mesh): Material[] {
   return Array.isArray(mesh.material) ? mesh.material : [mesh.material];
 }
 
-function takeMesh(root: Object3D, name: string): Mesh {
+function disposeMaterial(material: Material) {
+  const mapped = material as Material & { map?: { dispose: () => void } | null };
+  mapped.map?.dispose();
+  material.dispose();
+}
+
+function disposeObject(object: Object3D) {
+  const materials = new Set<Material>();
+  object.traverse((child) => {
+    if (!(child instanceof Mesh)) return;
+    child.geometry.dispose();
+    for (const material of materialsOf(child)) materials.add(material);
+  });
+  for (const material of materials) disposeMaterial(material);
+}
+
+function boneNamed(root: Object3D, name: string): Bone {
   const found = root.getObjectByName(name);
-  if (!(found instanceof Mesh)) throw new Error(`El GLB no trae la malla ${name}`);
-  found.removeFromParent();
+  if (!(found instanceof Bone)) throw new Error(`El muñeco no trae el hueso ${name}`);
   return found;
 }
 
-function centerOf(mesh: Mesh): Box3 {
-  mesh.geometry.computeBoundingBox();
-  const bounds = mesh.geometry.boundingBox;
-  if (!bounds) throw new Error("Geometría sin caja");
-  return bounds;
+function keepSubtree(seed: Object3D, keep: Set<Object3D>) {
+  keep.add(seed);
+  for (const child of seed.children) keepSubtree(child, keep);
+}
+
+function withAncestors(obj: Object3D, keep: Set<Object3D>) {
+  let cur: Object3D | null = obj;
+  while (cur) {
+    keep.add(cur);
+    cur = cur.parent;
+  }
+}
+
+function pruneExcept(root: Object3D, keep: Set<Object3D>) {
+  const removed: Object3D[] = [];
+  const walk = (obj: Object3D) => {
+    for (const child of [...obj.children]) {
+      if (keep.has(child)) walk(child);
+      else {
+        obj.remove(child);
+        removed.push(child);
+      }
+    }
+  };
+  walk(root);
+  for (const obj of removed) disposeObject(obj);
 }
 
 function shadowTexture(): CanvasTexture {
@@ -107,8 +174,8 @@ function shadowTexture(): CanvasTexture {
   canvas.height = 128;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Sin lienzo para la sombra");
-  const gradient = ctx.createRadialGradient(64, 64, 10, 64, 64, 62);
-  gradient.addColorStop(0, "rgba(0,0,0,0.55)");
+  const gradient = ctx.createRadialGradient(64, 64, 8, 64, 64, 62);
+  gradient.addColorStop(0, "rgba(0,0,0,0.45)");
   gradient.addColorStop(1, "rgba(0,0,0,0)");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 128, 128);
@@ -117,165 +184,238 @@ function shadowTexture(): CanvasTexture {
   return texture;
 }
 
-function makeLeg(mesh: Mesh, sneaker: Mesh): Limb {
-  const legBox = centerOf(mesh);
-  const shoeBox = centerOf(sneaker);
-  const hip = new Vector3(
-    (legBox.min.x + legBox.max.x) / 2,
-    legBox.max.y,
-    (legBox.min.z + legBox.max.z) / 2,
-  );
-  const ankle = new Vector3(
-    (shoeBox.min.x + shoeBox.max.x) / 2,
-    shoeBox.max.y,
-    shoeBox.min.z + (shoeBox.max.z - shoeBox.min.z) * 0.35,
-  );
-  const bind = Math.max(0.2, hip.y - legBox.min.y);
-  mesh.geometry.translate(-hip.x, -hip.y, -hip.z);
-  mesh.geometry.computeBoundingSphere();
-  mesh.position.set(0, 0, 0);
-  sneaker.geometry.translate(-ankle.x, -ankle.y, -ankle.z);
-  sneaker.geometry.computeBoundingSphere();
-  sneaker.position.set(0, 0, 0);
-
-  const pivot = new Group();
-  pivot.position.copy(hip);
-  const scaler = new Group();
-  scaler.add(mesh);
-  pivot.add(scaler);
-
-  return { pivot, scaler, hip, l1: bind * 0.54, l2: bind * 0.46, bind, sneaker };
+function captureBasis(root: Object3D, bones: Rig["bones"]) {
+  const left = new Vector3();
+  const right = new Vector3();
+  const hip = new Vector3();
+  const chest = new Vector3();
+  bones.thighL.getWorldPosition(left);
+  bones.thighR.getWorldPosition(right);
+  bones.hips.getWorldPosition(hip);
+  bones.chest.getWorldPosition(chest);
+  const across = right.sub(left).normalize();
+  const up = chest.sub(hip).normalize();
+  const forward = new Vector3().crossVectors(across, up).normalize();
+  across.crossVectors(up, forward).normalize();
+  root.getWorldQuaternion(basisQ).invert();
+  return {
+    right: across.applyQuaternion(basisQ),
+    up: up.applyQuaternion(basisQ.clone()),
+    forward: forward.applyQuaternion(basisQ),
+  };
 }
 
-function makeArm(mesh: Mesh): { arm: Arm; shoulder: Vector3 } {
-  const armBox = centerOf(mesh);
-  const shoulder = new Vector3(
-    (armBox.min.x + armBox.max.x) / 2,
-    armBox.max.y,
-    (armBox.min.z + armBox.max.z) / 2,
-  );
-  mesh.geometry.translate(-shoulder.x, -shoulder.y, -shoulder.z);
-  mesh.geometry.computeBoundingSphere();
-  mesh.position.set(0, 0, 0);
-  const pivot = new Group();
-  pivot.add(mesh);
-  return { arm: { pivot }, shoulder };
-}
+function buildRig(root: Object3D, gear: GearKit): Rig {
+  const oliver = root.getObjectByName(RED_SHIRT);
+  const body = root.getObjectByName(RED_MESH);
+  if (!oliver) throw new Error("El GLB no trae el muñeco Oliver (camisa roja)");
+  if (!(body instanceof SkinnedMesh)) throw new Error("El GLB no trae la malla de la camisa roja");
 
-function boostShirt(torso: Mesh) {
-  for (const material of materialsOf(torso)) {
-    if (material instanceof MeshStandardMaterial && material.name === "Shirt") {
-      material.color.multiplyScalar(8);
-    }
+  const keep = new Set<Object3D>();
+  withAncestors(oliver, keep);
+  withAncestors(body, keep);
+  keepSubtree(oliver, keep);
+  keepSubtree(body, keep);
+  pruneExcept(root, keep);
+
+  body.frustumCulled = false;
+  const bones = {} as Rig["bones"];
+  for (const key of Object.keys(BONE) as (keyof typeof BONE)[]) {
+    bones[key] = boneNamed(oliver, BONE[key]);
   }
-}
+  const rests = new Map<Bone, Quaternion>();
+  for (const bone of body.skeleton.bones) rests.set(bone, bone.quaternion.clone());
 
-function buildRig(root: Object3D): Rig {
-  const head = takeMesh(root, "Head");
-  const torso = takeMesh(root, "Torso");
-  const shorts = takeMesh(root, "Shorts");
-  const armLeft = takeMesh(root, "ArmLeft");
-  const armRight = takeMesh(root, "ArmRight");
-  const legLeft = takeMesh(root, "LegLeft");
-  const legRight = takeMesh(root, "LegRight");
-  const sneakerLeft = takeMesh(root, "SneakerLeft");
-  const sneakerRight = takeMesh(root, "SneakerRight");
-  boostShirt(torso);
+  const poseRoot = new Group();
+  poseRoot.add(root);
+  poseRoot.updateMatrixWorld(true);
+  const basis = captureBasis(poseRoot, bones);
+  // La cruz de caderas apunta a la espalda: la cámara y los brazos miran al pecho.
+  basis.forward.negate();
+  const head = bones.head.getWorldPosition(new Vector3());
+  const foot = bones.footL.getWorldPosition(new Vector3());
+  const height = Math.abs(head.y - foot.y);
+  if (height > 0.4 && (height < 1.05 || height > 2.1)) poseRoot.scale.setScalar(1.65 / height);
 
-  const legL = makeLeg(legLeft, sneakerLeft);
-  const legR = makeLeg(legRight, sneakerRight);
-  const { arm: armL, shoulder: shoulderL } = makeArm(armLeft);
-  const { arm: armR, shoulder: shoulderR } = makeArm(armRight);
-  const hipY = (legL.hip.y + legR.hip.y) / 2;
-
-  const lean = new Group();
-  lean.position.set(0, hipY, 0);
-  for (const mesh of [torso, shorts, head]) {
-    mesh.position.set(0, -hipY, 0);
-    lean.add(mesh);
-  }
-  armL.pivot.position.set(shoulderL.x, shoulderL.y - hipY, shoulderL.z);
-  armR.pivot.position.set(shoulderR.x, shoulderR.y - hipY, shoulderR.z);
-  lean.add(armL.pivot, armR.pivot);
-
-  const pose = new Group();
-  pose.add(lean, legL.pivot, legR.pivot, legL.sneaker, legR.sneaker);
-
-  const layout = new Group();
-  layout.add(pose);
-
-  const fit = new Group();
-  fit.add(layout);
-
+  const stage = new Group();
   const shadow = new Mesh(
-    new CircleGeometry(0.55, 28),
+    new CircleGeometry(0.46, 28),
     new MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthWrite: false }),
   );
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = 0.006;
+  shadow.position.y = 0.008;
+  stage.add(poseRoot, gear.group, shadow);
 
-  return { fit, layout, pose, lean, armL, armR, legL, legR, shadow };
+  return {
+    stage,
+    poseRoot,
+    skeleton: body.skeleton,
+    bones,
+    rests,
+    localRight: basis.right,
+    localUp: basis.up,
+    localForward: basis.forward,
+    gear,
+    shadow,
+  };
 }
 
 function layoutAngle(layout: Layout): number {
-  if (layout === "supine") return -Math.PI / 2;
-  if (layout === "prone") return Math.PI / 2;
+  // El eje lateral del muñeco apunta al otro lado del eje mundo, así que el
+  // signo queda al revés de la regla de la mano derecha: +90 deja el pecho arriba.
+  if (layout === "supine") return Math.PI / 2;
+  if (layout === "prone") return -Math.PI / 2;
   return 0;
 }
 
-function chord(upper: number, lower: number, l1: number, l2: number): { pitch: number; length: number } {
-  const a = upper * DEG;
-  const b = (upper + lower) * DEG;
-  const y = -Math.cos(a) * l1 - Math.cos(b) * l2;
-  const z = -Math.sin(a) * l1 - Math.sin(b) * l2;
-  const length = Math.max(0.05, Math.hypot(y, z));
-  return { pitch: Math.atan2(-z, -y), length };
+function limbDir(up: Vector3, forward: Vector3, angleDeg: number, out: Vector3) {
+  const a = angleDeg * DEG;
+  out.copy(up).multiplyScalar(-Math.cos(a));
+  out.addScaledVector(forward, -Math.sin(a));
+  if (out.lengthSq() < 1e-8) out.copy(up).multiplyScalar(-1);
+  return out.normalize();
 }
 
-function poseArm(arm: Arm, shoulder: number, elbow: number) {
-  const { pitch } = chord(shoulder, elbow, 0.38, 0.62);
-  arm.pivot.rotation.set(pitch, 0, 0);
+function aim(bone: Bone, worldDir: Vector3, rests: Map<Bone, Quaternion>) {
+  const parent = bone.parent;
+  const rest = rests.get(bone);
+  if (!parent || !rest) return;
+  parent.updateWorldMatrix(true, false);
+  parent.getWorldQuaternion(parentQ);
+  desiredLocal.copy(worldDir).applyQuaternion(parentQ.invert());
+  if (desiredLocal.lengthSq() < 1e-8) return;
+  desiredLocal.normalize();
+  restDir.set(0, 1, 0).applyQuaternion(rest).normalize();
+  if (restDir.dot(desiredLocal) < -0.9995) deltaQ.setFromAxisAngle(restDir, Math.PI);
+  else deltaQ.setFromUnitVectors(restDir, desiredLocal);
+  bone.quaternion.copy(deltaQ).multiply(rest);
+  bone.updateMatrixWorld(true);
 }
 
-function poseLeg(limb: Limb, thigh: number, knee: number, foot: number, planted: boolean) {
-  const { pitch, length } = chord(thigh, knee, limb.l1, limb.l2);
-  limb.pivot.rotation.set(pitch, 0, 0);
-  limb.scaler.scale.set(1, length / limb.bind, 1);
-  const a = thigh * DEG;
-  const b = (thigh + knee) * DEG;
-  const ankleY = limb.hip.y - Math.cos(a) * limb.l1 - Math.cos(b) * limb.l2;
-  const ankleZ = limb.hip.z - Math.sin(a) * limb.l1 - Math.sin(b) * limb.l2;
-  limb.sneaker.position.set(limb.hip.x, ankleY, ankleZ);
-  const flex = Math.min(0.7, Math.max(-0.7, (foot - REST_FOOT) * DEG));
-  const pitchFoot = planted ? flex : -(thigh + knee) * DEG + flex;
-  limb.sneaker.rotation.set(pitchFoot, 0, 0);
+function applyLean(spine: Bone, right: Vector3, leanDeg: number, rests: Map<Bone, Quaternion>) {
+  const parent = spine.parent;
+  const rest = rests.get(spine);
+  if (!parent || !rest) return;
+  parent.updateWorldMatrix(true, false);
+  parent.getWorldQuaternion(parentQ);
+  rightLocal.copy(right).applyQuaternion(parentQ.clone().invert());
+  if (rightLocal.lengthSq() < 1e-8) return;
+  rightLocal.normalize();
+  leanQ.setFromAxisAngle(rightLocal, -leanDeg * DEG);
+  spine.quaternion.copy(leanQ).multiply(rest);
+  spine.updateMatrixWorld(true);
 }
 
-function applyPose(joints: Joints, layout: Layout) {
+function worldBasis(root: Group, localRight: Vector3, localUp: Vector3, localForward: Vector3) {
+  root.getWorldQuaternion(basisQ);
+  worldRight.copy(localRight).applyQuaternion(basisQ);
+  worldUp.copy(localUp).applyQuaternion(basisQ);
+  worldForward.copy(localForward).applyQuaternion(basisQ);
+}
+
+function readAnchors(bones: Rig["bones"]): GearAnchors {
+  bones.hips.getWorldPosition(anchor.hips);
+  bones.head.getWorldPosition(anchor.head);
+  bones.shoulderL.getWorldPosition(anchor.shoulder);
+  bones.shoulderR.getWorldPosition(scratch);
+  anchor.shoulder.add(scratch).multiplyScalar(0.5);
+  bones.handL.getWorldPosition(anchor.handL);
+  bones.handR.getWorldPosition(anchor.handR);
+  bones.footL.getWorldPosition(anchor.footL);
+  bones.footR.getWorldPosition(anchor.footR);
+  return {
+    pose: "squat",
+    layout: "stand",
+    hips: anchor.hips,
+    head: anchor.head,
+    shoulder: anchor.shoulder,
+    handL: anchor.handL,
+    handR: anchor.handR,
+    footL: anchor.footL,
+    footR: anchor.footR,
+    right: worldRight,
+    up: worldUp,
+    forward: worldForward,
+  };
+}
+
+function shown(obj: Object3D): boolean {
+  let cur: Object3D | null = obj;
+  while (cur) {
+    if (!cur.visible) return false;
+    cur = cur.parent;
+  }
+  return true;
+}
+
+function frameStage() {
   if (!rig) return;
-  const planted = layout === "stand" || layout === "sit" || layout === "kneel";
-  rig.layout.rotation.set(layoutAngle(layout), 0, 0);
-  rig.pose.position.set(0, -joints.lift * 0.008, joints.shift * 0.01);
-  rig.lean.rotation.set(joints.lean * DEG, 0, 0);
-  poseArm(rig.armL, joints.armL, joints.elbL);
-  poseArm(rig.armR, joints.armR, joints.elbR);
-  poseLeg(rig.legL, joints.thighL, joints.kneeL, joints.footL, planted);
-  poseLeg(rig.legR, joints.thighR, joints.kneeR, joints.footR, planted);
+  rig.stage.position.set(0, 0, 0);
+  rig.stage.updateMatrixWorld(true);
+  const points = [anchor.hips, anchor.head, anchor.handL, anchor.handR, anchor.footL, anchor.footR];
+  let minY = Infinity;
+  for (const point of points) minY = Math.min(minY, point.y);
+  gearBox.makeEmpty();
+  rig.gear.group.traverse((child) => {
+    if (!(child instanceof Mesh) || child instanceof SkinnedMesh || !shown(child)) return;
+    if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
+    const bounds = child.geometry.boundingBox;
+    if (!bounds) return;
+    meshBox.copy(bounds).applyMatrix4(child.matrixWorld);
+    gearBox.union(meshBox);
+  });
+  if (!gearBox.isEmpty()) minY = Math.min(minY, gearBox.min.y);
+  if (!Number.isFinite(minY)) minY = 0;
+  rig.stage.position.set(-anchor.hips.x, -minY, -anchor.hips.z);
+}
 
-  rig.fit.position.set(0, 0, 0);
-  rig.fit.updateMatrixWorld(true);
-  box.setFromObject(rig.layout);
-  const spanX = box.max.x - box.min.x;
-  const spanZ = box.max.z - box.min.z;
-  rig.shadow.scale.set(Math.max(0.85, spanX * 0.62), Math.max(0.85, spanZ * 0.62), 1);
-  rig.fit.position.set(-(box.min.x + box.max.x) / 2, -box.min.y, -(box.min.z + box.max.z) / 2);
+function applyPose(joints: Joints, layout: Layout, pose: PoseId) {
+  if (!rig) return;
+  for (const [bone, rest] of rig.rests) bone.quaternion.copy(rest);
+  rig.poseRoot.quaternion.setFromAxisAngle(rig.localRight, layoutAngle(layout));
+  rig.poseRoot.position.set(joints.shift * 0.012, joints.lift * 0.008, 0);
+  rig.poseRoot.updateMatrixWorld(true);
+  worldBasis(rig.poseRoot, rig.localRight, rig.localUp, rig.localForward);
+  applyLean(rig.bones.spine, worldRight, joints.lean, rig.rests);
+  rig.poseRoot.updateMatrixWorld(true);
+  worldBasis(rig.poseRoot, rig.localRight, rig.localUp, rig.localForward);
+
+  aim(rig.bones.thighL, limbDir(worldUp, worldForward, joints.thighL, dir), rig.rests);
+  aim(rig.bones.kneeL, limbDir(worldUp, worldForward, joints.thighL + joints.kneeL, dir), rig.rests);
+  aim(rig.bones.thighR, limbDir(worldUp, worldForward, joints.thighR, dir), rig.rests);
+  aim(rig.bones.kneeR, limbDir(worldUp, worldForward, joints.thighR + joints.kneeR, dir), rig.rests);
+  aim(rig.bones.footL, limbDir(worldUp, worldForward, joints.footL, dir), rig.rests);
+  aim(rig.bones.footR, limbDir(worldUp, worldForward, joints.footR, dir), rig.rests);
+
+  leanQ.setFromAxisAngle(worldRight, -joints.lean * DEG);
+  leanedUp.copy(worldUp).applyQuaternion(leanQ);
+  leanedForward.copy(worldForward).applyQuaternion(leanQ);
+  aim(rig.bones.armL, limbDir(leanedUp, leanedForward, joints.armL, dir), rig.rests);
+  aim(rig.bones.foreL, limbDir(leanedUp, leanedForward, joints.armL + joints.elbL, dir), rig.rests);
+  aim(rig.bones.armR, limbDir(leanedUp, leanedForward, joints.armR, dir), rig.rests);
+  aim(rig.bones.foreR, limbDir(leanedUp, leanedForward, joints.armR + joints.elbR, dir), rig.rests);
+
+  rig.skeleton.update();
+  rig.poseRoot.updateMatrixWorld(true);
+  const anchors = readAnchors(rig.bones);
+  anchors.pose = pose;
+  anchors.layout = layout;
+  rig.gear.place(anchors);
+  frameStage();
 }
 
 function frameCamera(layout: Layout) {
   if (!camera) return;
-  const framing = FRAMING[layout];
-  camera.position.copy(framing.position);
-  camera.lookAt(0, framing.lookY, 0);
+  flat.set(worldForward.x, 0, worldForward.z);
+  if (flat.lengthSq() < 0.12) flat.set(worldRight.x, 0, worldRight.z);
+  if (flat.lengthSq() < 1e-6) flat.set(0, 0, 1);
+  flat.normalize();
+  const side = scratch.set(worldRight.x, 0, worldRight.z);
+  if (side.lengthSq() > 1e-4) flat.addScaledVector(side.normalize(), 0.42).normalize();
+  const lying = layout === "supine" || layout === "prone";
+  const dist = lying ? 3.45 : 3.2;
+  camera.position.set(flat.x * dist, lying ? 1.65 : 1.2, flat.z * dist);
+  camera.lookAt(0, lying ? 0.42 : 0.84, 0);
 }
 
 const atlas = document.createElement("canvas");
@@ -283,7 +423,7 @@ const atlasCtx = atlas.getContext("2d", { alpha: true });
 
 function pixelSize(view: View): { w: number; h: number } | null {
   if (view.cssW < 2 || view.cssH < 2) return null;
-  const dpr = Math.min(window.devicePixelRatio || 1, view.hero ? 2 : 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const cap = view.hero ? 800 : 96;
   const w = Math.max(1, Math.round(view.cssW * dpr));
   const h = Math.max(1, Math.round(view.cssH * dpr));
@@ -301,7 +441,7 @@ function fitCanvas(view: View, w: number, h: number) {
 function paintView(view: View, timeMs: number, w: number, h: number) {
   if (!renderer || !camera || !rig) return;
   const motion = motionFor(view.pose);
-  applyPose(sampleMotion(motion, timeMs, view.reduced), motion.layout);
+  applyPose(sampleMotion(motion, timeMs, view.reduced), motion.layout, view.pose);
   frameCamera(motion.layout);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
@@ -419,12 +559,12 @@ function ensureRenderer() {
   renderer.outputColorSpace = SRGBColorSpace;
   scene = new Scene();
   camera = new PerspectiveCamera(32, 1, 0.05, 40);
-  scene.add(new HemisphereLight(0xf7f3ec, 0x3a312c, 1.15));
-  const key = new DirectionalLight(0xfff6ec, 2.6);
+  scene.add(new HemisphereLight(0xf7f3ec, 0x3a312c, 1.25));
+  const key = new DirectionalLight(0xfff6ec, 2.8);
   key.position.set(1.8, 3.4, 2.6);
-  const fill = new DirectionalLight(0xd5e2f6, 1.15);
+  const fill = new DirectionalLight(0xd5e2f6, 1.2);
   fill.position.set(-2.6, 1.8, -1.4);
-  const rim = new DirectionalLight(0xffd8b0, 1.35);
+  const rim = new DirectionalLight(0xffd8b0, 1.45);
   rim.position.set(-1.4, 2.4, -2.8);
   scene.add(key, fill, rim);
 }
@@ -432,11 +572,13 @@ function ensureRenderer() {
 async function ensureModel() {
   if (rig || failed) return;
   if (!loadPromise) {
-    loadPromise = new GLTFLoader().loadAsync(MODEL_URL).then((gltf) => {
+    loadPromise = Promise.all([
+      new GLTFLoader().loadAsync(MODEL_URL),
+      loadGear(),
+    ]).then(([gltf, gear]) => {
       ensureRenderer();
-      rig = buildRig(gltf.scene);
-      if (!scene) return;
-      scene.add(rig.fit, rig.shadow);
+      rig = buildRig(gltf.scene, gear);
+      scene?.add(rig.stage);
       dirty = true;
       ensureLoop();
     }).catch((error: unknown) => {
@@ -449,27 +591,13 @@ async function ensureModel() {
   await loadPromise;
 }
 
-function disposeMaterial(material: Material) {
-  const mapped = material as Material & { map?: { dispose: () => void } | null };
-  mapped.map?.dispose();
-  material.dispose();
-}
-
-function disposeObject(object: Object3D) {
-  object.traverse((child) => {
-    if (!(child instanceof Mesh)) return;
-    child.geometry.dispose();
-    for (const material of materialsOf(child)) disposeMaterial(material);
-  });
-}
-
 function disposeStage() {
   if (raf) cancelAnimationFrame(raf);
   raf = 0;
   if (rig && scene) {
-    scene.remove(rig.fit, rig.shadow);
-    disposeObject(rig.fit);
-    disposeObject(rig.shadow);
+    scene.remove(rig.stage);
+    rig.gear.dispose();
+    disposeObject(rig.stage);
   }
   rig = null;
   scene = null;

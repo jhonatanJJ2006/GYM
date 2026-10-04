@@ -1,7 +1,7 @@
 import { FIGURE_MOTIONS, playback, type Joints, type Motion } from "../data/figureMotions.ts";
 import type { PoseId } from "../data/poses.ts";
 
-/** El GLB no tiene esqueleto: estos ángulos se proyectan a las mallas rígidas. */
+/** El GLB trae esqueleto y ningún clip: estos ángulos se aplican a los huesos. */
 export function durationSeconds(motion: Motion): number {
   const value = Number.parseFloat(motion.dur);
   return Number.isFinite(value) && value > 0 ? value : 2.8;
