@@ -350,7 +350,9 @@ function shown(obj: Object3D): boolean {
 
 function frameStage() {
   if (!rig) return;
-  rig.stage.position.set(0, 0, 0);
+  // Las anclas se leyeron con el escenario en el origen. No lo pongas en cero
+  // otra vez: eso dejaría las anclas del encuadre anterior y el cuerpo se iría
+  // a las coordenadas crudas del GLB.
   rig.stage.updateMatrixWorld(true);
   const points = [anchor.hips, anchor.head, anchor.handL, anchor.handR, anchor.footL, anchor.footR];
   let minY = Infinity;
@@ -366,11 +368,20 @@ function frameStage() {
   });
   if (!gearBox.isEmpty()) minY = Math.min(minY, gearBox.min.y);
   if (!Number.isFinite(minY)) minY = 0;
-  rig.stage.position.set(-anchor.hips.x, -minY, -anchor.hips.z);
+  rig.stage.position.x -= anchor.hips.x;
+  rig.stage.position.y -= minY;
+  rig.stage.position.z -= anchor.hips.z;
 }
 
 function applyPose(joints: Joints, layout: Layout, pose: PoseId) {
   if (!rig) return;
+  // Un solo rig sirve a la miniatura, al héroe y al modal. El equipo se coloca
+  // en coordenadas de mundo: si el escenario sigue desplazado por la vista
+  // anterior, la barra se queda en el encuadre y Oliver vuelve al punto del GLB.
+  rig.stage.position.set(0, 0, 0);
+  rig.stage.quaternion.identity();
+  rig.stage.scale.set(1, 1, 1);
+  rig.stage.updateMatrixWorld(true);
   for (const [bone, rest] of rig.rests) bone.quaternion.copy(rest);
   rig.poseRoot.quaternion.setFromAxisAngle(rig.localRight, layoutAngle(layout));
   rig.poseRoot.position.set(joints.shift * 0.012, joints.lift * 0.008, 0);

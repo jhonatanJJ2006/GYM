@@ -189,7 +189,8 @@ export async function loadGear(): Promise<GearKit> {
   const band = new Mesh(new CylinderGeometry(0.012, 0.012, 1, 8), bandMat);
   const wheel = new Mesh(new TorusGeometry(0.11, 0.028, 8, 18), rubber);
   const dip = buildDip();
-  for (const extra of [grip, cableLine, band, wheel, dip]) {
+  const smith = buildSmith();
+  for (const extra of [grip, cableLine, band, wheel, dip, smith]) {
     extra.visible = false;
     extra.traverse((child) => {
       if (child instanceof Mesh) child.frustumCulled = false;
@@ -197,7 +198,7 @@ export async function loadGear(): Promise<GearKit> {
     group.add(extra);
   }
 
-  const sources = [...models.values(), grip, cableLine, band, wheel, dip];
+  const sources = [...models.values(), grip, cableLine, band, wheel, dip, smith];
 
   function hideAll() {
     for (const model of models.values()) model.visible = false;
@@ -206,6 +207,7 @@ export async function loadGear(): Promise<GearKit> {
     band.visible = false;
     wheel.visible = false;
     dip.visible = false;
+    smith.visible = false;
     dumbbellL.visible = false;
   }
 
@@ -298,6 +300,7 @@ export async function loadGear(): Promise<GearKit> {
     }
     if (kinds.includes("band")) span(band, a.handL, a.handR);
     if (kinds.includes("dip")) placeDip(dip, a);
+    if (a.pose === "rdl") placeSmith(smith, a, handMid);
     if (kinds.includes("wheel")) {
       wheel.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), a.right.clone().normalize());
       wheel.position.copy(handMid);
@@ -329,6 +332,47 @@ function vHand(a: GearAnchors): Vector3 {
 
 function vFoot(a: GearAnchors): Vector3 {
   return a.footL.clone().add(a.footR).multiplyScalar(0.5);
+}
+
+function buildSmith(): Group {
+  const root = new Group();
+  const railGeo = new CylinderGeometry(0.018, 0.018, 1, 10);
+  const footGeo = new CylinderGeometry(0.02, 0.02, 1, 8);
+  for (const side of [-1, 1]) {
+    const rail = new Mesh(railGeo, metal);
+    rail.name = `smith-rail-${side}`;
+    const foot = new Mesh(footGeo, metal);
+    foot.name = `smith-foot-${side}`;
+    root.add(rail, foot);
+  }
+  const base = new Mesh(footGeo, metal);
+  base.name = "smith-base";
+  root.add(base);
+  return root;
+}
+
+function placeSmith(smith: Group, a: GearAnchors, handMid: Vector3) {
+  const footY = Math.min(a.footL.y, a.footR.y, a.hips.y);
+  const top = Math.max(a.head.y, handMid.y, a.shoulder.y) + 0.45;
+  const across = a.right.clone().normalize();
+  const reach = 0.62;
+  for (const side of [-1, 1]) {
+    const at = handMid.clone().addScaledVector(across, side * reach);
+    const bottom = at.clone();
+    bottom.y = footY;
+    const up = at.clone();
+    up.y = top;
+    span(smith.getObjectByName(`smith-rail-${side}`) as Mesh, bottom, up);
+    const foot = smith.getObjectByName(`smith-foot-${side}`) as Mesh;
+    const back = bottom.clone().addScaledVector(a.forward, -0.28);
+    span(foot, bottom, back);
+  }
+  const left = handMid.clone().addScaledVector(across, -reach);
+  const right = handMid.clone().addScaledVector(across, reach);
+  left.y = footY;
+  right.y = footY;
+  span(smith.getObjectByName("smith-base") as Mesh, left, right);
+  smith.visible = true;
 }
 
 function buildDip(): Group {
