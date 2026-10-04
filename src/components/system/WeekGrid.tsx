@@ -278,6 +278,83 @@ function DayColumn({
 }
 
 
+function agendaTimes(item: TimelineItem): { start: string; end: string | null } {
+  if (item.kind === "clase") return { start: item.block.start, end: item.block.end };
+  if (item.kind === "trabajo") return { start: formatClock(item.start), end: formatClock(item.end) };
+  if (item.kind === "gym") return { start: formatClock(item.start), end: formatClock(item.end) };
+  return { start: item.meal.time, end: item.meal.end ?? null };
+}
+
+function agendaLabel(item: TimelineItem): string {
+  if (item.kind === "clase") return item.block.name;
+  if (item.kind === "trabajo") return "Trabajo";
+  if (item.kind === "gym") return item.session.title;
+  return item.meal.role;
+}
+
+export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boolean> }) {
+  const modals = useModals();
+  const plan = isInRange(day) ? buildDay(day) : null;
+  const items = (plan?.items.filter((item) => kinds[item.kind]) ?? []).slice().sort((a, b) => a.start - b.start || itemEnd(a) - itemEnd(b));
+
+  function onKey(event: KeyboardEvent<HTMLOListElement>) {
+    if (!["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+    const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button")];
+    const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+    if (index < 0 || buttons.length === 0) return;
+    const next =
+      event.key === "Home"
+        ? buttons[0]
+        : event.key === "End"
+          ? buttons[buttons.length - 1]
+          : event.key === "ArrowDown"
+            ? (buttons[index + 1] ?? buttons[0])
+            : (buttons[index - 1] ?? buttons[buttons.length - 1]);
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+  }
+
+  return (
+    <div className="w-full min-w-0" role="region" aria-label="Agenda del día">
+      {plan?.holiday ? <p className="mb-2 text-sm leading-relaxed text-muted">{plan.holiday}</p> : null}
+      {items.length === 0 ? (
+        <p className="rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Nada con estos filtros.</p>
+      ) : (
+        <ol data-rise className="space-y-2" onKeyDown={onKey}>
+          {items.map((item, index) => {
+            const times = agendaTimes(item);
+            const label = agendaLabel(item);
+            const thumb = itemThumb(item);
+            const when = times.end ? `${times.start} a ${times.end}` : times.start;
+            return (
+              <li key={`${item.kind}-${item.start}-${index}`} className="grid min-w-0 grid-cols-[4.25rem_minmax(0,1fr)] items-start gap-2">
+                <p className="pt-2 text-right font-display text-xs tabular-nums leading-tight text-[var(--color-mark)]">
+                  <span className="block">{times.start}</span>
+                  {times.end ? <span className="mt-0.5 block text-muted">{times.end}</span> : null}
+                </p>
+                <button
+                  type="button"
+                  data-block
+                  className={cn(
+                    "week-block flex min-h-11 min-w-0 items-start gap-2 rounded-block px-2.5 py-2 text-left",
+                    KIND_CLASS[item.kind],
+                  )}
+                  aria-label={`${formatLong(day)}, ${label}, ${when}`}
+                  onClick={() => openItem(modals, plan!.iso, plan!, item)}
+                >
+                  {thumb ? <img src={thumb} alt="" className="mt-0.5 size-4 shrink-0 rounded-[3px] object-cover" /> : null}
+                  <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug">{label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </div>
+  );
+}
+
 export function WeekAgenda({
   days,
   kinds,
