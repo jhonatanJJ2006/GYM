@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageIntro } from "../components/Brand.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { CompactRow } from "../components/system/CompactRow.tsx";
 import { MealThumb } from "../components/system/Thumbnail.tsx";
@@ -37,30 +38,28 @@ export function MealsPage() {
 
   return (
     <div>
-      <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
-      <h1 className="font-display text-4xl leading-none tracking-tight">Comidas</h1>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
+      <PageIntro title="Comidas">
         Meta ~{PROFILE.kcal} kcal y {PROFILE.protein} g de proteína. Estimación para {PROFILE.weightKg} kg y{" "}
         {PROFILE.heightM} m, IMC ~{PROFILE.bmi}.
-      </p>
+      </PageIntro>
 
-      <dl className="mt-5 grid grid-cols-3 gap-2">
+      <dl data-rise className="mt-5 grid grid-cols-3 gap-2">
         <div className="rounded-row border border-line bg-panel px-3 py-3">
           <dt className="text-xs text-muted">Kcal</dt>
-          <dd className="mt-1 font-display text-2xl leading-none">{PROFILE.kcal}</dd>
+          <dd className="mt-1 font-display text-2xl leading-none text-[var(--color-mark)]">{PROFILE.kcal}</dd>
         </div>
         <div className="rounded-row border border-line bg-panel px-3 py-3">
           <dt className="text-xs text-muted">Proteína</dt>
-          <dd className="mt-1 font-display text-2xl leading-none">{PROFILE.protein} g</dd>
+          <dd className="mt-1 font-display text-2xl leading-none text-[var(--color-mark)]">{PROFILE.protein} g</dd>
         </div>
         <div className="rounded-row border border-line bg-panel px-3 py-3">
           <dt className="text-xs text-muted">IMC</dt>
-          <dd className="mt-1 font-display text-2xl leading-none">~{PROFILE.bmi}</dd>
+          <dd className="mt-1 font-display text-2xl leading-none text-[var(--color-mark)]">~{PROFILE.bmi}</dd>
         </div>
       </dl>
 
-      <section className="mt-8">
-        <h2 className="font-display text-2xl tracking-tight">Hoy en el plato</h2>
+      <section data-rise className="mt-8">
+        <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">Hoy en el plato</h2>
         <p className="mt-1 text-sm text-muted">
           El desayuno es de 5:30 a 6:00. El jueves el pre-entreno sigue a las 19:00.
         </p>
@@ -120,13 +119,13 @@ export function MealsPage() {
         </ul>
       </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-2xl tracking-tight">De dónde salen las 2800 kcal</h2>
+      <section data-rise className="mt-8">
+        <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">De dónde salen las 2800 kcal</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">{KCAL_INTRO}</p>
         <ol className="mt-4 space-y-3">
           {KCAL_POINTS.map((point, index) => (
             <li key={point.lead} className="grid grid-cols-[1.8rem_1fr] gap-2 text-sm leading-relaxed">
-              <span className="font-display text-accent">{index + 1}</span>
+              <span className="font-display text-[var(--color-mark)]">{index + 1}</span>
               <span>
                 <span className="font-semibold">{point.lead} </span>
                 {point.text}
@@ -136,9 +135,9 @@ export function MealsPage() {
         </ol>
       </section>
 
-      <section className="mt-8">
+      <section data-rise className="mt-8">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="font-display text-2xl tracking-tight">Compra de la semana</h2>
+          <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">Compra de la semana</h2>
           <Button
             variant="ghost"
             className="h-11 px-3 text-xs"

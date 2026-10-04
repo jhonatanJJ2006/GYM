@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageIntro } from "../components/Brand.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { Button } from "../components/ui/button.tsx";
 import { classKey, classesFor, courseColor } from "../data/courses.ts";
@@ -29,12 +30,10 @@ export function ClassesPage() {
 
   return (
     <div>
-      <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
-      <h1 className="font-display text-4xl leading-none tracking-tight">Clases</h1>
-      <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
+      <PageIntro title="Clases">
         Semana a semana, del 6 de octubre de 2026 al 2 de febrero de 2027. Sábado y domingo no hay clases. Si un día ya
         está marcado como feriado, la clase puede suspenderse y sigue etiquetada.
-      </p>
+      </PageIntro>
 
       <div className="mt-5 flex items-center justify-between gap-3">
         <Button
@@ -47,7 +46,7 @@ export function ClassesPage() {
           ‹
         </Button>
         <div className="text-center">
-          <p className="font-display text-2xl leading-none">{formatWeekSpan(week)}</p>
+          <p className="font-display text-2xl leading-none text-[var(--color-mark)]">{formatWeekSpan(week)}</p>
           <p className="mt-1 text-xs text-muted">
             Semana {index + 1} de {weeks.length}
           </p>
@@ -69,7 +68,7 @@ export function ClassesPage() {
         </p>
       ) : null}
 
-      <div className="mt-4 grid gap-3 xl:grid-cols-7">
+      <div data-rise className="mt-4 grid gap-3 xl:grid-cols-7">
         {week.map((date) => (
           <DayColumn key={toIso(date)} date={date} />
         ))}
@@ -95,7 +94,7 @@ function DayColumn({ date }: { date: Date }) {
     <section className="min-w-0 rounded-row border border-line bg-ink-2 p-3">
       <button type="button" onClick={() => modals.openDay(iso)} className="w-full text-left">
         <p className="text-[0.62rem] font-medium uppercase tracking-wide text-muted">{WEEK_LETTERS[(dow + 6) % 7]}</p>
-        <h2 className="text-sm font-medium leading-tight">{title}</h2>
+        <h2 className="font-display text-base leading-tight tracking-tight text-[var(--color-mark)]">{title}</h2>
       </button>
       {holiday ? (
         <p className="mt-2 text-sm leading-relaxed text-muted">

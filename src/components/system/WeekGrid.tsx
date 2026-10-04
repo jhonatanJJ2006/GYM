@@ -252,6 +252,7 @@ function DayColumn({
             data-day={toIso(date)}
             aria-label={`${formatLong(date)}, ${itemLabel(item)}, ${itemMeta(item)}`}
             onClick={() => openItem(modals, plan!.iso, plan!, item)}
+            data-rise
             className={cn(
               "week-block absolute overflow-hidden rounded-block py-0.5 pl-1.5 pr-1 text-left",
               KIND_CLASS[item.kind],
@@ -298,7 +299,7 @@ export function WeekAgenda({
         const items = plan.items.filter((item) => kinds[item.kind]);
         const active = isSameDay(date, selected);
         return (
-          <section key={toIso(date)} className={cn("min-w-0 rounded-row border border-grid", active && "bg-wash")}>
+          <section data-rise key={toIso(date)} className={cn("min-w-0 rounded-row border border-grid", active && "bg-wash")}>
             <button
               type="button"
               onClick={() => onSelect(date)}

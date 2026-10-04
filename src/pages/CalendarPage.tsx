@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageIntro } from "../components/Brand.tsx";
 import { Legend } from "../components/Legend.tsx";
 import { WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
 import { Button } from "../components/ui/button.tsx";
@@ -110,13 +111,7 @@ export function CalendarPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-end justify-between gap-3">
-        <div>
-          <p className="font-display text-sm tracking-wide text-[var(--color-mark)]">Hierro</p>
-          <h1 className="font-display text-4xl leading-none tracking-tight">Calendario</h1>
-          <p className="mt-1 text-sm text-muted">Día, semana o mes · 1 oct – 28 feb</p>
-        </div>
-      </div>
+      <PageIntro title="Calendario">Día, semana o mes · 1 oct – 28 feb</PageIntro>
 
       <div className="mb-3 grid grid-cols-3 gap-1" role="tablist" aria-label="Vista del calendario">
         {(
@@ -194,7 +189,7 @@ export function CalendarPage() {
         >
           ‹
         </Button>
-        <p className="min-w-0 text-center text-sm font-medium">
+        <p className="min-w-0 text-balance text-center font-display text-sm leading-tight tracking-tight text-[var(--color-mark)] sm:text-lg">
           {view === "dia"
             ? formatLong(cursor).replace(/^./, (letter) => letter.toUpperCase())
             : view === "mes"
@@ -249,7 +244,7 @@ export function CalendarPage() {
         <p className="mt-4 rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Activa al menos un tipo para ver el día.</p>
       ) : null}
 
-      <details className="mt-4 rounded-row border border-line bg-panel">
+      <details data-rise className="mt-4 rounded-row border border-line bg-panel">
         <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>
         <div className="px-4 pb-4">
           <Legend />
@@ -290,7 +285,7 @@ function MonthJump({
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
-    <div className="mb-4 rounded-row border border-line bg-ink-2 p-3">
+    <div data-rise className="mb-4 rounded-row border border-line bg-ink-2 p-3">
       <div className="grid grid-cols-7 gap-1 text-center text-[0.68rem] font-semibold text-muted">
         {WEEK_LETTERS.map((letter) => (
           <div key={letter}>{letter}</div>
