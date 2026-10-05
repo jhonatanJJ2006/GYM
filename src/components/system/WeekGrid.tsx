@@ -2,7 +2,8 @@ import { COURSE_SHORT, classKey } from "../../data/courses.ts";
 import { mealWhen } from "../../data/meals.ts";
 import { exercisePhoto, mealPhoto } from "../../data/photos.ts";
 import { WEEK_LETTERS, formatLong, isInRange, isSameDay, toIso } from "../../lib/dates.ts";
-import { useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
+import { animate, stagger } from "animejs";
 import { buildDay, type TimelineItem } from "../../lib/schedule.ts";
 import { classInterval, formatClock, formatSpan, parseClock, spanInterval } from "../../lib/time.ts";
 import { cn } from "../../lib/utils.ts";
@@ -14,6 +15,8 @@ const HOUR_PX = 52;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, index) => START_HOUR + index);
 
 type Kind = "clase" | "trabajo" | "gym" | "comida";
+
+const KIND_NAME: Record<Kind, string> = { clase: "Clase", trabajo: "Trabajo", gym: "Gym", comida: "Comida" };
 
 const KIND_CLASS: Record<Kind, string> = {
   clase: "bg-block-class text-cream shadow-[inset_3px_0_0_var(--color-rail-class)]",
@@ -299,6 +302,23 @@ export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boole
   const modals = useModals();
   const plan = isInRange(day) ? buildDay(day) : null;
   const items = (plan?.items.filter((item) => kinds[item.kind]) ?? []).slice().sort((a, b) => a.start - b.start || itemEnd(a) - itemEnd(b));
+  const listRef = useRef<HTMLOListElement>(null);
+  const dayKey = toIso(day);
+  useEffect(() => {
+    const nodes = listRef.current?.querySelectorAll("[data-tl]");
+    if (!nodes || nodes.length === 0) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const anim = animate(nodes, {
+      opacity: [0, 1],
+      translateX: [-14, 0],
+      duration: 480,
+      delay: stagger(55),
+      ease: "outCubic",
+    });
+    return () => {
+      anim.revert();
+    };
+  }, [dayKey, items.length]);
 
   function onKey(event: KeyboardEvent<HTMLOListElement>) {
     if (!["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
@@ -324,30 +344,42 @@ export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boole
       {items.length === 0 ? (
         <p className="rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Nada con estos filtros.</p>
       ) : (
-        <ol data-rise className="space-y-2" onKeyDown={onKey}>
+        <ol ref={listRef} className="relative space-y-3 pl-1" onKeyDown={onKey}>
+          <span aria-hidden className="pointer-events-none absolute bottom-2 left-[4.6rem] top-2 w-px bg-gradient-to-b from-white/5 via-white/15 to-white/5" />
           {items.map((item, index) => {
             const times = agendaTimes(item);
             const label = agendaLabel(item);
             const thumb = itemThumb(item);
             const when = times.end ? `${times.start} a ${times.end}` : times.start;
+            const clash = item.kind === "gym" && plan!.gymConflicts.length > 0;
             return (
-              <li key={`${item.kind}-${item.start}-${index}`} className="grid min-w-0 grid-cols-[4.25rem_minmax(0,1fr)] items-start gap-2">
+              <li key={`${item.kind}-${item.start}-${index}`} data-tl className="relative grid min-w-0 grid-cols-[4.25rem_minmax(0,1fr)] items-start gap-3">
                 <p className="pt-2 text-right font-display text-xs tabular-nums leading-tight text-[var(--color-mark)]">
-                  <span className="block">{times.start}</span>
+                  <span className="block text-sm font-bold text-cream">{times.start}</span>
                   {times.end ? <span className="mt-0.5 block text-muted">{times.end}</span> : null}
                 </p>
+                <span aria-hidden className={cn("absolute left-[4.6rem] top-3 size-2.5 -translate-x-1/2 rounded-full ring-4 ring-[var(--color-ink,#0b0b0d)]", `tl-dot-${item.kind}`)} />
                 <button
                   type="button"
                   data-block
                   className={cn(
-                    "week-block flex min-h-11 min-w-0 items-start gap-2 rounded-block px-2.5 py-2 text-left",
-                    KIND_CLASS[item.kind],
+                    "tl-block week-block flex min-h-12 min-w-0 flex-col items-stretch gap-1 rounded-2xl border border-white/5 px-3 py-2.5 text-left text-cream",
+                    `tl-${item.kind}`,
+                    clash && "ring-1 ring-red-500/60",
                   )}
                   aria-label={`${formatLong(day)}, ${label}, ${when}`}
                   onClick={() => openItem(modals, plan!.iso, plan!, item)}
                 >
-                  {thumb ? <img src={thumb} alt="" className="mt-0.5 size-4 shrink-0 rounded-[3px] object-cover" /> : null}
-                  <span className="min-w-0 flex-1 break-words text-sm font-medium leading-snug">{label}</span>
+                  <span className="flex min-w-0 items-start gap-2">
+                    {thumb ? <img src={thumb} alt="" className="mt-0.5 size-5 shrink-0 rounded-md object-cover" /> : null}
+                    <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-snug">{label}</span>
+                  </span>
+                  <span className="text-[0.68rem] font-medium uppercase tracking-wider text-muted">{KIND_NAME[item.kind]} · {when}</span>
+                  {clash ? (
+                    <span className="mt-1 inline-flex w-fit items-center gap-1 rounded-full border border-amber-400/40 bg-red-500/15 px-2 py-0.5 text-[0.68rem] font-bold text-amber-300">
+                      ⚠ Choca con {plan!.gymConflicts.join(", ")}
+                    </span>
+                  ) : null}
                 </button>
               </li>
             );

@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { PageIntro } from "../components/Brand.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { MonthPicker, PeriodBar, useHorizon } from "../components/PeriodBar.tsx";
-import { CompactRow } from "../components/system/CompactRow.tsx";
+import { Expand, useStagger } from "../components/Motion.tsx";
 import { MealThumb } from "../components/system/Thumbnail.tsx";
 import { Button } from "../components/ui/button.tsx";
-import { MEALS, mealWhen } from "../data/meals.ts";
+import { MEALS, mealWhen, type Meal } from "../data/meals.ts";
 import { DISCLAIMER, KCAL_INTRO, KCAL_POINTS, PROFILE, SHOPPING, SHOPPING_NOTE } from "../data/nutrition.ts";
 import { DOW_LONG, toIso } from "../lib/dates.ts";
 import { cn } from "../lib/utils.ts";
@@ -31,6 +31,7 @@ export function MealsPage() {
   const [checks, setChecks] = useState<boolean[]>(readChecks);
   const done = checks.filter(Boolean).length;
   const shown = horizon.view === "semana" ? horizon.week : [horizon.date];
+  const listRef = useStagger<HTMLDivElement>(`${horizon.view}-${toIso(horizon.date)}`);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(checks));
@@ -44,15 +45,15 @@ export function MealsPage() {
       </PageIntro>
 
       <dl data-rise className="mt-5 grid grid-cols-3 gap-2">
-        <div className="rounded-row border border-line bg-panel px-3 py-3">
+        <div className="card px-3 py-3">
           <dt className="text-xs text-muted">Kcal</dt>
           <dd className="mt-1 font-display text-2xl leading-none text-[var(--color-mark)]">{PROFILE.kcal}</dd>
         </div>
-        <div className="rounded-row border border-line bg-panel px-3 py-3">
+        <div className="card px-3 py-3">
           <dt className="text-xs text-muted">Proteína</dt>
           <dd className="mt-1 font-display text-2xl leading-none text-[var(--color-mark)]">{PROFILE.protein} g</dd>
         </div>
-        <div className="rounded-row border border-line bg-panel px-3 py-3">
+        <div className="card px-3 py-3">
           <dt className="text-xs text-muted">IMC</dt>
           <dd className="mt-1 font-display text-2xl leading-none text-[var(--color-mark)]">~{PROFILE.bmi}</dd>
         </div>
@@ -72,31 +73,25 @@ export function MealsPage() {
       {horizon.view === "mes" ? <MonthPicker date={horizon.date} onChoose={horizon.setDate} caption={() => "plato"} /> : null}
 
       <section data-rise className="mt-8">
-        <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">En el plato</h2>
+        <h2 className="display-title text-2xl">En el plato</h2>
         <p className="mt-1 text-sm text-muted">
           Estimación, no consejo médico. Lunes, jueves y viernes: pre-entreno ligero 6:15–6:30 en casa y post-entreno
           para llevar (tupper preparado la noche anterior) a las 9:00, antes de las clases de las 10:00. Martes,
           miércoles y fin de semana: desayuno 5:30–6:00. Meta ~{PROFILE.kcal} kcal y {PROFILE.protein} g de proteína.
         </p>
-        <div className={horizon.view === "semana" ? "mt-4 grid gap-4 xl:grid-cols-2" : "mt-4"}>
+        <div ref={listRef} className={horizon.view === "semana" ? "mt-4 grid gap-4 xl:grid-cols-2" : "mt-4"}>
           {shown.map((item) => {
             const itemDow = item.getDay();
             const menu = MEALS[itemDow];
             return (
               <div key={toIso(item)} data-day-panel>
-                <p className="text-sm text-cream/85">
+                <p className="text-sm font-semibold text-cream/85">
                   {DOW_LONG[itemDow].replace(/^./, (letter) => letter.toUpperCase())} {item.getDate()} · ~{menu.total}
                 </p>
-                <ul className="mt-2 space-y-1">
+                <ul className="mt-2 space-y-2">
                   {menu.items.map((meal, index) => (
-                    <li key={`${toIso(item)}-${meal.time}-${meal.role}`}>
-                      <CompactRow
-                        title={meal.role}
-                        meta={mealWhen(meal)}
-                        thumb={<MealThumb ingredients={meal.ingredients} />}
-                        className="shadow-[inset_3px_0_0_var(--color-rail-meal)]"
-                        onClick={() => modals.openMeal(itemDow, index)}
-                      />
+                    <li key={`${toIso(item)}-${meal.time}-${meal.role}`} data-stagger>
+                      <MealCard meal={meal} onOpen={() => modals.openMeal(itemDow, index)} />
                     </li>
                   ))}
                 </ul>
@@ -107,7 +102,7 @@ export function MealsPage() {
       </section>
 
       <section data-rise className="mt-8">
-        <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">De dónde salen las 2800 kcal</h2>
+        <h2 className="display-title text-2xl">De dónde salen las 2800 kcal</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">{KCAL_INTRO}</p>
         <ol className="mt-4 space-y-3">
           {KCAL_POINTS.map((point, index) => (
@@ -124,7 +119,7 @@ export function MealsPage() {
 
       <section data-rise className="mt-8">
         <div className="flex items-end justify-between gap-3">
-          <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">Compra de la semana</h2>
+          <h2 className="display-title text-2xl">Compra de la semana</h2>
           <Button
             variant="ghost"
             className="h-11 px-3 text-xs"
@@ -162,5 +157,61 @@ export function MealsPage() {
 
       <p className="mt-6 text-sm leading-relaxed text-muted">{DISCLAIMER}</p>
     </div>
+  );
+}
+
+function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
+  const [open, setOpen] = useState(false);
+  const takeaway = /para llevar/i.test(meal.role);
+  return (
+    <article className="card overflow-hidden border-l-4 border-l-[#ff9f43] p-3">
+      <div className="flex items-start gap-3">
+        <button type="button" onClick={onOpen} className="shrink-0" aria-label={`Ver ${meal.role}`}>
+          <MealThumb ingredients={meal.ingredients} />
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={onOpen} className="min-w-0 break-words text-left text-sm font-bold leading-snug text-cream">
+              {meal.role}
+            </button>
+            {takeaway ? <span className="chip chip-sky">🥡 Para llevar</span> : null}
+          </div>
+          <p className="mt-0.5 text-xs text-muted">{mealWhen(meal)}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="chip chip-orange">{meal.kcal} kcal</span>
+            <span className="chip chip-lime">{meal.protein} g proteína</span>
+          </div>
+        </div>
+      </div>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className="mt-3 flex w-full items-center justify-between rounded-full border border-line px-3 py-1.5 text-xs font-semibold text-cream/85"
+      >
+        {open ? "Ocultar receta" : "Ingredientes y pasos"}
+        <span className={cn("transition-transform duration-300", open && "rotate-180")}>▾</span>
+      </button>
+      <Expand open={open}>
+        <div className="grid gap-3 pt-3 text-sm sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#c6ff3d]">Ingredientes</p>
+            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-cream/85">
+              {meal.ingredients.map((entry) => (
+                <li key={entry}>{entry}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#c6ff3d]">Pasos</p>
+            <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-cream/85">
+              {meal.steps.map((entry) => (
+                <li key={entry}>{entry}</li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </Expand>
+    </article>
   );
 }

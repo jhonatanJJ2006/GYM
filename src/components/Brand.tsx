@@ -36,7 +36,8 @@ export function AppHeader() {
 export function PageIntro({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <header data-rise className="mb-6 max-w-xl">
-      <h1 className="display-title">{title}</h1>
+      <span aria-hidden className="mb-3 block h-1 w-10 rounded-full bg-[#c6ff3d] shadow-[0_0_14px_rgba(198,255,61,0.5)]" />
+      <h1 className="display-title text-4xl sm:text-5xl">{title}</h1>
       {children ? <div className="mt-3 text-sm leading-relaxed text-muted">{children}</div> : null}
     </header>
   );

@@ -104,7 +104,19 @@ export function PeriodBar({
 
   return (
     <div className="mt-4" data-rise>
-      <div className="grid grid-cols-3 gap-1" role="tablist" aria-label={`Vista de ${label}`}>
+      <div
+        className="relative grid grid-cols-3 rounded-full border border-line bg-ink-2 p-1"
+        role="tablist"
+        aria-label={`Vista de ${label}`}
+      >
+        <span
+          aria-hidden
+          className="period-indicator pointer-events-none absolute inset-y-1 left-1 rounded-full bg-[#c6ff3d] shadow-[0_0_18px_rgba(198,255,61,0.35)]"
+          style={{
+            width: "calc((100% - 0.5rem) / 3)",
+            transform: `translateX(${view === "dia" ? 0 : view === "semana" ? 100 : 200}%)`,
+          }}
+        />
         {(
           [
             ["dia", "Día"],
@@ -119,8 +131,8 @@ export function PeriodBar({
             aria-selected={view === id}
             onClick={() => onView(id)}
             className={cn(
-              "min-h-9 rounded-row text-sm font-medium",
-              view === id ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
+              "relative z-10 min-h-9 rounded-full text-sm font-semibold transition-colors duration-300",
+              view === id ? "text-[#0b0f05]" : "text-muted hover:text-cream",
             )}
           >
             {name}

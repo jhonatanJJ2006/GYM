@@ -6,11 +6,13 @@ import { CompactRow } from "../components/system/CompactRow.tsx";
 import { classKey, classesFor } from "../data/courses.ts";
 import { sessionFor, shoulderFocus } from "../data/sessions.ts";
 import { ANCHOR_MON, DOW_LONG, cycleWeek, isSameDay, toIso } from "../lib/dates.ts";
+import { useStagger } from "../components/Motion.tsx";
 import { cn } from "../lib/utils.ts";
 
 export function WeekPage() {
   const modals = useModals();
   const horizon = useHorizon(ANCHOR_MON);
+  const staggerRef = useStagger<HTMLDivElement>(`${horizon.view}-${toIso(horizon.date)}`);
   const { date, view, week } = horizon;
   const days = view === "semana" ? week : [date];
   const focus = shoulderFocus(cycleWeek(date));
@@ -46,7 +48,7 @@ export function WeekPage() {
         />
       ) : null}
 
-      <div className={view === "semana" ? "mt-4 grid gap-3 xl:grid-cols-7" : "mt-4"}>
+      <div ref={staggerRef} className={view === "semana" ? "mt-4 grid gap-3 xl:grid-cols-7" : "mt-4"}>
         {days.map((day) => {
           const session = sessionFor(day);
           const classes = classesFor(day);
@@ -54,15 +56,16 @@ export function WeekPage() {
           return (
             <article
               key={toIso(day)}
-              data-rise
+              data-stagger
               data-day-panel={active ? "" : undefined}
               className={cn(
-                "rounded-row border border-line bg-panel p-4",
+                "card p-4",
+                active && view === "semana" && "ring-1 ring-[#c6ff3d]/60",
                 view === "mes" && !active && "hidden",
               )}
             >
               <button type="button" onClick={() => horizon.setDate(day)} className="w-full text-left">
-                <h2 className="font-display text-2xl capitalize tracking-tight text-[var(--color-mark)]">
+                <h2 className="display-title text-2xl capitalize">
                   {DOW_LONG[day.getDay()]} {day.getDate()}
                 </h2>
               </button>
@@ -99,7 +102,7 @@ export function WeekPage() {
         })}
       </div>
 
-      <details className="mt-4 rounded-row border border-line bg-panel">
+      <details className="card mt-4">
         <summary className="flex min-h-12 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>
         <div className="px-4 pb-4">
           <Legend />

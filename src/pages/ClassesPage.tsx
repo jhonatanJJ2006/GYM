@@ -1,3 +1,4 @@
+import { useStagger } from "../components/Motion.tsx";
 import { PageIntro } from "../components/Brand.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { MonthPicker, PeriodBar, useHorizon } from "../components/PeriodBar.tsx";
@@ -8,6 +9,7 @@ import { DOW_LONG, TERM_END, TERM_START, WEEK_LETTERS, isInTerm, toIso } from ".
 
 export function ClassesPage() {
   const horizon = useHorizon(TERM_START);
+  const staggerRef = useStagger<HTMLDivElement>(`${horizon.view}-${toIso(horizon.date)}`);
   const { date, view, week } = horizon;
   const holidayDays = (view === "semana" ? week : [date]).filter((day) => HOLIDAYS[toIso(day)]);
 
@@ -30,7 +32,7 @@ export function ClassesPage() {
       />
 
       {holidayDays.length ? (
-        <p className="mt-3 rounded-row border border-line bg-panel px-3 py-3 text-sm leading-relaxed text-muted">
+        <p className="card mt-3 px-3 py-3 text-sm leading-relaxed text-muted">
           Feriado en esta vista: {holidayDays.map((day) => HOLIDAYS[toIso(day)]).join(" · ")}.
         </p>
       ) : null}
@@ -48,7 +50,7 @@ export function ClassesPage() {
         />
       ) : null}
 
-      <div data-day-panel className={view === "semana" ? "mt-4 grid gap-3 xl:grid-cols-7" : "mt-4"}>
+      <div ref={staggerRef} data-day-panel className={view === "semana" ? "mt-4 grid gap-3 xl:grid-cols-7" : "mt-4"}>
         {(view === "semana" ? week : [date]).map((day) => (
           <DayColumn key={toIso(day)} date={day} />
         ))}
@@ -70,10 +72,10 @@ function DayColumn({ date }: { date: Date }) {
   const title = `${DOW_LONG[dow].replace(/^./, (letter) => letter.toUpperCase())} ${date.getDate()}`;
 
   return (
-    <section data-rise className="min-w-0 rounded-row border border-line bg-ink-2 p-3">
+    <section data-stagger className="card min-w-0 p-4">
       <button type="button" onClick={() => modals.openDay(iso)} className="w-full text-left">
         <p className="text-[0.62rem] font-medium uppercase tracking-wide text-muted">{WEEK_LETTERS[(dow + 6) % 7]}</p>
-        <h2 className="font-display text-base leading-tight tracking-tight text-[var(--color-mark)]">{title}</h2>
+        <h2 className="display-title text-xl leading-tight">{title}</h2>
       </button>
       {holiday ? (
         <p className="mt-2 text-sm leading-relaxed text-muted">

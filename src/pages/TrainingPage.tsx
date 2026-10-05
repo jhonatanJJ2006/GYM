@@ -9,6 +9,7 @@ import type { PoseId } from "../data/poses.ts";
 import { sessionFor, type SessionId } from "../data/sessions.ts";
 import { ANCHOR_MON, DOW_LONG, toIso } from "../lib/dates.ts";
 import { useExerciseView } from "../lib/exerciseView.ts";
+import { useStagger } from "../components/Motion.tsx";
 import { cn } from "../lib/utils.ts";
 
 const STORAGE_KEY = "hierro.entreno.checks";
@@ -75,6 +76,7 @@ function CardMedia({ pose, name }: { pose: PoseId; name: string }) {
 export function TrainingPage() {
   const modals = useModals();
   const horizon = useHorizon(ANCHOR_MON);
+  const staggerRef = useStagger<HTMLDivElement>(`${horizon.view}-${toIso(horizon.date)}`);
   const day = horizon.date;
   const [checks, setChecks] = useState(readChecks);
   const session = sessionFor(day);
@@ -138,8 +140,8 @@ export function TrainingPage() {
         <MonthPicker date={day} onChoose={horizon.setDate} caption={(item) => sessionFor(item).short} />
       ) : null}
 
-      <article className="mt-4 min-w-0 rounded-row border border-line bg-panel p-4">
-        <h2 className="break-words font-display text-3xl tracking-tight">{session.title}</h2>
+      <article className="card mt-4 min-w-0 p-5">
+        <h2 className="display-title break-words text-3xl">{session.title}</h2>
         <p className="mt-1 break-words text-sm font-semibold tabular-nums text-cream/80">
           {session.time} · {session.minutesLabel}
         </p>
@@ -151,11 +153,13 @@ export function TrainingPage() {
 
       <ExerciseViewSwitch className="mt-4 max-w-sm" />
 
+      <div ref={staggerRef}>
+
       {groups.map((group) => {
         const exercises = session.exercises.slice(group.from, group.to);
         return (
           <section key={group.label} data-day-panel className="mt-6 min-w-0">
-            <h3 className="mb-2 break-words font-display text-2xl tracking-tight text-[var(--color-mark)]">{group.label}</h3>
+            <h3 className="display-title mb-2 break-words text-2xl">{group.label}</h3>
             <ul className="space-y-3">
               {exercises.map((exercise) => {
                 const index = session.exercises.indexOf(exercise);
@@ -163,8 +167,9 @@ export function TrainingPage() {
                 return (
                   <li
                     key={exercise.id}
+                    data-stagger
                     className={cn(
-                      "grid min-w-0 grid-cols-[minmax(0,5fr)_minmax(0,7fr)] overflow-hidden rounded-row border border-line bg-panel",
+                      "card grid min-w-0 grid-cols-[minmax(0,5fr)_minmax(0,7fr)] overflow-hidden",
                       checked && "opacity-60",
                     )}
                   >
@@ -205,6 +210,7 @@ export function TrainingPage() {
           </section>
         );
       })}
+      </div>
     </div>
   );
 }
