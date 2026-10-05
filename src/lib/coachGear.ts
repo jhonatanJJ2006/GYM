@@ -319,12 +319,7 @@ export async function loadGear(): Promise<GearKit> {
       }
     }
     if (kinds.includes("cable")) {
-      const machine = models.get("cable");
-      if (machine) {
-        const spot = a.hips.clone().addScaledVector(face, -0.2);
-        placeUpright(machine, new Vector3(0, 0, 0), spot, face.clone().negate(), 0.48);
-        sitOnFloor(machine, Math.min(a.footL.y, a.footR.y));
-      }
+      // No usamos cable.glb: el cable viene cocido en el marco y flota. Solo polea + poste + cable.
       placeAlong(grip, handMid, a.right, new Vector3(0, 1, 0), new Vector3(0, 0, 0), 0.48);
       const highCable = a.pose === "pushdown" || a.pose === "face" || a.pose === "pallof";
       const origin = highCable
