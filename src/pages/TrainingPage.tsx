@@ -1,14 +1,11 @@
 import { useState } from "react";
 import { PageIntro } from "../components/Brand.tsx";
 import { CoachView } from "../components/CoachView.tsx";
-import { ExerciseViewSwitch } from "../components/ExerciseView.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { MonthPicker, PeriodBar, useHorizon } from "../components/PeriodBar.tsx";
-import { exercisePhoto } from "../data/photos.ts";
 import type { PoseId } from "../data/poses.ts";
 import { sessionFor, type SessionId } from "../data/sessions.ts";
 import { ANCHOR_MON, DOW_LONG, toIso } from "../lib/dates.ts";
-import { useExerciseView } from "../lib/exerciseView.ts";
 import { useStagger } from "../components/Motion.tsx";
 import { cn } from "../lib/utils.ts";
 
@@ -60,17 +57,12 @@ function readChecks(): Record<string, boolean> {
   }
 }
 
-function CardMedia({ pose, name }: { pose: PoseId; name: string }) {
-  const { mode } = useExerciseView();
-  const photo = exercisePhoto(pose, name);
-  if (mode === "figures" || !photo) {
-    return (
-      <span className="grid aspect-square w-full place-items-center overflow-hidden bg-ink">
-        <CoachView pose={pose} decorative className="h-full w-full" />
-      </span>
-    );
-  }
-  return <img src={photo.src} alt="" className="aspect-square w-full object-cover" />;
+function CardMedia({ pose }: { pose: PoseId; name: string }) {
+  return (
+    <span className="grid aspect-square w-full place-items-center overflow-hidden bg-ink">
+      <CoachView pose={pose} decorative className="h-full w-full" />
+    </span>
+  );
 }
 
 export function TrainingPage() {
@@ -150,8 +142,6 @@ export function TrainingPage() {
           Hechos {doneCount} de {session.exercises.length}
         </p>
       </article>
-
-      <ExerciseViewSwitch className="mt-4 max-w-sm" />
 
       <div ref={staggerRef}>
 

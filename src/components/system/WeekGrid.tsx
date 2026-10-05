@@ -1,6 +1,6 @@
 import { COURSE_SHORT, classKey } from "../../data/courses.ts";
 import { mealWhen } from "../../data/meals.ts";
-import { exercisePhoto, mealPhoto } from "../../data/photos.ts";
+import { mealPhoto } from "../../data/photos.ts";
 import { WEEK_LETTERS, formatLong, isInRange, isSameDay, toIso } from "../../lib/dates.ts";
 import { useEffect, useRef, type KeyboardEvent } from "react";
 import { animate, stagger } from "animejs";
@@ -41,11 +41,6 @@ function itemLabel(item: TimelineItem): string {
 
 function itemThumb(item: TimelineItem): string | null {
   if (item.kind === "comida") return mealPhoto(item.meal.ingredients).src;
-  if (item.kind === "gym") {
-    const exercise = item.session.exercises.find((entry) => entry.name !== "Calentamiento") ?? item.session.exercises[0];
-    const photo = exercise ? exercisePhoto(exercise.pose, exercise.name) : null;
-    return photo?.src ?? null;
-  }
   return null;
 }
 
