@@ -1,3 +1,4 @@
+import { FIGURE_MOTIONS } from "./figureMotions.ts";
 import type { PoseId } from "./poses.ts";
 
 export type Coach = {
@@ -359,6 +360,31 @@ const BY_NAME: Record<string, Coach> = {
     "Pies altos en la plataforma para cargar más el femoral y el glúteo. No bloquees las rodillas.",
   ),
   "Gemelos sentado": load("calf-seat", "15 kg sobre las rodillas", "Sentado, sube las puntas y baja el talón despacio."),
+  "Elevación de gemelos de pie": load(
+    "calf",
+    "20 kg en la máquina, o el peso corporal en un cajón",
+    "De pie, sube sobre las puntas y baja el talón. La figura usa un cajón, no una máquina esculpida.",
+  ),
+  "Elevación de gemelos sentado": load(
+    "calf-seat",
+    "15 kg sobre las rodillas",
+    "Sentado, puntas arriba y talón abajo despacio. La figura está en un banco, que es el gesto de la máquina sentada.",
+  ),
+  "Elevación de gemelos en prensa": load(
+    "press",
+    "30 kg de carga, sin contar el carro",
+    "Pies bajos en la plataforma de la prensa. Solo se mueven los tobillos: puntas arriba, talón abajo.",
+  ),
+  "Elevación de gemelos a una pierna": load(
+    "calf",
+    "el peso del cuerpo, o 8 kg en una mano",
+    "Una pierna sobre el cajón o el escalón. La otra no empuja. Baja el talón y sube sin rebotar.",
+  ),
+  "Elevación de gemelos en Smith": load(
+    "calf",
+    "20 kg en la barra guiada",
+    "Barra sobre los trapecios, puntas en un escalón. Sube y baja solo los tobillos, rodillas quietas.",
+  ),
   "Camina o bici suave": body("bike", "Camina o pedalea suave, sin perder el aire. Es entrada en calor, no un sprint."),
   Camina: body("walk", "Camina a paso largo y relajado durante los 8 minutos."),
   "Dead bug": body("deadbug", "Boca arriba, baja un brazo y la pierna contraria sin despegar la zona lumbar."),
@@ -460,6 +486,11 @@ const PROGRAM_HOW: Record<string, string> = {
   "Flexión lateral en polea": "Posición: de lado a la polea baja. Recorrido: inclina el tronco al lado contrario y vuelve. Error común: tirar solo con el brazo.",
   "Crunch oblicuo en polea": "Posición: de rodillas, polea alta. Recorrido: un codo hacia la rodilla contraria, el giro sale del tronco. Error común: jalar con el brazo.",
   "Leñador en polea": "Posición: polea alta al lado, pies separados. Recorrido: diagonal desde arriba hasta la cadera contraria. Error común: doblar los brazos y perder el giro.",
+  "Elevación de gemelos de pie": "Posición: de pie, puntas en el borde de un escalón o en la máquina de gemelos. Recorrido: sube las puntas y baja el talón por debajo del pie. Error común: doblar las rodillas. La figura muestra el gesto sobre un cajón (plyo.glb); el archivo no trae una máquina de gemelos, así que el cajón es el apoyo.",
+  "Elevación de gemelos sentado": "Posición: sentado, rodillas bajo la almohadilla o, en la figura, sobre un banco. Recorrido: puntas arriba, talón abajo. Error común: despegar el glúteo.",
+  "Elevación de gemelos en prensa": "Posición: en la prensa, pies bajos en la plataforma. Recorrido: solo tobillos. Error común: empujar con las rodillas como si fuera una prensa completa. La figura usa el modelo de prensa (legpress.glb).",
+  "Elevación de gemelos a una pierna": "Posición: una pierna en el cajón, la otra al aire. Recorrido: talón abajo y punta arriba. Error común: ayudarte con la pierna libre.",
+  "Elevación de gemelos en Smith": "Posición: barra guiada sobre los trapecios, puntas en un escalón. Recorrido: solo tobillos. Error común: convertir el movimiento en una sentadilla. La figura muestra el cajón y el gesto de puntillas; las guías de Smith se dibujan en el peso muerto rumano, no en este gesto.",
 };
 
 export function coachFor(name: string, detail: string): Coach {
@@ -473,7 +504,13 @@ export function coachFor(name: string, detail: string): Coach {
       suggested: false,
       how: detail,
     };
-  return { ...found, how: PROGRAM_HOW[name] ?? found.how };
+  const shown = FIGURE_MOTIONS[found.pose].blurb;
+  const gear = FIGURE_MOTIONS[found.pose].gear;
+  const base = PROGRAM_HOW[name] ?? found.how;
+  return {
+    ...found,
+    how: `${base} La figura muestra: ${shown} (apoyo en pantalla: ${gear}).`,
+  };
 }
 
 export function describeReps(detail: string): string {

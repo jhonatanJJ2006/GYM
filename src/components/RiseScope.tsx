@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import { animate, stagger } from "animejs";
 
 export function RiseScope({ pathname, children }: { pathname: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -6,28 +7,37 @@ export function RiseScope({ pathname, children }: { pathname: string; children: 
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          entry.target.classList.add("rise-in");
-          io.unobserve(entry.target);
-        }
-      },
-      { threshold: 0.14, rootMargin: "0px 0px -4% 0px" },
-    );
-
-    const scan = () => {
-      for (const node of root.querySelectorAll<HTMLElement>("[data-rise]:not(.rise-in)")) io.observe(node);
+    const play = (nodes: HTMLElement[]) => {
+      const fresh = nodes.filter((node) => node.dataset.played !== "1");
+      if (fresh.length === 0) return;
+      for (const node of fresh) node.dataset.played = "1";
+      if (reduced) return;
+      animate(fresh, {
+        opacity: [0, 1],
+        y: [16, 0],
+        delay: stagger(46, { from: "first" }),
+        duration: 560,
+        ease: "outCubic",
+      });
     };
 
-    scan();
-    const mo = new MutationObserver(scan);
+    if (!reduced) {
+      animate(root, {
+        opacity: [0.35, 1],
+        x: [10, 0],
+        duration: 380,
+        ease: "outCubic",
+      });
+    }
+
+    play([...root.querySelectorAll<HTMLElement>("[data-rise]")]);
+    const mo = new MutationObserver(() => {
+      play([...root.querySelectorAll<HTMLElement>("[data-rise]")]);
+    });
     mo.observe(root, { childList: true, subtree: true });
     return () => {
-      io.disconnect();
       mo.disconnect();
     };
   }, [pathname]);

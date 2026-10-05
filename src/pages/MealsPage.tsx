@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { PageIntro } from "../components/Brand.tsx";
 import { useModals } from "../components/Modals.tsx";
+import { MonthPicker, PeriodBar, useHorizon } from "../components/PeriodBar.tsx";
 import { CompactRow } from "../components/system/CompactRow.tsx";
 import { MealThumb } from "../components/system/Thumbnail.tsx";
 import { Button } from "../components/ui/button.tsx";
-import { MEALS, WEEKDAY_MEAL_ORDER, mealWhen } from "../data/meals.ts";
+import { MEALS, mealWhen } from "../data/meals.ts";
 import { DISCLAIMER, KCAL_INTRO, KCAL_POINTS, PROFILE, SHOPPING, SHOPPING_NOTE } from "../data/nutrition.ts";
-import { DOW_LONG, initialIso, parseIso } from "../lib/dates.ts";
+import { DOW_LONG, toIso } from "../lib/dates.ts";
 import { cn } from "../lib/utils.ts";
 
-const LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const STORAGE_KEY = "hierro-compra";
 
 function readChecks(): boolean[] {
@@ -27,10 +27,10 @@ function readChecks(): boolean[] {
 
 export function MealsPage() {
   const modals = useModals();
-  const [dow, setDow] = useState(() => parseIso(initialIso()).getDay());
+  const horizon = useHorizon();
   const [checks, setChecks] = useState<boolean[]>(readChecks);
-  const day = MEALS[dow];
   const done = checks.filter(Boolean).length;
+  const shown = horizon.view === "semana" ? horizon.week : [horizon.date];
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(checks));
@@ -58,65 +58,51 @@ export function MealsPage() {
         </div>
       </dl>
 
+      <PeriodBar
+        label="comidas"
+        date={horizon.date}
+        view={horizon.view}
+        atStart={horizon.atStart}
+        atEnd={horizon.atEnd}
+        onDate={horizon.setDate}
+        onView={horizon.setView}
+        onStep={horizon.step}
+      />
+
+      {horizon.view === "mes" ? <MonthPicker date={horizon.date} onChoose={horizon.setDate} caption={() => "plato"} /> : null}
+
       <section data-rise className="mt-8">
-        <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">Hoy en el plato</h2>
+        <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">En el plato</h2>
         <p className="mt-1 text-sm text-muted">
-          El desayuno es de 5:30 a 6:00. El jueves el pre-entreno sigue a las 19:00.
+          Estimación, no consejo médico. Desayuno 5:30–6:00. El jueves el pre-entreno es a las 19:00, entre la tutoría
+          de las 18:00 y el gym de las 19:15. Meta ~{PROFILE.kcal} kcal y {PROFILE.protein} g de proteína.
         </p>
-        <div
-          className="mt-3 grid grid-cols-7 gap-1"
-          role="group"
-          aria-label="Día de comidas"
-          onKeyDown={(event) => {
-            if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
-            const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>("button")];
-            const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
-            if (index < 0 || buttons.length === 0) return;
-            const next =
-              event.key === "Home"
-                ? 0
-                : event.key === "End"
-                  ? buttons.length - 1
-                  : event.key === "ArrowRight"
-                    ? (index + 1) % buttons.length
-                    : (index - 1 + buttons.length) % buttons.length;
-            event.preventDefault();
-            buttons[next]?.focus();
-            const value = WEEKDAY_MEAL_ORDER[next];
-            if (value != null) setDow(value);
-          }}
-        >
-          {WEEKDAY_MEAL_ORDER.map((value, index) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={dow === value}
-              onClick={() => setDow(value)}
-              className={cn(
-                "min-h-10 rounded-row text-xs font-medium",
-                dow === value ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
-              )}
-            >
-              {LABELS[index]}
-            </button>
-          ))}
+        <div className={horizon.view === "semana" ? "mt-4 grid gap-4 xl:grid-cols-2" : "mt-4"}>
+          {shown.map((item) => {
+            const itemDow = item.getDay();
+            const menu = MEALS[itemDow];
+            return (
+              <div key={toIso(item)} data-day-panel>
+                <p className="text-sm text-cream/85">
+                  {DOW_LONG[itemDow].replace(/^./, (letter) => letter.toUpperCase())} {item.getDate()} · ~{menu.total}
+                </p>
+                <ul className="mt-2 space-y-1">
+                  {menu.items.map((meal, index) => (
+                    <li key={`${toIso(item)}-${meal.time}-${meal.role}`}>
+                      <CompactRow
+                        title={meal.role}
+                        meta={mealWhen(meal)}
+                        thumb={<MealThumb ingredients={meal.ingredients} />}
+                        className="shadow-[inset_3px_0_0_var(--color-rail-meal)]"
+                        onClick={() => modals.openMeal(itemDow, index)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
-        <p className="mt-3 text-sm text-cream/85">
-          {DOW_LONG[dow].replace(/^./, (letter) => letter.toUpperCase())} · ~{day.total}
-        </p>
-        <ul className="mt-3 space-y-1">
-          {day.items.map((meal, index) => (
-            <li key={`${dow}-${meal.time}-${meal.role}`}>
-              <CompactRow
-                title={meal.role}
-                meta={mealWhen(meal)}
-                thumb={<MealThumb ingredients={meal.ingredients} />}
-                className="shadow-[inset_3px_0_0_var(--color-rail-meal)]"
-                onClick={() => modals.openMeal(dow, index)}
-              />
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section data-rise className="mt-8">

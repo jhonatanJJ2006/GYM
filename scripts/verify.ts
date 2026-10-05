@@ -28,7 +28,7 @@ for (let cursor = RANGE_START; cursor.getTime() <= RANGE_END.getTime(); cursor =
     );
     const gym = spanInterval(plan.session.time);
     for (const block of plan.work) {
-      check(block.start >= 12 * 60, `${iso} trabajo empieza a las ${block.start}, antes del mediodía`);
+      check(block.start >= 7 * 60, `${iso} trabajo empieza a las ${block.start}, antes de las 7:00`);
       check(!overlaps(block, gym), `${iso} trabajo ${block.start}-${block.end} pisa el gym`);
       for (const klass of classesFor(cursor)) {
         check(
@@ -54,10 +54,11 @@ for (let cursor = RANGE_START; cursor.getTime() <= RANGE_END.getTime(); cursor =
 
 for (const session of Object.values(SESSIONS)) {
   const span = spanInterval(session.time);
-  check(span.end - span.start === 120, `${session.id} dura ${span.end - span.start} min`);
+  const expected = session.id === "absA" || session.id === "absB" ? 60 : 75;
+  check(span.end - span.start === expected, `${session.id} dura ${span.end - span.start} min`);
   for (const exercise of session.exercises) {
     const photo = exercisePhoto(exercise.pose, exercise.name);
-    check(existsSync(`public${photo.src}`), `${session.id} ${exercise.name} sin foto ${photo.src}`);
+    if (photo) check(existsSync(`public${photo.src}`), `${session.id} ${exercise.name} sin foto ${photo.src}`);
     check(exercise.reps.length > 0, `${exercise.name} sin repeticiones`);
     check(exercise.weight.length > 0, `${exercise.name} sin peso`);
   }
@@ -67,7 +68,7 @@ const oct8 = buildDay(new Date(2026, 9, 8));
 check(oct8.date.getDay() === 4, "8 oct no es jueves");
 check(oct8.cycleWeek === 1, `8 oct ciclo ${oct8.cycleWeek}, se esperaba 1`);
 check(oct8.session.id === "tri", `8 oct sesión ${oct8.session.id}`);
-check(oct8.session.time === "22:25–24:25", `8 oct gym ${oct8.session.time}`);
+check(oct8.session.time === "19:15–20:30", `8 oct gym ${oct8.session.time}`);
 check(oct8.session.title === "Hombro + tríceps", oct8.session.title);
 check(oct8.classes.some((item) => item.name === "Lógica Digital" && item.start === "18:00"), "falta tutoría de Lógica");
 check(oct8.meals.items.some((item) => item.time === "19:00" && item.role === "Pre-entreno"), "pre-entreno del jueves");
@@ -89,7 +90,7 @@ check(oct5.classes.length === 0, "5 oct no debería tener clases");
 check(oct6.classes.length > 0, "6 oct debería tener clases");
 check(feb2.classes.length > 0, "2 feb debería tener clases");
 check(feb3.classes.length === 0, "3 feb no debería tener clases");
-check(feb4.date.getDay() === 4 && feb4.session.time === "22:25–24:25", "4 feb el ciclo de hombro se cortó");
+check(feb4.date.getDay() === 4 && feb4.session.time === "19:15–20:30", "4 feb el ciclo de hombro se cortó");
 check(feb4.classes.length === 0, "4 feb todavía tiene clases");
 
 const oct15 = buildDay(new Date(2026, 9, 15));
@@ -112,26 +113,27 @@ for (const item of oct8.items) {
 console.log(`trabajo total ${oct8.workMinutes} min`);
 
 
-const pairs: Record<string, [string, string]> = {
+const pairs: Record<string, string[]> = {
   push: ["pecho", "tríceps"],
-  legs: ["cuádriceps", "isquiotibiales"],
+  legs: ["cuádriceps", "gemelos"],
   pull: ["espalda", "bíceps"],
   tri: ["hombro", "tríceps"],
   bi: ["hombro", "bíceps"],
-  legsB: ["isquiotibiales", "glúteo"],
+  legsB: ["isquiotibiales", "gemelos", "glúteo"],
 };
-for (const [id, [first, second]] of Object.entries(pairs)) {
+for (const [id, words] of Object.entries(pairs)) {
   const session = SESSIONS[id as keyof typeof SESSIONS];
   check(session.exercises.length === 10, `${id} tiene ${session.exercises.length} ejercicios, se esperaban 10`);
-  check(session.note.includes(first) && session.note.includes(second), `${id} no documenta ${first} + ${second}`);
+  const note = session.note.toLowerCase();
+  check(words.every((word) => note.includes(word)), `${id} no documenta ${words.join(" + ")}`);
 }
 check(SESSIONS.absA.exercises.length === 5, "abdomen debería tener 5 ejercicios");
 check(SESSIONS.absB.exercises.length === 5, "oblicuos deberían tener 5 ejercicios");
-check(SESSIONS.push.time === "07:30–09:30", "horario de empuje");
-check(SESSIONS.legs.time === "22:00–24:00", "horario de pierna");
-check(SESSIONS.pull.time === "15:10–17:10", "horario de jalón");
-check(SESSIONS.legsB.time === "15:10–17:10", "horario de pierna B");
-check(SESSIONS.absA.time === "09:15–11:15" && SESSIONS.absB.time === "09:15–11:15", "horario de abdomen");
+check(SESSIONS.push.time === "18:00–19:15", "horario de empuje");
+check(SESSIONS.legs.time === "18:00–19:15", "horario de pierna");
+check(SESSIONS.pull.time === "18:00–19:15", "horario de jalón");
+check(SESSIONS.legsB.time === "18:00–19:15", "horario de pierna B");
+check(SESSIONS.absA.time === "10:00–11:00" && SESSIONS.absB.time === "10:00–11:00", "horario de abdomen");
 
 if (failures.length) {
   console.error(failures.join("\n"));

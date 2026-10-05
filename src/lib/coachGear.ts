@@ -186,11 +186,17 @@ export async function loadGear(): Promise<GearKit> {
 
   const grip = new Mesh(new CylinderGeometry(0.02, 0.02, 1, 10), metal);
   const cableLine = new Mesh(new CylinderGeometry(0.008, 0.008, 1, 6), metal);
+  const pulleyPost = new Mesh(new CylinderGeometry(0.016, 0.016, 1, 8), metal);
+  const pulley = new Group();
+  pulley.name = "pulley";
+  const pulleyWheel = new Mesh(new TorusGeometry(0.05, 0.012, 10, 18), metal);
+  pulleyWheel.name = "pulley-wheel";
+  pulley.add(pulleyWheel);
   const band = new Mesh(new CylinderGeometry(0.012, 0.012, 1, 8), bandMat);
   const wheel = new Mesh(new TorusGeometry(0.11, 0.028, 8, 18), rubber);
   const dip = buildDip();
   const smith = buildSmith();
-  for (const extra of [grip, cableLine, band, wheel, dip, smith]) {
+  for (const extra of [grip, cableLine, pulleyPost, pulley, band, wheel, dip, smith]) {
     extra.visible = false;
     extra.traverse((child) => {
       if (child instanceof Mesh) child.frustumCulled = false;
@@ -198,12 +204,14 @@ export async function loadGear(): Promise<GearKit> {
     group.add(extra);
   }
 
-  const sources = [...models.values(), grip, cableLine, band, wheel, dip, smith];
+  const sources = [...models.values(), grip, cableLine, pulleyPost, pulley, band, wheel, dip, smith];
 
   function hideAll() {
     for (const model of models.values()) model.visible = false;
     grip.visible = false;
     cableLine.visible = false;
+    pulley.visible = false;
+    pulleyPost.visible = false;
     band.visible = false;
     wheel.visible = false;
     dip.visible = false;
@@ -259,8 +267,8 @@ export async function loadGear(): Promise<GearKit> {
       const machine = models.get("pulldown");
       if (machine) placeUpright(machine, new Vector3(0, 0.5, 0.34), a.hips, face.clone().negate(), 0.7);
       placeAlong(grip, handMid, a.right, new Vector3(0, 1, 0), new Vector3(0, 0, 0), 0.62);
-      const high = handMid.clone().addScaledVector(a.up, 0.7);
-      span(cableLine, high, handMid);
+      const high = handMid.clone().addScaledVector(a.up, 0.78).addScaledVector(face, 0.22);
+      placePulley(pulley, pulleyPost, cableLine, high, handMid, a);
     }
     if (kinds.includes("press")) {
       const machine = models.get("press");
@@ -276,10 +284,11 @@ export async function loadGear(): Promise<GearKit> {
         placeUpright(machine, new Vector3(0, 0, 0), spot, face.clone().negate(), 0.48);
       }
       placeAlong(grip, handMid, a.right, new Vector3(0, 1, 0), new Vector3(0, 0, 0), 0.48);
-      const origin = a.pose === "pushdown" || a.pose === "face"
-        ? handMid.clone().addScaledVector(a.up, 0.85).addScaledVector(face, 0.25)
-        : handMid.clone().addScaledVector(face, 0.7).addScaledVector(a.up, 0.15);
-      span(cableLine, origin, handMid);
+      const highCable = a.pose === "pushdown" || a.pose === "face" || a.pose === "pallof";
+      const origin = highCable
+        ? handMid.clone().addScaledVector(a.up, 0.98).addScaledVector(face, 0.62)
+        : handMid.clone().addScaledVector(face, 0.92).addScaledVector(a.up, 0.22);
+      placePulley(pulley, pulleyPost, cableLine, origin, handMid, a);
     }
     if (kinds.includes("mat")) {
       const mat = models.get("mat");
@@ -324,6 +333,28 @@ export async function loadGear(): Promise<GearKit> {
       bandMat.dispose();
     },
   };
+}
+
+
+/** El GLB de la polea no trae una rueda usable. Esta polea es un toroide; el cable sale de su borde y llega a la mano. */
+function placePulley(pulley: Group, post: Mesh, cable: Mesh, origin: Vector3, hand: Vector3, a: GearAnchors) {
+  const dir = hand.clone().sub(origin);
+  if (dir.lengthSq() < 1e-6) dir.set(0, -1, 0);
+  dir.normalize();
+  let axis = new Vector3().crossVectors(dir, a.up);
+  if (axis.lengthSq() < 1e-4) axis = new Vector3().crossVectors(dir, a.right);
+  axis.normalize();
+  pulley.quaternion.setFromUnitVectors(new Vector3(0, 0, 1), axis);
+  pulley.position.copy(origin);
+  pulley.scale.setScalar(1);
+  pulley.visible = true;
+  const footY = Math.min(a.footL.y, a.footR.y, a.hips.y);
+  const bottom = origin.clone();
+  bottom.y = footY;
+  if (origin.y - footY > 0.2) span(post, bottom, origin);
+  else post.visible = false;
+  const rim = origin.clone().addScaledVector(dir, 0.05);
+  span(cable, rim, hand);
 }
 
 function vHand(a: GearAnchors): Vector3 {

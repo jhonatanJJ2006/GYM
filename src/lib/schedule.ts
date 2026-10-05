@@ -6,7 +6,6 @@ import { cycleWeek, isInTerm, toIso } from "./dates.ts";
 import { classInterval, parseClock, spanInterval, type Interval } from "./time.ts";
 
 const DAY_START = 7 * 60;
-const AFTERNOON = 12 * 60;
 const DAY_END = 23 * 60;
 const MIN_TOTAL = 5 * 60;
 const MAX_TOTAL = 6 * 60;
@@ -74,7 +73,7 @@ function freeGaps(busy: Interval[], windowStart = DAY_START): Interval[] {
 }
 
 /**
- * Entre semana, 5 a 6 horas solo por la tarde (desde las 12:00), sin pisar clases, gym ni comidas.
+ * Entre semana, 5 a 6 horas en huecos que no pisan clases (también las virtuales), gym ni la ventana corta de una comida.
  * Sábado y domingo no tienen trabajo.
  */
 export function workBlocksFor(date: Date): Interval[] {
@@ -89,7 +88,7 @@ export function workBlocksFor(date: Date): Interval[] {
 
   const blocks: Interval[] = [];
   let total = 0;
-  for (const gap of freeGaps(busy, AFTERNOON)) {
+  for (const gap of freeGaps(busy, DAY_START)) {
     const room = MAX_TOTAL - total;
     if (room < MIN_BLOCK) break;
     let want = Math.min(gap.end - gap.start, room);
@@ -121,13 +120,11 @@ function bannersFor(date: Date, holiday: string | null): string[] {
   }
 
   if (weekend) {
-    notes.push("Fin de semana: sin clases y sin trabajo. Abdomen 09:15–11:15, para no pisar el post-entreno de las 11:15.");
-  } else if (dow === 4 && inTerm) {
-    notes.push(
-      "El jueves no se entrena a las 19:15. De 17:00 a 18:59 hay tutorías y el trabajo de la tarde necesita el hueco de las 19:00. El gym es 22:25–24:25.",
-    );
+    notes.push("Fin de semana: sin clases y sin trabajo. Abdomen 10:00–11:00. El post-entreno queda a las 11:15.");
   } else if (dow === 4) {
-    notes.push("El jueves el gym sigue a las 22:25–24:25. El ciclo de hombro no se corta al terminar las clases.");
+    notes.push(
+      "Jueves: tutorías virtuales 17:00–17:59 y 18:00–18:59. El snack pre-entreno es a las 19:00, no encima de esas tutorías. El gym es 19:15–20:30.",
+    );
   }
 
   if (holiday) {
