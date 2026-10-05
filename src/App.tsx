@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-route
 import { AppHeader, BrandAtmosphere } from "./components/Brand.tsx";
 import { BottomNav } from "./components/BottomNav.tsx";
 import { RiseScope } from "./components/RiseScope.tsx";
+import { PageTransition } from "./components/PageTransition.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
 import { ExerciseViewProvider } from "./components/ExerciseView.tsx";
 import { ModalProvider } from "./components/Modals.tsx";
@@ -27,14 +28,16 @@ function Frame() {
       <BrandAtmosphere page={page} />
       <RiseScope pathname={pathname}>
         <AppHeader />
-        <Routes>
-          <Route path="/" element={<CalendarPage />} />
-          <Route path="/clases" element={<ClassesPage />} />
-          <Route path="/semana" element={<WeekPage />} />
-          <Route path="/entreno" element={<TrainingPage />} />
-          <Route path="/comidas" element={<MealsPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <PageTransition pathname={pathname}>
+          <Routes>
+            <Route path="/" element={<CalendarPage />} />
+            <Route path="/clases" element={<ClassesPage />} />
+            <Route path="/semana" element={<WeekPage />} />
+            <Route path="/entreno" element={<TrainingPage />} />
+            <Route path="/comidas" element={<MealsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </PageTransition>
       </RiseScope>
       <BottomNav />
     </div>

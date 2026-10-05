@@ -23,15 +23,6 @@ export function RiseScope({ pathname, children }: { pathname: string; children: 
       });
     };
 
-    if (!reduced) {
-      animate(root, {
-        opacity: [0.35, 1],
-        x: [10, 0],
-        duration: 380,
-        ease: "outCubic",
-      });
-    }
-
     play([...root.querySelectorAll<HTMLElement>("[data-rise]")]);
     const mo = new MutationObserver(() => {
       play([...root.querySelectorAll<HTMLElement>("[data-rise]")]);
