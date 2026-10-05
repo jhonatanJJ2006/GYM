@@ -305,7 +305,10 @@ export async function loadGear(): Promise<GearKit> {
     }
     if (kinds.includes("pulldown")) {
       const machine = models.get("pulldown");
-      if (machine) placeUpright(machine, new Vector3(0, 0.5, 0.34), a.hips, face.clone().negate(), 0.7);
+      if (machine) {
+        placeUpright(machine, new Vector3(0, 0.5, 0.34), a.hips, face.clone().negate(), 0.7);
+        sitOnFloor(machine, Math.min(a.footL.y, a.footR.y));
+      }
       placeAlong(grip, handMid, a.right, new Vector3(0, 1, 0), new Vector3(0, 0, 0), 0.62);
       const high = a.hips.clone().addScaledVector(face, 0.85).addScaledVector(a.up, 1.05);
       const topHand = a.handL.clone().dot(a.up) > a.handR.clone().dot(a.up) ? a.handL : a.handR;
