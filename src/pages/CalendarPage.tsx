@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { animate, stagger } from "animejs";
 import { PageIntro } from "../components/Brand.tsx";
 import { Legend } from "../components/Legend.tsx";
 import { DayAgenda, WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
@@ -115,7 +116,7 @@ export function CalendarPage() {
     <div>
       <PageIntro title="Calendario">Día, semana o mes · 1 oct – 28 feb</PageIntro>
 
-      <div className="mb-3 grid grid-cols-3 gap-1" role="tablist" aria-label="Vista del calendario">
+      <div className="card mb-3 grid grid-cols-3 gap-1 p-1" role="tablist" aria-label="Vista del calendario">
         {(
           [
             ["dia", "Día"],
@@ -131,7 +132,7 @@ export function CalendarPage() {
             onClick={() => setView(id)}
             className={cn(
               "min-h-9 rounded-row text-sm font-medium",
-              view === id ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
+              view === id ? "bg-accent font-semibold text-[var(--color-accent-ink)] shadow-lg shadow-accent/30" : "text-muted",
             )}
           >
             {label}
@@ -139,7 +140,7 @@ export function CalendarPage() {
         ))}
       </div>
 
-      <label className="mb-3 flex items-center justify-between gap-3 rounded-row border border-line bg-ink-2 px-3 py-2 text-sm">
+      <label className="card mb-3 flex items-center justify-between gap-3 px-3 py-2 text-sm">
         <span className="text-muted">Ir a un día</span>
         <input
           type="date"
@@ -186,7 +187,7 @@ export function CalendarPage() {
                 onClick={() => setKinds((current) => ({ ...current, [filter.id]: !current[filter.id] }))}
                 className={cn(
                   "min-h-9 rounded-row text-xs font-medium",
-                  on ? "bg-panel-2 text-cream ring-1 ring-cream" : "text-muted",
+                  on ? "bg-accent font-semibold text-[var(--color-accent-ink)] shadow-lg shadow-accent/30" : "text-muted",
                 )}
               >
                 {filter.label}
@@ -259,7 +260,7 @@ export function CalendarPage() {
         <p className="mt-4 rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Activa al menos un tipo para ver el día.</p>
       ) : null}
 
-      <details data-rise className="mt-4 rounded-row border border-line bg-panel">
+      <details data-rise className="card mt-4">
         <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>
         <div className="px-4 pb-4">
           <Legend />
@@ -268,6 +269,8 @@ export function CalendarPage() {
     </div>
   );
 }
+
+const KIND_ORDER: Kind[] = ["clase", "gym", "trabajo", "comida"];
 
 const DOT: Record<Kind, string> = {
   clase: "bg-rail-class",
@@ -298,16 +301,35 @@ function MonthJump({
     ...Array.from({ length: count }, (_, index) => new Date(year, month, index + 1)),
   ];
   while (cells.length % 7 !== 0) cells.push(null);
+  const rows = cells.length / 7;
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const anim = animate([...grid.children] as HTMLElement[], {
+      opacity: [0, 1],
+      scale: [0.6, 1],
+      y: [10, 0],
+      delay: stagger(28, { grid: [7, rows], from: "first" }),
+      duration: 520,
+      ease: "outBack(1.6)",
+    });
+    return () => {
+      anim.pause();
+    };
+  }, [year, month, rows]);
 
   return (
-    <div data-rise className="mb-4 rounded-row border border-line bg-ink-2 p-3">
+    <div data-rise className="card mb-4 p-3">
       <div className="grid grid-cols-7 gap-1 text-center text-[0.68rem] font-semibold text-muted">
         {WEEK_LETTERS.map((letter) => (
           <div key={letter}>{letter}</div>
         ))}
       </div>
       <div
-        className="mt-1 grid grid-cols-7 gap-1"
+        ref={gridRef}
+        className="mt-2 grid grid-cols-7 gap-1.5"
         role="grid"
         aria-label={`Días de ${MONTHS[month]}`}
         onKeyDown={(event) => {
@@ -334,7 +356,7 @@ function MonthJump({
         }}
       >
         {cells.map((date, index) => {
-          if (!date || !isInRange(date)) return <div key={`vacio-${index}`} className="min-h-10" />;
+          if (!date || !isInRange(date)) return <div key={`vacio-${index}`} className="min-h-12" />;
           const plan = buildDay(date);
           const active = isSameDay(date, selected);
           return (
@@ -344,23 +366,22 @@ function MonthJump({
               data-iso={toIso(date)}
               onClick={() => onChoose(date)}
               aria-current={active ? "date" : undefined}
-              aria-label={formatLong(date)}
+              data-today={isSameDay(date, today) ? "1" : undefined}
+              aria-label={`${formatLong(date)}${isSameDay(date, today) ? " (hoy)" : ""}`}
               className={cn(
-                "flex min-h-10 flex-col items-center justify-center rounded-row",
-                active ? "bg-cream text-ink" : "text-cream",
+                "day-cell flex min-h-12 flex-col items-center justify-center rounded-row",
+                !active && "text-cream",
                 !active && !isInTerm(date) && "text-muted",
-                !active && isSameDay(date, today) && "ring-1 ring-cream",
               )}
             >
-              <span className="font-display text-base leading-none">{date.getDate()}</span>
-              <span className="mt-1 flex h-1 justify-center gap-0.5">
-                {plan.items
-                  .filter((item) => kinds[item.kind])
-                  .filter((item, index, list) => list.findIndex((other) => other.kind === item.kind) === index)
-                  .slice(0, 3)
-                  .map((item) => (
-                    <span key={item.kind} className={cn("size-1 rounded-full", DOT[item.kind])} />
-                  ))}
+              <span className="font-display text-base font-bold leading-none">{date.getDate()}</span>
+              <span className="mt-1.5 flex h-1.5 justify-center gap-0.5">
+                {KIND_ORDER.filter((kind) => kinds[kind] && plan.items.some((item) => item.kind === kind)).map((kind) => (
+                  <span
+                    key={kind}
+                    className={cn("size-1.5 rounded-full", DOT[kind], active && "ring-1 ring-[var(--color-accent-ink)]/60")}
+                  />
+                ))}
               </span>
               {plan.holiday ? <span className="sr-only">feriado</span> : null}
             </button>
