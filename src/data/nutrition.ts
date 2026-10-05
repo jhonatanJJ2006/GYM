@@ -43,12 +43,12 @@ export const DISCLAIMER =
   "No es consejo médico ni una dieta clínica. Si tienes una lesión, ajusta el ejercicio con quien te atiende. Las calorías son de tabla (huevo, arroz cocido, pollo crudo, etc.), redondeadas.";
 
 export const SHOPPING_NOTE =
-  "Para una persona. El arroz, la lenteja y el pollo conviene hacerlos el domingo en tanda.";
+  "Para una persona. El arroz, la lenteja y el pollo conviene hacerlos el domingo en tanda. Para el post-entreno de lunes, jueves y viernes: tupper con tapa hermética, lonchera térmica con 1–2 ice packs o un termo de comida.";
 
 export const SHOPPING: { item: string; amount: string }[] = [
   { item: "Huevos", amount: "18 unidades" },
-  { item: "Pechuga de pollo", amount: "600 g cruda" },
-  { item: "Carne molida magra", amount: "200 g" },
+  { item: "Pechuga de pollo", amount: "700 g cruda" },
+  { item: "Carne molida magra", amount: "400 g" },
   { item: "Atún al agua", amount: "4 latas chicas (80 g escurridos c/u)" },
   { item: "Leche semidescremada", amount: "3 litros" },
   { item: "Yogur natural", amount: "1,2 kg" },
@@ -57,6 +57,8 @@ export const SHOPPING: { item: string; amount: string }[] = [
   { item: "Arroz", amount: "1,2 kg en seco" },
   { item: "Lenteja y fréjol secos", amount: "400 g entre los dos" },
   { item: "Pan integral", amount: "2 fundas" },
+  { item: "Tortillas de trigo medianas", amount: "1 paquete (2 por semana para el wrap del lunes)" },
+  { item: "Lechuga, pimiento y cebolla", amount: "1 lechuga, 1 pimiento, 2 cebollas" },
   { item: "Plátano, manzana, naranja", amount: "10 / 5 / 4" },
   { item: "Verde, papa, camote, choclo", amount: "2 verdes, 1 kg papa, 2 camotes, 2 choclos" },
   { item: "Aguacate, tomate, brócoli", amount: "3 aguacates, 1 kg tomate, 1 brócoli" },

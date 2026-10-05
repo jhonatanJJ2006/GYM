@@ -14,7 +14,7 @@ export function ClassesPage() {
   return (
     <div>
       <PageIntro title="Clases">
-        Del 6 de octubre de 2026 al 2 de febrero de 2027. Sábado y domingo no hay clases. Puedes ver un día, la semana
+        Del lunes 5 de octubre de 2026 al 2 de febrero de 2027. Sábado y domingo no hay clases. Puedes ver un día, la semana
         o el mes, y saltar a cualquier fecha del rango.
       </PageIntro>
 
@@ -83,7 +83,7 @@ function DayColumn({ date }: { date: Date }) {
       {weekend ? <p className="mt-3 text-sm text-muted">Sin clases y sin trabajo.</p> : null}
       {!weekend && !isInTerm(date) ? (
         <p className="mt-3 text-sm text-muted">
-          {date < TERM_START ? "Antes del 6 de octubre no hay clases." : "Después del 2 de febrero de 2027 no hay clases."}
+          {date < TERM_START ? "Antes del 5 de octubre no hay clases." : "Después del 2 de febrero de 2027 no hay clases."}
         </p>
       ) : null}
       {classes.length ? (

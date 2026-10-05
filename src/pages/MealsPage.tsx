@@ -74,8 +74,9 @@ export function MealsPage() {
       <section data-rise className="mt-8">
         <h2 className="font-display text-2xl tracking-tight text-[var(--color-mark)]">En el plato</h2>
         <p className="mt-1 text-sm text-muted">
-          Estimación, no consejo médico. Desayuno 5:30–6:00. El jueves el pre-entreno es a las 19:00, entre la tutoría
-          de las 18:00 y el gym de las 19:15. Meta ~{PROFILE.kcal} kcal y {PROFILE.protein} g de proteína.
+          Estimación, no consejo médico. Lunes, jueves y viernes: pre-entreno ligero 6:15–6:30 en casa y post-entreno
+          para llevar (tupper preparado la noche anterior) a las 9:00, antes de las clases de las 10:00. Martes,
+          miércoles y fin de semana: desayuno 5:30–6:00. Meta ~{PROFILE.kcal} kcal y {PROFILE.protein} g de proteína.
         </p>
         <div className={horizon.view === "semana" ? "mt-4 grid gap-4 xl:grid-cols-2" : "mt-4"}>
           {shown.map((item) => {
