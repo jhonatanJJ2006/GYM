@@ -1,4 +1,5 @@
 import {
+  Box3,
   CylinderGeometry,
   Group,
   Mesh,
@@ -159,6 +160,44 @@ function span(mesh: Mesh, a: Vector3, b: Vector3) {
   mesh.visible = true;
 }
 
+const STRAND_NAME = /cable|wire|rope/i;
+
+/** Oculta cables horneados en el GLB (por nombre o por caja muy delgada); el cable real lo dibuja placePulley. */
+function hideBakedStrands(root: Object3D) {
+  root.updateMatrixWorld(true);
+  const meshes: Mesh[] = [];
+  root.traverse((child) => {
+    if (child instanceof Mesh) meshes.push(child);
+  });
+  const named = meshes.filter((m) => STRAND_NAME.test(m.name) || STRAND_NAME.test(m.geometry.name ?? ""));
+  const size = new Vector3();
+  const thin = meshes.filter((m) => {
+    if (named.includes(m)) return false;
+    new Box3().setFromObject(m).getSize(size);
+    const dims = [size.x, size.y, size.z].sort((x, y) => x - y);
+    return dims[2] > 0.4 && dims[0] < 0.04 && dims[1] < 0.04;
+  });
+  const hide = [...named, ...thin];
+  if (hide.length >= meshes.length) return;
+  for (const mesh of hide) mesh.visible = false;
+}
+
+/** Baja o sube el modelo para que la base de su caja (solo mallas visibles) quede en `floorY`. */
+function sitOnFloor(obj: Object3D, floorY: number) {
+  obj.updateMatrixWorld(true);
+  const box = new Box3();
+  const part = new Box3();
+  obj.traverse((child) => {
+    if (!(child instanceof Mesh) || !child.visible) return;
+    if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
+    part.copy(child.geometry.boundingBox!).applyMatrix4(child.matrixWorld);
+    box.union(part);
+  });
+  if (box.isEmpty()) return;
+  if (obj.parent) box.applyMatrix4(obj.parent.matrixWorld.clone().invert());
+  obj.position.y += floorY - box.min.y;
+}
+
 function prepare(root: Object3D) {
   root.traverse((child) => {
     if (child instanceof Mesh) child.frustumCulled = false;
@@ -173,6 +212,7 @@ export async function loadGear(): Promise<GearKit> {
   await Promise.all(
     Object.entries(FILES).map(async ([id, file]) => {
       const gltf = await loader.loadAsync(`${GEAR_URL}/${file}`);
+      if (id === "cable" || id === "pulldown") hideBakedStrands(gltf.scene);
       models.set(id, prepare(gltf.scene));
     }),
   );
@@ -265,10 +305,14 @@ export async function loadGear(): Promise<GearKit> {
     }
     if (kinds.includes("pulldown")) {
       const machine = models.get("pulldown");
-      if (machine) placeUpright(machine, new Vector3(0, 0.5, 0.34), a.hips, face.clone().negate(), 0.7);
+      if (machine) {
+        placeUpright(machine, new Vector3(0, 0.5, 0.34), a.hips, face.clone().negate(), 0.7);
+        sitOnFloor(machine, Math.min(a.footL.y, a.footR.y));
+      }
       placeAlong(grip, handMid, a.right, new Vector3(0, 1, 0), new Vector3(0, 0, 0), 0.62);
-      const high = handMid.clone().addScaledVector(a.up, 0.78).addScaledVector(face, 0.22);
-      placePulley(pulley, pulleyPost, cableLine, high, handMid, a);
+      const high = a.hips.clone().addScaledVector(face, 0.85).addScaledVector(a.up, 1.05);
+      const topHand = a.handL.clone().dot(a.up) > a.handR.clone().dot(a.up) ? a.handL : a.handR;
+      placePulley(pulley, pulleyPost, cableLine, high, topHand, a);
     }
     if (kinds.includes("press")) {
       const machine = models.get("press");
@@ -278,17 +322,15 @@ export async function loadGear(): Promise<GearKit> {
       }
     }
     if (kinds.includes("cable")) {
-      const machine = models.get("cable");
-      if (machine) {
-        const spot = a.hips.clone().addScaledVector(face, -0.2);
-        placeUpright(machine, new Vector3(0, 0, 0), spot, face.clone().negate(), 0.48);
-      }
+      // No usamos cable.glb: el cable viene cocido en el marco y flota. Solo polea + poste + cable.
       placeAlong(grip, handMid, a.right, new Vector3(0, 1, 0), new Vector3(0, 0, 0), 0.48);
       const highCable = a.pose === "pushdown" || a.pose === "face" || a.pose === "pallof";
       const origin = highCable
-        ? handMid.clone().addScaledVector(a.up, 0.98).addScaledVector(face, 0.62)
-        : handMid.clone().addScaledVector(face, 0.92).addScaledVector(a.up, 0.22);
-      placePulley(pulley, pulleyPost, cableLine, origin, handMid, a);
+        ? a.hips.clone().addScaledVector(face, 0.85).addScaledVector(a.up, 1.05)
+        : a.hips.clone().addScaledVector(face, 0.95).addScaledVector(a.up, 0.35);
+      const singleArm = a.pose === "pushdown" || a.pose === "face" || a.pose === "pallof" || a.pose === "kickback";
+      const end = singleArm && a.handR.distanceTo(a.hips) > a.handL.distanceTo(a.hips) ? a.handR : handMid;
+      placePulley(pulley, pulleyPost, cableLine, origin, end, a);
     }
     if (kinds.includes("mat")) {
       const mat = models.get("mat");
