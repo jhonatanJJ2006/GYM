@@ -89,13 +89,17 @@
     animation: sheet-in 180ms ease-out;
   }
 
-  [data-rise] {
-    opacity: 0;
-    transform: translateY(8px);
+  [data-day-panel] {
+    animation: day-open 460ms cubic-bezier(0.22, 0.8, 0.24, 1);
+    transform-origin: top center;
   }
 
-  [data-rise].rise-in {
-    animation: rise-in 420ms ease-out forwards;
+  nav a {
+    transition: transform 280ms cubic-bezier(0.22, 0.8, 0.24, 1);
+  }
+
+  nav a[aria-current="page"] svg {
+    transform: translateY(-2px) scale(1.08);
   }
 
   .week-block[data-rise]:nth-child(2) { animation-delay: 30ms; }
@@ -104,10 +108,10 @@
   .week-block[data-rise]:nth-child(n + 5) { animation-delay: 120ms; }
 }
 
-@keyframes rise-in {
+@keyframes day-open {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px) scaleY(0.96);
   }
   to {
     opacity: 1;

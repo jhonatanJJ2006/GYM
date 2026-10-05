@@ -40,7 +40,8 @@ function itemThumb(item: TimelineItem): string | null {
   if (item.kind === "comida") return mealPhoto(item.meal.ingredients).src;
   if (item.kind === "gym") {
     const exercise = item.session.exercises.find((entry) => entry.name !== "Calentamiento") ?? item.session.exercises[0];
-    return exercise ? exercisePhoto(exercise.pose, exercise.name).src : null;
+    const photo = exercise ? exercisePhoto(exercise.pose, exercise.name) : null;
+    return photo?.src ?? null;
   }
   return null;
 }

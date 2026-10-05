@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Hierro">
   <rect width="32" height="32" rx="8" fill="#0a0a0a"/>
-  <path d="M7.6 22.2 11 8.6h10L24.4 22.2H7.6Z" fill="#d9d2c8"/>
-  <path d="M11 8.6h10l-1.45 4.35H12.45L11 8.6Z" fill="#f0b08a"/>
-  <path d="M13.15 16.35h5.7l.75 2.7h-7.2l.75-2.7Z" fill="#241c16"/>
+  <rect x="3.5" y="13" width="3.2" height="6" rx="0.8" fill="#d9d4cc"/>
+  <rect x="7.2" y="10.5" width="3.4" height="11" rx="0.7" fill="#f0b08a"/>
+  <rect x="10.6" y="14.6" width="10.8" height="2.8" rx="0.4" fill="#f2f2f2"/>
+  <rect x="21.4" y="10.5" width="3.4" height="11" rx="0.7" fill="#f0b08a"/>
+  <rect x="25.3" y="13" width="3.2" height="6" rx="0.8" fill="#d9d4cc"/>
 </svg>

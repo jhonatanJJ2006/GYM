@@ -12,6 +12,8 @@ import {
   daysInMonth,
   formatLong,
   formatWeekSpan,
+  RANGE_END,
+  RANGE_START,
   initialIso,
   isInRange,
   isInTerm,
@@ -137,6 +139,21 @@ export function CalendarPage() {
         ))}
       </div>
 
+      <label className="mb-3 flex items-center justify-between gap-3 rounded-row border border-line bg-ink-2 px-3 py-2 text-sm">
+        <span className="text-muted">Ir a un día</span>
+        <input
+          type="date"
+          value={toIso(cursor)}
+          min={toIso(RANGE_START)}
+          max={toIso(RANGE_END)}
+          onChange={(event) => {
+            if (!event.target.value) return;
+            choose(parseIso(event.target.value));
+          }}
+          className="min-h-10 rounded-row border border-line bg-ink px-2 text-cream"
+        />
+      </label>
+
       <div className="sticky top-0 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6">
         <div
           className="grid grid-cols-4 gap-1"
@@ -213,7 +230,7 @@ export function CalendarPage() {
         </Button>
       </div>
 
-      {view === "dia" ? <DayAgenda day={cursor} kinds={kinds} /> : null}
+      {view === "dia" ? <div data-day-panel><DayAgenda day={cursor} kinds={kinds} /></div> : null}
 
       {view === "semana" && narrow ? (
         <WeekAgenda days={week} kinds={kinds} selected={cursor} onSelect={choose} />

@@ -3,24 +3,44 @@ import { PageIntro } from "../components/Brand.tsx";
 import { CoachView } from "../components/CoachView.tsx";
 import { ExerciseViewSwitch } from "../components/ExerciseView.tsx";
 import { useModals } from "../components/Modals.tsx";
+import { MonthPicker, PeriodBar, useHorizon } from "../components/PeriodBar.tsx";
 import { exercisePhoto } from "../data/photos.ts";
 import type { PoseId } from "../data/poses.ts";
 import { sessionFor, type SessionId } from "../data/sessions.ts";
-import { DOW_LONG, RANGE_END, RANGE_START, addDays, dateOnly, formatLong, isInRange, toIso } from "../lib/dates.ts";
+import { ANCHOR_MON, DOW_LONG, toIso } from "../lib/dates.ts";
 import { useExerciseView } from "../lib/exerciseView.ts";
 import { cn } from "../lib/utils.ts";
 
 const STORAGE_KEY = "hierro.entreno.checks";
 
-const GROUPS: Record<SessionId, readonly string[]> = {
-  push: ["Pecho", "Tríceps"],
-  legs: ["Cuádriceps", "Isquiotibiales"],
-  pull: ["Espalda", "Bíceps"],
-  tri: ["Hombro", "Tríceps"],
-  bi: ["Hombro", "Bíceps"],
-  legsB: ["Isquiotibiales", "Glúteo"],
-  absA: ["Abdomen"],
-  absB: ["Oblicuos"],
+const GROUPS: Record<SessionId, { label: string; from: number; to: number }[]> = {
+  push: [
+    { label: "Pecho", from: 0, to: 5 },
+    { label: "Tríceps", from: 5, to: 10 },
+  ],
+  legs: [
+    { label: "Cuádriceps", from: 0, to: 5 },
+    { label: "Gemelos", from: 5, to: 10 },
+  ],
+  pull: [
+    { label: "Espalda", from: 0, to: 5 },
+    { label: "Bíceps", from: 5, to: 10 },
+  ],
+  tri: [
+    { label: "Hombro", from: 0, to: 5 },
+    { label: "Tríceps", from: 5, to: 10 },
+  ],
+  bi: [
+    { label: "Hombro", from: 0, to: 5 },
+    { label: "Bíceps", from: 5, to: 10 },
+  ],
+  legsB: [
+    { label: "Isquiotibiales", from: 0, to: 4 },
+    { label: "Gemelos", from: 4, to: 7 },
+    { label: "Glúteo", from: 7, to: 10 },
+  ],
+  absA: [{ label: "Abdomen", from: 0, to: 5 }],
+  absB: [{ label: "Oblicuos", from: 0, to: 5 }],
 };
 
 function readChecks(): Record<string, boolean> {
@@ -39,41 +59,28 @@ function readChecks(): Record<string, boolean> {
   }
 }
 
-function initialDay(): Date {
-  const today = dateOnly(new Date());
-  return isInRange(today) ? today : dateOnly(RANGE_START);
-}
-
 function CardMedia({ pose, name }: { pose: PoseId; name: string }) {
   const { mode } = useExerciseView();
-  if (mode === "figures") {
+  const photo = exercisePhoto(pose, name);
+  if (mode === "figures" || !photo) {
     return (
       <span className="grid aspect-square w-full place-items-center overflow-hidden bg-ink">
         <CoachView pose={pose} decorative className="h-full w-full" />
       </span>
     );
   }
-  const photo = exercisePhoto(pose, name);
   return <img src={photo.src} alt="" className="aspect-square w-full object-cover" />;
 }
 
 export function TrainingPage() {
   const modals = useModals();
-  const [day, setDay] = useState(initialDay);
+  const horizon = useHorizon(ANCHOR_MON);
+  const day = horizon.date;
   const [checks, setChecks] = useState(readChecks);
   const session = sessionFor(day);
   const iso = toIso(day);
   const groups = GROUPS[session.id];
-  const slice = Math.ceil(session.exercises.length / groups.length);
   const doneCount = session.exercises.filter((exercise) => checks[`${iso}:${exercise.id}`]).length;
-  const atStart = day.getTime() <= dateOnly(RANGE_START).getTime();
-  const atEnd = day.getTime() >= dateOnly(RANGE_END).getTime();
-
-  function shift(delta: number) {
-    const next = addDays(day, delta);
-    if (!isInRange(next)) return;
-    setDay(next);
-  }
 
   function toggle(id: string) {
     const key = `${iso}:${id}`;
@@ -87,38 +94,49 @@ export function TrainingPage() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-[42rem]">
       <PageIntro title="Entreno">
-        Un solo día. El ciclo sigue anclado al lunes 5 de octubre de 2026; la semana completa está en Semana y en el
-        calendario.
+        Ciclo de 4 semanas desde el lunes 5 de octubre de 2026 hasta el 2 de febrero de 2027. Lunes pecho y tríceps,
+        martes cuádriceps y gemelos, miércoles espalda y bíceps, jueves hombro (tríceps en semanas 1 y 3, bíceps en 2 y
+        4), viernes femoral, gemelos y glúteo. Fin de semana, abdomen.
       </PageIntro>
 
-      <div
-        className="mt-4 grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2"
-        role="group"
-        aria-label="Cambiar el día de entreno"
-      >
-        <button
-          type="button"
-          onClick={() => shift(-1)}
-          disabled={atStart}
-          className="min-h-12 rounded-row border border-line px-2.5 text-sm font-semibold disabled:opacity-40"
-        >
-          Anterior
-        </button>
-        <div className="min-w-0 text-center">
-          <p className="break-words font-display text-2xl capitalize leading-none tracking-tight text-[var(--color-mark)]">
-            {DOW_LONG[day.getDay()]}
-          </p>
-          <p className="mt-1 break-words text-sm text-muted">{formatLong(day)}</p>
+      <PeriodBar
+        label="entreno"
+        date={day}
+        view={horizon.view}
+        atStart={horizon.atStart}
+        atEnd={horizon.atEnd}
+        onDate={horizon.setDate}
+        onView={horizon.setView}
+        onStep={horizon.step}
+      />
+
+      {horizon.view === "semana" ? (
+        <div className="mt-3 grid grid-cols-7 gap-1" data-rise>
+          {horizon.week.map((item) => {
+            const itemSession = sessionFor(item);
+            const on = toIso(item) === iso;
+            return (
+              <button
+                key={toIso(item)}
+                type="button"
+                onClick={() => horizon.setDate(item)}
+                className={cn(
+                  "min-h-14 rounded-row px-0.5 text-center",
+                  on ? "bg-cream text-ink" : "text-muted",
+                )}
+              >
+                <span className="block text-[0.62rem] font-semibold">{DOW_LONG[item.getDay()].slice(0, 3)}</span>
+                <span className="block font-display text-lg leading-none">{item.getDate()}</span>
+                <span className="block text-[0.62rem]">{itemSession.short}</span>
+              </button>
+            );
+          })}
         </div>
-        <button
-          type="button"
-          onClick={() => shift(1)}
-          disabled={atEnd}
-          className="min-h-12 rounded-row border border-line px-2.5 text-sm font-semibold disabled:opacity-40"
-        >
-          Siguiente
-        </button>
-      </div>
+      ) : null}
+
+      {horizon.view === "mes" ? (
+        <MonthPicker date={day} onChoose={horizon.setDate} caption={(item) => sessionFor(item).short} />
+      ) : null}
 
       <article className="mt-4 min-w-0 rounded-row border border-line bg-panel p-4">
         <h2 className="break-words font-display text-3xl tracking-tight">{session.title}</h2>
@@ -133,11 +151,11 @@ export function TrainingPage() {
 
       <ExerciseViewSwitch className="mt-4 max-w-sm" />
 
-      {groups.map((group, groupIndex) => {
-        const exercises = session.exercises.slice(groupIndex * slice, (groupIndex + 1) * slice);
+      {groups.map((group) => {
+        const exercises = session.exercises.slice(group.from, group.to);
         return (
-          <section key={group} className="mt-6 min-w-0">
-            <h3 className="mb-2 break-words font-display text-2xl tracking-tight text-[var(--color-mark)]">{group}</h3>
+          <section key={group.label} data-day-panel className="mt-6 min-w-0">
+            <h3 className="mb-2 break-words font-display text-2xl tracking-tight text-[var(--color-mark)]">{group.label}</h3>
             <ul className="space-y-3">
               {exercises.map((exercise) => {
                 const index = session.exercises.indexOf(exercise);

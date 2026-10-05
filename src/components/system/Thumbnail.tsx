@@ -1,7 +1,8 @@
 import { exercisePhoto, mealPhoto, type Photo } from "../../data/photos.ts";
 import type { PoseId } from "../../data/poses.ts";
-import { CoachView } from "../CoachView.tsx";
 import { useExerciseView } from "../../lib/exerciseView.ts";
+import { CoachView } from "../CoachView.tsx";
+import { ExerciseGlyph } from "../ExerciseGlyph.tsx";
 
 /** Miniatura de lista. La foto grande vive en el modal, no aquí. */
 export function Thumbnail({ photo }: { photo: Photo }) {
@@ -21,12 +22,17 @@ export function MealThumb({ ingredients }: { ingredients: readonly string[] }) {
 
 export function ExerciseThumb({ pose, name }: { pose: PoseId; name?: string }) {
   const { mode } = useExerciseView();
-  if (mode === "figures") {
+  const photo = exercisePhoto(pose, name);
+  if (mode === "figures" || !photo) {
     return (
-      <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-row bg-ink">
-        <CoachView pose={pose} decorative className="size-10" />
+      <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-row bg-ink text-cream">
+        {mode === "figures" ? (
+          <CoachView pose={pose} decorative className="size-10" />
+        ) : (
+          <ExerciseGlyph pose={pose} label={name ?? ""} decorative className="size-10" />
+        )}
       </span>
     );
   }
-  return <Thumbnail photo={exercisePhoto(pose, name)} />;
+  return <Thumbnail photo={photo} />;
 }

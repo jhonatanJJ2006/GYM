@@ -1,81 +1,60 @@
-import { useState } from "react";
 import { PageIntro } from "../components/Brand.tsx";
 import { useModals } from "../components/Modals.tsx";
-import { Button } from "../components/ui/button.tsx";
-import { classKey, classesFor, courseColor } from "../data/courses.ts";
+import { MonthPicker, PeriodBar, useHorizon } from "../components/PeriodBar.tsx";
 import { CompactRow } from "../components/system/CompactRow.tsx";
+import { classKey, classesFor, courseColor } from "../data/courses.ts";
 import { HOLIDAYS } from "../data/holidays.ts";
-import {
-  DOW_LONG,
-  TERM_END,
-  TERM_START,
-  WEEK_LETTERS,
-  formatWeekSpan,
-  isInTerm,
-  isSameDay,
-  termWeeks,
-  toIso,
-} from "../lib/dates.ts";
+import { DOW_LONG, TERM_END, TERM_START, WEEK_LETTERS, isInTerm, toIso } from "../lib/dates.ts";
+
 export function ClassesPage() {
-  const weeks = termWeeks();
-  const [index, setIndex] = useState(() => {
-    const today = new Date();
-    const target = isInTerm(today) ? today : TERM_START;
-    const found = weeks.findIndex((week) => week.some((day) => isSameDay(day, target)));
-    return found < 0 ? 0 : found;
-  });
-  const week = weeks[index] ?? weeks[0];
-  const inside = week.filter((date) => isInTerm(date) || date.getDay() === 0 || date.getDay() === 6);
-  const holidayDays = week.filter((date) => HOLIDAYS[toIso(date)]);
+  const horizon = useHorizon(TERM_START);
+  const { date, view, week } = horizon;
+  const holidayDays = (view === "semana" ? week : [date]).filter((day) => HOLIDAYS[toIso(day)]);
 
   return (
     <div>
       <PageIntro title="Clases">
-        Semana a semana, del 6 de octubre de 2026 al 2 de febrero de 2027. Sábado y domingo no hay clases. Si un día ya
-        está marcado como feriado, la clase puede suspenderse y sigue etiquetada.
+        Del 6 de octubre de 2026 al 2 de febrero de 2027. Sábado y domingo no hay clases. Puedes ver un día, la semana
+        o el mes, y saltar a cualquier fecha del rango.
       </PageIntro>
 
-      <div className="mt-5 flex items-center justify-between gap-3">
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Semana anterior"
-          disabled={index === 0}
-          onClick={() => setIndex((value) => Math.max(0, value - 1))}
-        >
-          ‹
-        </Button>
-        <div className="text-center">
-          <p className="font-display text-2xl leading-none text-[var(--color-mark)]">{formatWeekSpan(week)}</p>
-          <p className="mt-1 text-xs text-muted">
-            Semana {index + 1} de {weeks.length}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Semana siguiente"
-          disabled={index >= weeks.length - 1}
-          onClick={() => setIndex((value) => Math.min(weeks.length - 1, value + 1))}
-        >
-          ›
-        </Button>
-      </div>
+      <PeriodBar
+        label="clases"
+        date={date}
+        view={view}
+        atStart={horizon.atStart}
+        atEnd={horizon.atEnd}
+        onDate={horizon.setDate}
+        onView={horizon.setView}
+        onStep={horizon.step}
+      />
 
       {holidayDays.length ? (
         <p className="mt-3 rounded-row border border-line bg-panel px-3 py-3 text-sm leading-relaxed text-muted">
-          Esta semana tiene feriado: {holidayDays.map((date) => HOLIDAYS[toIso(date)]).join(" · ")}.
+          Feriado en esta vista: {holidayDays.map((day) => HOLIDAYS[toIso(day)]).join(" · ")}.
         </p>
       ) : null}
 
-      <div data-rise className="mt-4 grid gap-3 xl:grid-cols-7">
-        {week.map((date) => (
-          <DayColumn key={toIso(date)} date={date} />
+      {view === "mes" ? (
+        <MonthPicker
+          date={date}
+          onChoose={horizon.setDate}
+          caption={(day) => {
+            const count = classesFor(day).length;
+            if (day.getDay() === 0 || day.getDay() === 6) return "Libre";
+            if (!isInTerm(day)) return "—";
+            return count ? `${count} clases` : "—";
+          }}
+        />
+      ) : null}
+
+      <div data-day-panel className={view === "semana" ? "mt-4 grid gap-3 xl:grid-cols-7" : "mt-4"}>
+        {(view === "semana" ? week : [date]).map((day) => (
+          <DayColumn key={toIso(day)} date={day} />
         ))}
       </div>
       <p className="sr-only">
-        Periodo {TERM_START.toLocaleDateString("es")} a {TERM_END.toLocaleDateString("es")}. Días con clase en la semana:{" "}
-        {inside.length}.
+        Periodo {TERM_START.toLocaleDateString("es")} a {TERM_END.toLocaleDateString("es")}.
       </p>
     </div>
   );
@@ -91,7 +70,7 @@ function DayColumn({ date }: { date: Date }) {
   const title = `${DOW_LONG[dow].replace(/^./, (letter) => letter.toUpperCase())} ${date.getDate()}`;
 
   return (
-    <section className="min-w-0 rounded-row border border-line bg-ink-2 p-3">
+    <section data-rise className="min-w-0 rounded-row border border-line bg-ink-2 p-3">
       <button type="button" onClick={() => modals.openDay(iso)} className="w-full text-left">
         <p className="text-[0.62rem] font-medium uppercase tracking-wide text-muted">{WEEK_LETTERS[(dow + 6) % 7]}</p>
         <h2 className="font-display text-base leading-tight tracking-tight text-[var(--color-mark)]">{title}</h2>
@@ -101,7 +80,7 @@ function DayColumn({ date }: { date: Date }) {
           {holiday}. Puede suspender la clase. Confirma con la universidad.
         </p>
       ) : null}
-      {weekend ? <p className="mt-3 text-sm text-muted">Sin clases.</p> : null}
+      {weekend ? <p className="mt-3 text-sm text-muted">Sin clases y sin trabajo.</p> : null}
       {!weekend && !isInTerm(date) ? (
         <p className="mt-3 text-sm text-muted">
           {date < TERM_START ? "Antes del 6 de octubre no hay clases." : "Después del 2 de febrero de 2027 no hay clases."}

@@ -61,3 +61,6 @@ Las fotografías de comida están en Wikimedia Commons. Algunas de ejercicio vie
 - Press de pecho en máquina — Pexels, Licencia Pexels. https://www.pexels.com/photo/muscular-man-exercising-with-shoulder-press-machine-in-gym-3837293/
 - Aperturas en pec deck — Pexels, Licencia Pexels. https://www.pexels.com/photo/man-training-at-gym-on-chest-fly-machine-14616295/
 - Silla romana — Julia Larson, Licencia Pexels. https://www.pexels.com/photo/black-sportsman-doing-abs-exercises-on-machine-6455947/
+
+
+Fotos de mujer que se dejaron de usar (el ejercicio pasa a la figura 3D, sin foto): extensión de tríceps sobre la cabeza, plancha lateral (dos archivos), dead bug, crunch en el suelo, elevación de piernas, giro de tronco, banda elástica y brazos abiertos. No se sustituyeron por fotos nuevas.

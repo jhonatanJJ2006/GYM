@@ -571,8 +571,23 @@ const BY_NAME: Record<string, Photo> = {
   ),
 };
 
-export function exercisePhoto(pose: PoseId, name?: string): Photo {
+/** Fotos de mujer que ya no se usan. El hueco cae en la figura 3D. */
+const DROPPED_POSES = new Set<PoseId>([
+  "overhead",
+  "kickback",
+  "side-plank",
+  "side-hip",
+  "deadbug",
+  "crunch",
+  "leg-raise",
+  "twist",
+  "band",
+  "circles",
+]);
+
+export function exercisePhoto(pose: PoseId, name?: string): Photo | null {
   if (name && BY_NAME[name]) return BY_NAME[name];
+  if (DROPPED_POSES.has(pose)) return null;
   return exercises[pose];
 }
 
