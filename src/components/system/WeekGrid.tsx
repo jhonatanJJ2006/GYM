@@ -289,7 +289,9 @@ function agendaTimes(item: TimelineItem): { start: string; end: string | null } 
 function agendaLabel(item: TimelineItem): string {
   if (item.kind === "clase") return item.block.name;
   if (item.kind === "trabajo") return "Trabajo";
-  if (item.kind === "gym") return item.session.title;
+  if (item.kind === "gym") {
+    return item.conflicts.length ? `${item.session.title} · ${item.conflicts.join(" · ")}` : item.session.title;
+  }
   return item.meal.role;
 }
 

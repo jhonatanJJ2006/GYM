@@ -34,8 +34,8 @@ export function WeekPage() {
       />
 
       <p className="mt-3 text-sm font-semibold text-cream">
-        Semana {cycleWeek(date)} del ciclo. El jueves de esta semana es hombro + {focus}. Gym entre semana 18:00–19:15;
-        el jueves 19:15–20:30; sábado y domingo abdomen 10:00–11:00.
+        Semana {cycleWeek(date)} del ciclo. El jueves de esta semana es hombro + {focus}. Gym lunes, jueves y viernes 07:00–09:00;
+        martes y miércoles 18:00–19:15; sábado y domingo abdomen 10:00–11:00.
       </p>
 
       {view === "mes" ? (

@@ -2,7 +2,7 @@ import { classesFor, type ClassBlock } from "../data/courses.ts";
 import { HOLIDAYS } from "../data/holidays.ts";
 import { MEALS, type Meal, type MealDay } from "../data/meals.ts";
 import { sessionFor, type Session } from "../data/sessions.ts";
-import { cycleWeek, isInTerm, toIso } from "./dates.ts";
+import { TERM_START, cycleWeek, isInTerm, toIso } from "./dates.ts";
 import { classInterval, parseClock, spanInterval, type Interval } from "./time.ts";
 
 const DAY_START = 7 * 60;
@@ -16,7 +16,7 @@ const MEAL_HOLD = 25;
 export type TimelineItem =
   | { kind: "clase"; start: number; block: ClassBlock }
   | { kind: "trabajo"; start: number; end: number }
-  | { kind: "gym"; start: number; end: number; session: Session }
+  | { kind: "gym"; start: number; end: number; session: Session; conflicts: string[] }
   | { kind: "comida"; start: number; meal: Meal };
 
 export type DayPlan = {
@@ -30,6 +30,8 @@ export type DayPlan = {
   workMinutes: number;
   meals: MealDay;
   holiday: string | null;
+  /** Avisos "Choca con ..." cuando el gym pisa una clase que se mantiene en la malla. */
+  gymConflicts: string[];
   banners: string[];
   items: TimelineItem[];
 };
@@ -105,14 +107,27 @@ export function workBlocksFor(date: Date): Interval[] {
   return blocks;
 }
 
-function bannersFor(date: Date, holiday: string | null): string[] {
+const TYPE_LABEL = { DOCENCIA: "docencia", "TUTORÍA": "tutoría", "PRÁCTICA": "práctica" } as const;
+
+/** Clases que se cruzan con el gym. No se borran: se muestran con un aviso. */
+export function gymConflictsFor(date: Date): string[] {
+  const gym = spanInterval(sessionFor(date).time);
+  return classesFor(date)
+    .filter((block) => overlaps(gym, classInterval(block.start, block.end)))
+    .map((block) => {
+      const virtual = block.mode === "distancia" ? " virtual" : "";
+      return `Choca con ${block.name} (${TYPE_LABEL[block.type]}${virtual} ${block.start}–${block.end})`;
+    });
+}
+
+function bannersFor(date: Date, holiday: string | null, conflicts: string[]): string[] {
   const notes: string[] = [];
   const dow = date.getDay();
   const inTerm = isInTerm(date);
   const weekend = dow === 0 || dow === 6;
 
-  if (!inTerm && date < new Date(2026, 9, 6)) {
-    notes.push("Antes del 6 de octubre no hay clases. El gym sigue el ciclo para que octubre no quede vacío.");
+  if (!inTerm && date < TERM_START) {
+    notes.push("Antes del lunes 5 de octubre no hay clases. El gym sigue el ciclo para que octubre no quede vacío.");
   } else if (!inTerm) {
     notes.push(
       "Después del 2 de febrero de 2027 no hay clases. Si sigues entrenando, el ciclo de 4 semanas continúa igual.",
@@ -121,10 +136,16 @@ function bannersFor(date: Date, holiday: string | null): string[] {
 
   if (weekend) {
     notes.push("Fin de semana: sin clases y sin trabajo. Abdomen 10:00–11:00. El post-entreno queda a las 11:15.");
-  } else if (dow === 4) {
+  } else if (dow === 1 || dow === 4 || dow === 5) {
     notes.push(
-      "Jueves: tutorías virtuales 17:00–17:59 y 18:00–18:59. El snack pre-entreno es a las 19:00, no encima de esas tutorías. El gym es 19:15–20:30.",
+      "Gym en la mañana, 07:00–09:00. Pre-entreno ligero 6:15–6:30 en casa; el post-entreno va para llevar (tupper hecho la noche anterior) y se come 9:00–9:20, antes de las clases de las 10:00.",
     );
+  }
+  if (dow === 4 && inTerm) {
+    notes.push("Jueves: tutorías virtuales 9:00–9:59 (Sistemas Operativos), 17:00–17:59 y 18:00–18:59. La cena va a las 19:15.");
+  }
+  for (const conflict of conflicts) {
+    notes.push(`${conflict}: el gym 07:00–09:00 se mantiene y la clase sigue en la malla. Decide tú cómo cubrirla.`);
   }
 
   if (holiday) {
@@ -143,11 +164,12 @@ export function buildDay(date: Date): DayPlan {
   const work = workBlocksFor(date);
   const meals = MEALS[dow];
   const holiday = HOLIDAYS[toIso(date)] ?? null;
+  const gymConflicts = gymConflictsFor(date);
 
   const items: TimelineItem[] = [
     ...classes.map((block) => ({ kind: "clase" as const, start: parseClock(block.start), block })),
     ...work.map((block) => ({ kind: "trabajo" as const, start: block.start, end: block.end })),
-    { kind: "gym" as const, start: gym.start, end: gym.end, session },
+    { kind: "gym" as const, start: gym.start, end: gym.end, session, conflicts: gymConflicts },
     ...meals.items.map((meal) => ({ kind: "comida" as const, start: parseClock(meal.time), meal })),
   ];
   items.sort((a, b) => a.start - b.start || KIND_ORDER[a.kind] - KIND_ORDER[b.kind]);
@@ -163,7 +185,8 @@ export function buildDay(date: Date): DayPlan {
     workMinutes: work.reduce((sum, block) => sum + (block.end - block.start), 0),
     meals,
     holiday,
-    banners: bannersFor(date, holiday),
+    gymConflicts,
+    banners: bannersFor(date, holiday, gymConflicts),
     items,
   };
 }

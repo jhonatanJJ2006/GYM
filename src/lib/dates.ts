@@ -26,7 +26,7 @@ export const DOW_LONG = [
 /** Encabezados de lunes a domingo. */
 export const WEEK_LETTERS = ["L", "M", "X", "J", "V", "S", "D"] as const;
 
-export const TERM_START = new Date(2026, 9, 6);
+export const TERM_START = new Date(2026, 9, 5);
 export const TERM_END = new Date(2027, 1, 2);
 export const RANGE_START = new Date(2026, 9, 1);
 export const RANGE_END = new Date(2027, 1, 28);
@@ -135,7 +135,7 @@ export function mondayOnOrBefore(date: Date): Date {
   return addDays(dateOnly(date), -((date.getDay() + 6) % 7));
 }
 
-/** Semanas del periodo de clases, de la semana del 6 oct a la del 2 feb. */
+/** Semanas del periodo de clases, de la semana del 5 oct a la del 2 feb. */
 export function termWeeks(): Date[][] {
   return weeksFromMondays(mondayOnOrBefore(TERM_START), mondayOnOrBefore(TERM_END));
 }
