@@ -131,8 +131,8 @@ export function CalendarPage() {
             aria-selected={view === id}
             onClick={() => setView(id)}
             className={cn(
-              "min-h-9 rounded-row text-sm font-medium",
-              view === id ? "bg-accent font-semibold text-[var(--color-accent-ink)] shadow-lg shadow-accent/30" : "text-muted",
+              "min-h-9 rounded-lg border text-xs font-medium transition-colors",
+              view === id ? "border-accent/40 bg-panel-2 font-semibold text-accent" : "border-transparent text-muted hover:text-cream",
             )}
           >
             {label}
@@ -186,8 +186,8 @@ export function CalendarPage() {
                 aria-pressed={on}
                 onClick={() => setKinds((current) => ({ ...current, [filter.id]: !current[filter.id] }))}
                 className={cn(
-                  "min-h-9 rounded-row text-xs font-medium",
-                  on ? "bg-accent font-semibold text-[var(--color-accent-ink)] shadow-lg shadow-accent/30" : "text-muted",
+                  "min-h-9 rounded-full border text-xs font-medium transition-colors",
+                  on ? "border-accent/40 bg-panel-2 text-cream" : "border-line bg-panel text-muted hover:text-cream",
                 )}
               >
                 {filter.label}

@@ -372,7 +372,7 @@ export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boole
                   <span className="text-[0.68rem] font-medium uppercase tracking-wider text-muted">{KIND_NAME[item.kind]} · {when}</span>
                   {clash ? (
                     <span className="mt-1 inline-flex w-fit items-center gap-1 rounded-full border border-amber-400/40 bg-red-500/15 px-2 py-0.5 text-[0.68rem] font-bold text-amber-300">
-                      ⚠ Choca con {plan!.gymConflicts.join(", ")}
+                      Aviso: Choca con {plan!.gymConflicts.join(", ")}
                     </span>
                   ) : null}
                 </button>
