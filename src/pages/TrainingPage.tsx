@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { GuidedWorkout } from "../components/Extras.tsx";
+import { IconPlay } from "../components/Icons.tsx";
+import { EMPTY_TRAINING, KEYS, useStored } from "../lib/store.ts";
+import { isoWeek } from "../lib/progress.ts";
+import { formatLong } from "../lib/dates.ts";
 import { PageIntro } from "../components/Brand.tsx";
 import { CoachView } from "../components/CoachView.tsx";
 import { useModals } from "../components/Modals.tsx";
@@ -9,7 +14,6 @@ import { ANCHOR_MON, DOW_LONG, toIso } from "../lib/dates.ts";
 import { useStagger } from "../components/Motion.tsx";
 import { cn } from "../lib/utils.ts";
 
-const STORAGE_KEY = "hierro.entreno.checks";
 
 const GROUPS: Record<SessionId, { label: string; from: number; to: number }[]> = {
   push: [
@@ -41,21 +45,6 @@ const GROUPS: Record<SessionId, { label: string; from: number; to: number }[]> =
   absB: [{ label: "Oblicuos", from: 0, to: 5 }],
 };
 
-function readChecks(): Record<string, boolean> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object") return {};
-    const checks: Record<string, boolean> = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (typeof value === "boolean") checks[key] = value;
-    }
-    return checks;
-  } catch {
-    return {};
-  }
-}
 
 function CardMedia({ pose }: { pose: PoseId; name: string }) {
   return (
@@ -70,29 +59,40 @@ export function TrainingPage() {
   const horizon = useHorizon(ANCHOR_MON);
   const staggerRef = useStagger<HTMLDivElement>(`${horizon.view}-${toIso(horizon.date)}`);
   const day = horizon.date;
-  const [checks, setChecks] = useState(readChecks);
+  const [checks, setChecks] = useStored(KEYS.training, EMPTY_TRAINING);
+  const [guided, setGuided] = useState(false);
+  const [today] = useState(() => new Date());
   const session = sessionFor(day);
   const iso = toIso(day);
   const groups = GROUPS[session.id];
   const doneCount = session.exercises.filter((exercise) => checks[`${iso}:${exercise.id}`]).length;
 
-  function toggle(id: string) {
+  function setDone(id: string, value: boolean) {
     const key = `${iso}:${id}`;
-    setChecks((current) => {
-      const next = { ...current, [key]: !current[key] };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
+    setChecks((current) => ({ ...current, [key]: value }));
+  }
+
+  function toggle(id: string) {
+    setDone(id, !checks[`${iso}:${id}`]);
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[42rem]">
+    <div className="mx-auto w-full min-w-0 max-w-[42rem] lg:max-w-none">
       <PageIntro title="Entreno">
         Ciclo de 4 semanas desde el lunes 5 de octubre de 2026 hasta el 2 de febrero de 2027. Lunes pecho y tríceps,
         martes cuádriceps y gemelos, miércoles espalda y bíceps, jueves hombro (tríceps en semanas 1 y 3, bíceps en 2 y
         4), viernes femoral, gemelos y glúteo. Fin de semana, abdomen.
       </PageIntro>
 
+      <div data-rise className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="chip text-accent">Hoy, {formatLong(today)}</span>
+        <span className="chip text-muted">Semana {isoWeek(today)}</span>
+        <button type="button" className="chip text-muted hover:text-cream" onClick={() => horizon.setDate(today)}>
+          Ir a hoy
+        </button>
+      </div>
+      <div className="lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start lg:gap-6">
+      <aside className="min-w-0 lg:sticky lg:top-20">
       <PeriodBar
         label="entreno"
         date={day}
@@ -116,7 +116,7 @@ export function TrainingPage() {
                 onClick={() => horizon.setDate(item)}
                 className={cn(
                   "min-h-14 rounded-row px-0.5 text-center",
-                  on ? "bg-cream text-ink" : "text-muted",
+                  on ? "border border-accent/40 bg-panel-2 text-accent" : "border border-line bg-panel text-muted",
                 )}
               >
                 <span className="block text-[0.62rem] font-semibold">{DOW_LONG[item.getDay()].slice(0, 3)}</span>
@@ -141,16 +141,21 @@ export function TrainingPage() {
         <p className="mt-3 text-sm font-semibold">
           Hechos {doneCount} de {session.exercises.length}
         </p>
+        <button type="button" onClick={() => setGuided(true)} className="btn-accent mt-4 inline-flex w-full items-center justify-center gap-2">
+          <IconPlay className="size-4" /> Iniciar entreno guiado
+        </button>
       </article>
+      <GuidedWorkout open={guided} onClose={() => setGuided(false)} session={session} iso={iso} checks={checks} onDone={setDone} />
 
-      <div ref={staggerRef}>
+      </aside>
+      <div ref={staggerRef} className="min-w-0">
 
       {groups.map((group) => {
         const exercises = session.exercises.slice(group.from, group.to);
         return (
           <section key={group.label} data-day-panel className="mt-6 min-w-0">
             <h3 className="display-title mb-2 break-words text-2xl">{group.label}</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
               {exercises.map((exercise) => {
                 const index = session.exercises.indexOf(exercise);
                 const checked = Boolean(checks[`${iso}:${exercise.id}`]);
@@ -200,6 +205,7 @@ export function TrainingPage() {
           </section>
         );
       })}
+      </div>
       </div>
     </div>
   );

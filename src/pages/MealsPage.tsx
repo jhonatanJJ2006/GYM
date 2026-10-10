@@ -3,7 +3,10 @@ import { PageIntro } from "../components/Brand.tsx";
 import { useModals } from "../components/Modals.tsx";
 import { MonthPicker, PeriodBar, useHorizon } from "../components/PeriodBar.tsx";
 import { Expand, useStagger } from "../components/Motion.tsx";
-import { MealThumb } from "../components/system/Thumbnail.tsx";
+import { Bar } from "../components/Extras.tsx";
+import { mealPhoto } from "../data/photos.ts";
+import { intakeFor } from "../lib/progress.ts";
+import { EMPTY_MEALS, KEYS, useStored } from "../lib/store.ts";
 import { Button } from "../components/ui/button.tsx";
 import { MEALS, mealWhen, type Meal } from "../data/meals.ts";
 import { DISCLAIMER, KCAL_INTRO, KCAL_POINTS, PROFILE, SHOPPING, SHOPPING_NOTE } from "../data/nutrition.ts";
@@ -30,6 +33,16 @@ export function MealsPage() {
   const horizon = useHorizon();
   const [checks, setChecks] = useState<boolean[]>(readChecks);
   const done = checks.filter(Boolean).length;
+  const [eatenLog, setEatenLog] = useStored(KEYS.meals, EMPTY_MEALS);
+  const intake = intakeFor(horizon.date, eatenLog);
+  function toggleEaten(iso: string, index: number) {
+    setEatenLog((current) => {
+      const list = new Set(current[iso] ?? []);
+      if (list.has(index)) list.delete(index);
+      else list.add(index);
+      return { ...current, [iso]: [...list].sort((a, b) => a - b) };
+    });
+  }
   const shown = horizon.view === "semana" ? horizon.week : [horizon.date];
   const listRef = useStagger<HTMLDivElement>(`${horizon.view}-${toIso(horizon.date)}`);
 
@@ -58,6 +71,33 @@ export function MealsPage() {
           <dd className="mt-1 font-display text-2xl leading-none text-[var(--color-mark)]">~{PROFILE.bmi}</dd>
         </div>
       </dl>
+
+      <section data-rise className="mt-3 rounded-xl border border-line bg-panel p-4" aria-label="Consumo del día">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+            Consumido el {DOW_LONG[horizon.date.getDay()]} {horizon.date.getDate()}
+          </p>
+          <p className="text-xs text-muted">
+            {intake.eaten} de {intake.planned} comidas marcadas
+          </p>
+        </div>
+        <div className="mt-2 grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="font-display text-3xl font-extrabold tabular-nums">
+              {intake.kcal}
+              <span className="text-sm font-semibold text-muted"> / {intake.targetKcal} kcal</span>
+            </p>
+            <div className="mt-2"><Bar value={intake.kcal} max={intake.targetKcal} label="Kcal consumidas" /></div>
+          </div>
+          <div>
+            <p className="font-display text-3xl font-extrabold tabular-nums">
+              {intake.protein}
+              <span className="text-sm font-semibold text-muted"> / {intake.targetProtein} g proteína</span>
+            </p>
+            <div className="mt-2"><Bar value={intake.protein} max={intake.targetProtein} color="bg-rail-meal" label="Proteína consumida" /></div>
+          </div>
+        </div>
+      </section>
 
       <PeriodBar
         label="comidas"
@@ -88,10 +128,10 @@ export function MealsPage() {
                 <p className="text-sm font-semibold text-cream/85">
                   {DOW_LONG[itemDow].replace(/^./, (letter) => letter.toUpperCase())} {item.getDate()} · ~{menu.total}
                 </p>
-                <ul className="mt-2 space-y-2">
+                <ul className={cn("mt-2 space-y-2", horizon.view !== "semana" && "lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0 2xl:grid-cols-3")}>
                   {menu.items.map((meal, index) => (
                     <li key={`${toIso(item)}-${meal.time}-${meal.role}`} data-stagger>
-                      <MealCard meal={meal} onOpen={() => modals.openMeal(itemDow, index)} />
+                      <MealCard meal={meal} eaten={(eatenLog[toIso(item)] ?? []).includes(index)} onEaten={() => toggleEaten(toIso(item), index)} onOpen={() => modals.openMeal(itemDow, index)} />
                     </li>
                   ))}
                 </ul>
@@ -101,6 +141,7 @@ export function MealsPage() {
         </div>
       </section>
 
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
       <section data-rise className="mt-8">
         <h2 className="display-title text-2xl">De dónde salen las 2800 kcal</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">{KCAL_INTRO}</p>
@@ -154,27 +195,32 @@ export function MealsPage() {
           ))}
         </ul>
       </section>
+      </div>
 
       <p className="mt-6 text-sm leading-relaxed text-muted">{DISCLAIMER}</p>
     </div>
   );
 }
 
-function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
+function MealCard({ meal, onOpen, eaten, onEaten }: { meal: Meal; onOpen: () => void; eaten: boolean; onEaten: () => void }) {
+  const photo = mealPhoto(meal.ingredients);
   const [open, setOpen] = useState(false);
   const takeaway = /para llevar/i.test(meal.role);
   return (
-    <article className="card overflow-hidden border-l-4 border-l-[#ff9f43] p-3">
-      <div className="flex items-start gap-3">
-        <button type="button" onClick={onOpen} className="shrink-0" aria-label={`Ver ${meal.role}`}>
-          <MealThumb ingredients={meal.ingredients} />
-        </button>
+    <article className={cn("card overflow-hidden", eaten && "border-rail-meal/50")}>
+      <button type="button" onClick={onOpen} className="relative block aspect-[16/9] w-full overflow-hidden bg-panel-2" aria-label={`Ver ${meal.role}`}>
+        <img src={photo.src} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+        <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <span className="absolute left-3 top-3 rounded-full border border-rail-meal/40 bg-ink/80 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-rail-meal">Comida</span>
+        <span className="absolute right-3 top-3 rounded border border-line bg-ink/80 px-2 py-0.5 text-xs font-semibold tabular-nums text-cream">{meal.time}</span>
+      </button>
+      <div className="flex items-start gap-3 p-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={onOpen} className="min-w-0 break-words text-left text-sm font-bold leading-snug text-cream">
               {meal.role}
             </button>
-            {takeaway ? <span className="chip chip-sky">🥡 Para llevar</span> : null}
+            {takeaway ? <span className="chip chip-sky">Para llevar</span> : null}
           </div>
           <p className="mt-0.5 text-xs text-muted">{mealWhen(meal)}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -182,7 +228,12 @@ function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
             <span className="chip chip-lime">{meal.protein} g proteína</span>
           </div>
         </div>
+        <label className="flex shrink-0 cursor-pointer flex-col items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted">
+          <input type="checkbox" checked={eaten} onChange={onEaten} className="size-6 accent-[var(--color-rail-meal)]" aria-label={eaten ? `Desmarcar ${meal.role}` : `Marcar ${meal.role} como comida`} />
+          {eaten ? "Hecha" : "Marcar"}
+        </label>
       </div>
+      <div className="px-3 pb-3">
       <button
         type="button"
         aria-expanded={open}
@@ -195,7 +246,7 @@ function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
       <Expand open={open}>
         <div className="grid gap-3 pt-3 text-sm sm:grid-cols-2">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#c6ff3d]">Ingredientes</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#f0b08a]">Ingredientes</p>
             <ul className="mt-1 list-disc space-y-0.5 pl-4 text-cream/85">
               {meal.ingredients.map((entry) => (
                 <li key={entry}>{entry}</li>
@@ -203,7 +254,7 @@ function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
             </ul>
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#c6ff3d]">Pasos</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#f0b08a]">Pasos</p>
             <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-cream/85">
               {meal.steps.map((entry) => (
                 <li key={entry}>{entry}</li>
@@ -212,6 +263,7 @@ function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
           </div>
         </div>
       </Expand>
+      </div>
     </article>
   );
 }

@@ -4,6 +4,9 @@ import { PageIntro } from "../components/Brand.tsx";
 import { Legend } from "../components/Legend.tsx";
 import { DayAgenda, WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
 import { Button } from "../components/ui/button.tsx";
+import { IconCalendar } from "../components/Icons.tsx";
+import { NewEventButton } from "../components/Extras.tsx";
+import { isoWeek } from "../lib/progress.ts";
 import {
   MONTHS,
   WEEK_LETTERS,
@@ -111,10 +114,27 @@ export function CalendarPage() {
   }
 
   const active = FILTERS.filter((item) => kinds[item.id]);
+  const wide = view === "semana" && !narrow;
 
   return (
     <div>
       <PageIntro title="Calendario">Día, semana o mes · 1 oct – 28 feb</PageIntro>
+
+      <div data-rise className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="chip text-muted">Semana {isoWeek(today)}</span>
+        <button
+          type="button"
+          disabled={!isInRange(today)}
+          onClick={() => choose(new Date(today.getFullYear(), today.getMonth(), today.getDate()))}
+          className={cn("chip transition-colors hover:text-cream disabled:opacity-40", isSameDay(cursor, today) ? "border-accent/40 text-accent" : "text-muted")}
+        >
+          Hoy
+        </button>
+        <NewEventButton iso={toIso(cursor)} className="ml-auto min-h-9 rounded-full px-3.5 text-xs" />
+      </div>
+
+      <div className={cn("lg:items-start lg:gap-6", wide ? "lg:block" : "lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]")}>
+      <aside className={cn("min-w-0", wide ? "lg:mb-4 lg:flex lg:flex-wrap lg:items-center lg:gap-4 lg:[&>*]:mb-0" : "lg:sticky lg:top-20")}>
 
       <div className="card mb-3 grid grid-cols-3 gap-1 p-1" role="tablist" aria-label="Vista del calendario">
         {(
@@ -131,8 +151,8 @@ export function CalendarPage() {
             aria-selected={view === id}
             onClick={() => setView(id)}
             className={cn(
-              "min-h-9 rounded-row text-sm font-medium",
-              view === id ? "bg-accent font-semibold text-[var(--color-accent-ink)] shadow-lg shadow-accent/30" : "text-muted",
+              "min-h-9 rounded-lg border text-xs font-medium transition-colors",
+              view === id ? "border-accent/40 bg-panel-2 font-semibold text-accent" : "border-transparent text-muted hover:text-cream",
             )}
           >
             {label}
@@ -140,10 +160,20 @@ export function CalendarPage() {
         ))}
       </div>
 
-      <label className="card mb-3 flex items-center justify-between gap-3 px-3 py-2 text-sm">
-        <span className="text-muted">Ir a un día</span>
+      <div className="mb-3 flex justify-end lg:justify-start">
+      <label className="relative inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-line bg-panel px-3 text-xs font-medium text-muted transition-colors hover:border-accent/50 hover:text-cream">
+        <IconCalendar className="size-4" />
+        <span>Ir a un día</span>
         <input
           type="date"
+          aria-label="Ir a un día"
+          onClick={(event) => {
+            try {
+              event.currentTarget.showPicker?.();
+            } catch {
+              /* el navegador abre su selector propio */
+            }
+          }}
           value={toIso(cursor)}
           min={toIso(RANGE_START)}
           max={toIso(RANGE_END)}
@@ -151,13 +181,14 @@ export function CalendarPage() {
             if (!event.target.value) return;
             choose(parseIso(event.target.value));
           }}
-          className="min-h-10 rounded-row border border-line bg-ink px-2 text-cream"
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         />
       </label>
+      </div>
 
-      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6">
+      <div className="sticky top-14 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:bg-transparent lg:px-0">
         <div
-          className="grid grid-cols-4 gap-1"
+          className="no-scrollbar fade-right flex gap-2 overflow-x-auto py-0.5 pr-8 lg:flex-wrap lg:overflow-visible lg:pr-0 lg:[mask-image:none]"
           role="group"
           aria-label="Filtros del calendario"
           onKeyDown={(event) => {
@@ -177,6 +208,17 @@ export function CalendarPage() {
             buttons[next]?.focus();
           }}
         >
+          <button
+            type="button"
+            aria-pressed={active.length === FILTERS.length}
+            onClick={() => setKinds({ clase: true, trabajo: true, gym: true, comida: true })}
+            className={cn(
+              "min-h-9 shrink-0 rounded-full border px-3.5 text-xs font-medium transition-colors",
+              active.length === FILTERS.length ? "border-accent/40 bg-panel-2 text-cream" : "border-line bg-panel text-muted hover:text-cream",
+            )}
+          >
+            Todos
+          </button>
           {FILTERS.map((filter) => {
             const on = kinds[filter.id];
             return (
@@ -186,10 +228,11 @@ export function CalendarPage() {
                 aria-pressed={on}
                 onClick={() => setKinds((current) => ({ ...current, [filter.id]: !current[filter.id] }))}
                 className={cn(
-                  "min-h-9 rounded-row text-xs font-medium",
-                  on ? "bg-accent font-semibold text-[var(--color-accent-ink)] shadow-lg shadow-accent/30" : "text-muted",
+                  "inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium transition-colors",
+                  on ? "border-accent/40 bg-panel-2 text-cream" : "border-line bg-panel text-muted hover:text-cream",
                 )}
               >
+                <span aria-hidden className={cn("size-1.5 rounded-full", filter.dot)} />
                 {filter.label}
               </button>
             );
@@ -197,7 +240,9 @@ export function CalendarPage() {
         </div>
       </div>
 
-      <div className="mb-3 flex items-center justify-between gap-3">
+      </aside>
+      <div className="min-w-0">
+      <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-line bg-panel px-2 py-1.5">
         <Button
           variant="outline"
           size="icon"
@@ -207,7 +252,7 @@ export function CalendarPage() {
         >
           ‹
         </Button>
-        <p className="min-w-0 text-balance text-center font-display text-sm leading-tight tracking-tight text-[var(--color-mark)] sm:text-lg">
+        <p className="min-w-0 text-balance text-center font-display text-[15px] font-bold leading-tight tracking-wide text-cream sm:text-lg">
           {view === "dia"
             ? formatLong(cursor).replace(/^./, (letter) => letter.toUpperCase())
             : view === "mes"
@@ -236,8 +281,20 @@ export function CalendarPage() {
       {view === "semana" && narrow ? (
         <WeekAgenda days={week} kinds={kinds} selected={cursor} onSelect={choose} />
       ) : null}
-      {view === "semana" && !narrow ? (
-        <WeekGrid days={week} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
+      {wide ? (
+        <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_21rem] xl:items-start xl:gap-6">
+          <div className="min-w-0">
+            <WeekGrid days={week} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
+          </div>
+          <aside className="mt-4 min-w-0 rounded-xl border border-line bg-panel p-4 xl:sticky xl:top-20 xl:mt-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">Detalle del día</p>
+            <p className="mb-3 font-display text-lg font-bold">
+              {formatLong(cursor).replace(/^./, (letter) => letter.toUpperCase())}
+              {isSameDay(cursor, today) ? <span className="chip ml-2 align-middle text-accent">Hoy</span> : null}
+            </p>
+            <DayAgenda day={cursor} kinds={kinds} />
+          </aside>
+        </div>
       ) : null}
 
       {view === "mes" ? (
@@ -259,6 +316,8 @@ export function CalendarPage() {
       {active.length === 0 ? (
         <p className="mt-4 rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Activa al menos un tipo para ver el día.</p>
       ) : null}
+      </div>
+      </div>
 
       <details data-rise className="card mt-4">
         <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>

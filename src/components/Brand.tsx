@@ -1,4 +1,7 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { IconBell, IconMenu } from "./Icons.tsx";
+import { MenuDrawer, NotificationsSheet, upcomingToday, useEvents } from "./Extras.tsx";
 import { cn } from "../lib/utils.ts";
 import FluidOrb from "./ui/fluid-orb.tsx";
 
@@ -22,22 +25,45 @@ export function BrandMark({ className }: { className?: string }) {
 }
 
 export function AppHeader() {
+  const [menu, setMenu] = useState(false);
+  const [bell, setBell] = useState(false);
+  const [events] = useEvents();
+  const pending = upcomingToday(new Date(), events).length;
   return (
-    <header data-rise className="mb-6 flex items-center gap-3">
-      <BrandMark className="text-[var(--color-mark)]" />
-      <div className="min-w-0">
-        <p className="font-display text-[1.85rem] leading-none tracking-tight text-[var(--color-mark)]">Hierro</p>
-        <p className="mt-1 text-xs text-muted">Clases, gym y comidas</p>
+    <>
+    <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-line bg-ink px-4 sm:px-6">
+      <div className="flex items-center gap-1">
+        <button type="button" aria-label="Abrir menú" aria-expanded={menu} onClick={() => setMenu(true)} className="grid size-10 place-items-center rounded-lg text-cream transition-colors hover:bg-panel lg:hidden">
+          <IconMenu className="size-[22px]" />
+        </button>
+        <Link to="/" aria-label="Hierro, ir al calendario" className="hidden size-10 place-items-center rounded-lg text-cream transition-colors hover:bg-panel lg:grid">
+          <BrandMark className="size-7 text-accent" />
+        </Link>
+      </div>
+      <p className="font-display text-xl font-extrabold uppercase leading-none tracking-[0.25em] text-cream absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0">Hierro</p>
+      <div className="flex items-center gap-3">
+        <p className="hidden text-xs text-muted sm:block">Clases, gym y comidas</p>
+        <button
+          type="button"
+          aria-label={`Lo que queda hoy: ${pending} bloques`}
+          onClick={() => setBell(true)}
+          className="relative grid size-10 place-items-center rounded-lg text-cream transition-colors hover:bg-panel"
+        >
+          <IconBell className="size-[22px]" />
+          {pending ? <span className="absolute right-1.5 top-1.5 grid min-w-4 place-items-center rounded-full bg-accent px-1 text-[10px] font-bold leading-4 text-accent-ink tabular-nums">{pending}</span> : null}
+        </button>
       </div>
     </header>
+    <MenuDrawer open={menu} onClose={() => setMenu(false)} />
+    <NotificationsSheet open={bell} onClose={() => setBell(false)} />
+    </>
   );
 }
 
 export function PageIntro({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <header data-rise className="mb-6 max-w-xl">
-      <span aria-hidden className="mb-3 block h-1 w-10 rounded-full bg-[#c6ff3d] shadow-[0_0_14px_rgba(198,255,61,0.5)]" />
-      <h1 className="display-title text-4xl sm:text-5xl">{title}</h1>
+            <h1 className="display-title">{title}</h1>
       {children ? <div className="mt-3 text-sm leading-relaxed text-muted">{children}</div> : null}
     </header>
   );
@@ -46,8 +72,8 @@ export function PageIntro({ title, children }: { title: string; children?: React
 export function BrandAtmosphere({ page }: { page: string }) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 h-32 overflow-hidden" aria-hidden="true">
-      <div className="absolute -top-40 right-[-4.5rem] opacity-25 sm:right-[-1rem]">
-        <FluidOrb size={220} color={ORB_COLOR[page] ?? ORB_COLOR.cal} />
+      <div className="absolute -top-44 right-[-6rem] opacity-[0.08] sm:right-[-2rem]">
+        <FluidOrb size={200} color={ORB_COLOR[page] ?? ORB_COLOR.cal} />
       </div>
     </div>
   );
