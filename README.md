@@ -33,3 +33,7 @@ npm run verify
 - Output directory: `dist`
 
 No hace falta un comando de despliegue distinto. Este repositorio no se publica desde aquí.
+
+## Coach 3D
+
+El coach y el equipo son GLB con clips hechos en Blender. Detalle de clips, equipo, origen y licencias en `docs/3d/README.md` y `CREDITS.md`. Los scripts que los generan están en `scripts/3d`.

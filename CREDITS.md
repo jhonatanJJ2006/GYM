@@ -64,3 +64,9 @@ Las fotografías de comida están en Wikimedia Commons. Algunas de ejercicio vie
 
 
 Fotos de mujer que se dejaron de usar (el ejercicio pasa a la figura 3D, sin foto): extensión de tríceps sobre la cabeza, plancha lateral (dos archivos), dead bug, crunch en el suelo, elevación de piernas, giro de tronco, banda elástica y brazos abiertos. No se sustituyeron por fotos nuevas.
+
+# Créditos del 3D
+
+- Coach (`public/models/coach.glb`): personaje Oliver tomado del GLB que ya usaba la app, una escena tipo "Hyper Casual Gym" con cuatro personajes riggeados. El repositorio no guarda su origen ni su licencia. El paquete "Hyper Casual Gym" de Reberu Game Studio en la Unity Asset Store se vende con la licencia estándar de la Unity Asset Store (EULA, una sola entidad) y solo trae utilería, sin personajes, así que no se pudo confirmar de dónde salió Oliver. Hay que confirmar la licencia antes de publicar la app.
+- Animaciones del coach: hechas por script en Blender para este proyecto (`scripts/3d`), sin captura de movimiento de terceros.
+- Equipo (`public/models/gear/*.glb`): modelado por script en Blender para este proyecto. Reemplaza las piezas anteriores (CC0, 3dassets.dev).
