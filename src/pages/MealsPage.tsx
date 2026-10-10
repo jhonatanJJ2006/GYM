@@ -88,7 +88,7 @@ export function MealsPage() {
                 <p className="text-sm font-semibold text-cream/85">
                   {DOW_LONG[itemDow].replace(/^./, (letter) => letter.toUpperCase())} {item.getDate()} · ~{menu.total}
                 </p>
-                <ul className="mt-2 space-y-2">
+                <ul className={cn("mt-2 space-y-2", horizon.view !== "semana" && "lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0 2xl:grid-cols-3")}>
                   {menu.items.map((meal, index) => (
                     <li key={`${toIso(item)}-${meal.time}-${meal.role}`} data-stagger>
                       <MealCard meal={meal} onOpen={() => modals.openMeal(itemDow, index)} />
@@ -101,6 +101,7 @@ export function MealsPage() {
         </div>
       </section>
 
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
       <section data-rise className="mt-8">
         <h2 className="display-title text-2xl">De dónde salen las 2800 kcal</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">{KCAL_INTRO}</p>
@@ -154,6 +155,7 @@ export function MealsPage() {
           ))}
         </ul>
       </section>
+      </div>
 
       <p className="mt-6 text-sm leading-relaxed text-muted">{DISCLAIMER}</p>
     </div>

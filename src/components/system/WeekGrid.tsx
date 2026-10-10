@@ -293,6 +293,11 @@ function agendaLabel(item: TimelineItem): string {
   return item.meal.role;
 }
 
+const CARD_LABEL: Record<Kind, string> = { clase: "Materia", trabajo: "Laboral", gym: "Entrenamiento", comida: "Comida" };
+const CARD_TEXT: Record<Kind, string> = { clase: "text-rail-class", trabajo: "text-rail-work", gym: "text-rail-gym", comida: "text-rail-meal" };
+const CARD_BORDER: Record<Kind, string> = { clase: "border-rail-class/20", trabajo: "border-rail-work/20", gym: "border-rail-gym/20", comida: "border-rail-meal/20" };
+const CARD_BG: Record<Kind, string> = { clase: "bg-block-class/45", trabajo: "bg-block-work/45", gym: "bg-block-gym/45", comida: "bg-block-meal/45" };
+
 export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boolean> }) {
   const modals = useModals();
   const plan = isInRange(day) ? buildDay(day) : null;
@@ -339,47 +344,58 @@ export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boole
       {items.length === 0 ? (
         <p className="rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Nada con estos filtros.</p>
       ) : (
-        <ol ref={listRef} className="relative space-y-3 pl-1" onKeyDown={onKey}>
-          <span aria-hidden className="pointer-events-none absolute bottom-2 left-[4.6rem] top-2 w-px bg-gradient-to-b from-white/5 via-white/15 to-white/5" />
+        <>
+        <div data-rise className="mb-3 flex items-end justify-between gap-3 rounded-xl border border-line bg-panel px-4 py-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">Primer bloque</p>
+            <p className="font-display text-5xl font-extrabold leading-none tabular-nums text-cream">{agendaTimes(items[0]!).start}</p>
+          </div>
+          <p className="pb-1 text-right text-xs text-muted">
+            {items.length} {items.length === 1 ? "bloque" : "bloques"}
+            <span className="block truncate text-cream/85">{agendaLabel(items[0]!)}</span>
+          </p>
+        </div>
+        <ol ref={listRef} className="space-y-3" onKeyDown={onKey}>
           {items.map((item, index) => {
             const times = agendaTimes(item);
             const label = agendaLabel(item);
             const thumb = itemThumb(item);
-            const when = times.end ? `${times.start} a ${times.end}` : times.start;
+            const when = times.end ? `${times.start} – ${times.end}` : times.start;
             const clash = item.kind === "gym" && plan!.gymConflicts.length > 0;
             return (
-              <li key={`${item.kind}-${item.start}-${index}`} data-tl className="relative grid min-w-0 grid-cols-[4.25rem_minmax(0,1fr)] items-start gap-3">
-                <p className="pt-2 text-right font-display text-xs tabular-nums leading-tight text-[var(--color-mark)]">
-                  <span className="block text-sm font-bold text-cream">{times.start}</span>
-                  {times.end ? <span className="mt-0.5 block text-muted">{times.end}</span> : null}
-                </p>
-                <span aria-hidden className={cn("absolute left-[4.6rem] top-3 size-2.5 -translate-x-1/2 rounded-full ring-4 ring-[var(--color-ink,#0b0b0d)]", `tl-dot-${item.kind}`)} />
+              <li key={`${item.kind}-${item.start}-${index}`} data-tl className="min-w-0">
                 <button
                   type="button"
                   data-block
                   className={cn(
-                    "tl-block week-block flex min-h-12 min-w-0 flex-col items-stretch gap-1 rounded-2xl border border-white/5 px-3 py-2.5 text-left text-cream",
-                    `tl-${item.kind}`,
+                    "week-block relative flex w-full min-w-0 items-start justify-between gap-3 overflow-hidden rounded-xl border border-line py-3 pl-4 pr-3.5 text-left text-cream transition-transform active:scale-[0.99]",
+                    CARD_BG[item.kind],
                     clash && "ring-1 ring-red-500/60",
                   )}
                   aria-label={`${formatLong(day)}, ${label}, ${when}`}
                   onClick={() => openItem(modals, plan!.iso, plan!, item)}
                 >
-                  <span className="flex min-w-0 items-start gap-2">
-                    {thumb ? <img src={thumb} alt="" className="mt-0.5 size-5 shrink-0 rounded-md object-cover" /> : null}
-                    <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-snug">{label}</span>
-                  </span>
-                  <span className="text-[0.68rem] font-medium uppercase tracking-wider text-muted">{KIND_NAME[item.kind]} · {when}</span>
-                  {clash ? (
-                    <span className="mt-1 inline-flex w-fit items-center gap-1 rounded-full border border-amber-400/40 bg-red-500/15 px-2 py-0.5 text-[0.68rem] font-bold text-amber-300">
-                      Aviso: Choca con {plan!.gymConflicts.join(", ")}
+                  <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", `tl-dot-${item.kind}`)} />
+                  <span className="min-w-0 space-y-0.5">
+                    <span className={cn("block text-[11px] font-semibold uppercase tracking-wider", CARD_TEXT[item.kind])}>{CARD_LABEL[item.kind]}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      {thumb ? <img src={thumb} alt="" className="size-5 shrink-0 rounded-md object-cover" /> : null}
+                      <span className="min-w-0 break-words font-display text-base font-bold leading-snug">{label}</span>
                     </span>
-                  ) : null}
+                    <span className="block text-xs text-muted">{KIND_NAME[item.kind]}</span>
+                    {clash ? (
+                      <span className="mt-1 inline-flex w-fit items-center gap-1 rounded-full border border-amber-400/40 bg-red-500/15 px-2 py-0.5 text-[0.68rem] font-bold text-amber-300">
+                        Aviso: Choca con {plan!.gymConflicts.join(", ")}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className={cn("shrink-0 rounded border bg-ink/50 px-2 py-1 text-xs font-medium tabular-nums", CARD_TEXT[item.kind], CARD_BORDER[item.kind])}>{when}</span>
                 </button>
               </li>
             );
           })}
         </ol>
+        </>
       )}
     </div>
   );

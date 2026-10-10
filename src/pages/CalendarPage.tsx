@@ -4,6 +4,7 @@ import { PageIntro } from "../components/Brand.tsx";
 import { Legend } from "../components/Legend.tsx";
 import { DayAgenda, WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
 import { Button } from "../components/ui/button.tsx";
+import { IconCalendar } from "../components/Icons.tsx";
 import {
   MONTHS,
   WEEK_LETTERS,
@@ -116,6 +117,9 @@ export function CalendarPage() {
     <div>
       <PageIntro title="Calendario">Día, semana o mes · 1 oct – 28 feb</PageIntro>
 
+      <div className="lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start lg:gap-6">
+      <aside className="min-w-0 lg:sticky lg:top-20">
+
       <div className="card mb-3 grid grid-cols-3 gap-1 p-1" role="tablist" aria-label="Vista del calendario">
         {(
           [
@@ -140,10 +144,20 @@ export function CalendarPage() {
         ))}
       </div>
 
-      <label className="card mb-3 flex items-center justify-between gap-3 px-3 py-2 text-sm">
-        <span className="text-muted">Ir a un día</span>
+      <div className="mb-3 flex justify-end lg:justify-start">
+      <label className="relative inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-full border border-line bg-panel px-3 text-xs font-medium text-muted transition-colors hover:border-accent/50 hover:text-cream">
+        <IconCalendar className="size-4" />
+        <span>Ir a un día</span>
         <input
           type="date"
+          aria-label="Ir a un día"
+          onClick={(event) => {
+            try {
+              event.currentTarget.showPicker?.();
+            } catch {
+              /* el navegador abre su selector propio */
+            }
+          }}
           value={toIso(cursor)}
           min={toIso(RANGE_START)}
           max={toIso(RANGE_END)}
@@ -151,13 +165,14 @@ export function CalendarPage() {
             if (!event.target.value) return;
             choose(parseIso(event.target.value));
           }}
-          className="min-h-10 rounded-row border border-line bg-ink px-2 text-cream"
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
         />
       </label>
+      </div>
 
-      <div className="sticky top-0 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6">
+      <div className="sticky top-14 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:bg-transparent lg:px-0">
         <div
-          className="grid grid-cols-4 gap-1"
+          className="no-scrollbar flex gap-2 overflow-x-auto py-0.5 lg:flex-wrap lg:overflow-visible"
           role="group"
           aria-label="Filtros del calendario"
           onKeyDown={(event) => {
@@ -177,6 +192,17 @@ export function CalendarPage() {
             buttons[next]?.focus();
           }}
         >
+          <button
+            type="button"
+            aria-pressed={active.length === FILTERS.length}
+            onClick={() => setKinds({ clase: true, trabajo: true, gym: true, comida: true })}
+            className={cn(
+              "min-h-9 shrink-0 rounded-full border px-3.5 text-xs font-medium transition-colors",
+              active.length === FILTERS.length ? "border-accent/40 bg-panel-2 text-cream" : "border-line bg-panel text-muted hover:text-cream",
+            )}
+          >
+            Todos
+          </button>
           {FILTERS.map((filter) => {
             const on = kinds[filter.id];
             return (
@@ -186,10 +212,11 @@ export function CalendarPage() {
                 aria-pressed={on}
                 onClick={() => setKinds((current) => ({ ...current, [filter.id]: !current[filter.id] }))}
                 className={cn(
-                  "min-h-9 rounded-full border text-xs font-medium transition-colors",
+                  "inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-xs font-medium transition-colors",
                   on ? "border-accent/40 bg-panel-2 text-cream" : "border-line bg-panel text-muted hover:text-cream",
                 )}
               >
+                <span aria-hidden className={cn("size-1.5 rounded-full", filter.dot)} />
                 {filter.label}
               </button>
             );
@@ -197,7 +224,9 @@ export function CalendarPage() {
         </div>
       </div>
 
-      <div className="mb-3 flex items-center justify-between gap-3">
+      </aside>
+      <div className="min-w-0">
+      <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-line bg-panel px-2 py-1.5">
         <Button
           variant="outline"
           size="icon"
@@ -207,7 +236,7 @@ export function CalendarPage() {
         >
           ‹
         </Button>
-        <p className="min-w-0 text-balance text-center font-display text-sm leading-tight tracking-tight text-[var(--color-mark)] sm:text-lg">
+        <p className="min-w-0 text-balance text-center font-display text-[15px] font-bold leading-tight tracking-wide text-cream sm:text-lg">
           {view === "dia"
             ? formatLong(cursor).replace(/^./, (letter) => letter.toUpperCase())
             : view === "mes"
@@ -259,6 +288,8 @@ export function CalendarPage() {
       {active.length === 0 ? (
         <p className="mt-4 rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Activa al menos un tipo para ver el día.</p>
       ) : null}
+      </div>
+      </div>
 
       <details data-rise className="card mt-4">
         <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-semibold">Materias</summary>

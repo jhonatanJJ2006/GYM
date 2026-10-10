@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { IconCalendar } from "./Icons.tsx";
 import { cn } from "../lib/utils.ts";
 import FluidOrb from "./ui/fluid-orb.tsx";
 
@@ -23,12 +25,22 @@ export function BrandMark({ className }: { className?: string }) {
 
 export function AppHeader() {
   return (
-    <header data-rise className="-mx-4 mb-6 flex h-14 items-center justify-between gap-3 border-b border-line px-4 sm:-mx-6 sm:px-6">
-      <div className="flex items-center gap-2.5">
-        <BrandMark className="size-8 text-accent" />
-        <p className="font-display text-xl font-extrabold uppercase leading-none tracking-[0.2em] text-cream">Hierro</p>
+    <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-3 border-b border-line bg-ink px-4 sm:px-6">
+      <Link to="/" aria-label="Hierro, ir al calendario" className="grid size-10 place-items-center rounded-lg text-cream transition-colors hover:bg-panel">
+        <BrandMark className="size-7 text-accent" />
+      </Link>
+      <p className="font-display text-xl font-extrabold uppercase leading-none tracking-[0.25em] text-cream lg:absolute lg:left-[4.25rem]">Hierro</p>
+      <div className="flex items-center gap-3">
+        <p className="hidden text-xs text-muted sm:block">Clases, gym y comidas</p>
+        <button
+          type="button"
+          aria-label="Volver arriba"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="grid size-10 place-items-center rounded-lg text-cream transition-colors hover:bg-panel"
+        >
+          <IconCalendar className="size-[22px]" />
+        </button>
       </div>
-      <p className="text-xs text-muted">Clases, gym y comidas</p>
     </header>
   );
 }

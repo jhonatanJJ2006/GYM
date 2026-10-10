@@ -34,7 +34,7 @@ export function RiseScope({ pathname, children }: { pathname: string; children: 
   }, [pathname]);
 
   return (
-    <div ref={ref} className="relative z-10 mx-auto min-h-dvh w-full max-w-6xl px-4 pb-32 pt-5 sm:px-6">
+    <div ref={ref} className="relative z-10 mx-auto min-h-dvh w-full max-w-6xl px-4 pb-32 pt-20 sm:px-6 lg:max-w-[90rem] lg:pb-12 lg:pl-[17rem] lg:pr-8">
       {children}
     </div>
   );

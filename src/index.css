@@ -236,3 +236,6 @@
 .tl-dot-gym { background: #f0b08a; }
 .tl-dot-trabajo { background: #e8c98a; }
 .tl-dot-comida { background: #b7dcb8; }
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

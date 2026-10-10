@@ -200,7 +200,7 @@ function DayBody({ iso, titleId, title }: { iso: string; titleId: string; title:
   const works = plan.items.filter((item) => item.kind === "trabajo");
   return (
     <div className="space-y-3 px-5 pb-8 pt-14">
-      <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
+      <h2 id={titleId} className="font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-[28px]">
         {title}
       </h2>
       <p className="text-sm text-muted">
@@ -274,7 +274,7 @@ function ClassBody({
   const description = mode === "Sin salón" ? block.type : `${mode} · ${block.type}`;
   return (
     <div className="space-y-4 px-5 pb-8 pt-14">
-      <h2 id={titleId} className="font-display text-3xl leading-tight tracking-tight">
+      <h2 id={titleId} className="font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-[28px]">
         {title}
       </h2>
       <dl className="space-y-3 text-sm">
@@ -320,7 +320,7 @@ function WorkBody({ iso, start, titleId, title }: { iso: string; start: number; 
   }
   return (
     <div className="space-y-3 px-5 pb-8 pt-14">
-      <h2 id={titleId} className="font-display text-3xl leading-tight tracking-tight">
+      <h2 id={titleId} className="font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-[28px]">
         {title}
       </h2>
       <p className="text-sm tabular-nums text-muted">{formatSpan(block)}</p>
@@ -356,7 +356,7 @@ function SessionBody({
     <div>
       <ExerciseFigure pose={heroPose(session)} label={session.title} showPhoto={false} />
       <div className="space-y-3 px-5 pb-8 pt-4">
-      <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
+      <h2 id={titleId} className="font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-[28px]">
         {title}
       </h2>
       <p className="text-sm text-muted">
@@ -383,10 +383,10 @@ function MealBody({ dow, index, titleId, title }: { dow: number; index: number; 
     <div>
       <MealArt ingredients={meal.ingredients} label={meal.role} />
       <div className="space-y-4 px-5 pb-8 pt-4">
-      <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
+      <h2 id={titleId} className="font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-[28px]">
         {title}
       </h2>
-      <p className="font-display text-3xl tabular-nums text-cream">{mealWhen(meal)}</p>
+      <p className="font-display text-4xl font-extrabold tabular-nums text-accent">{mealWhen(meal)}</p>
       <p className="text-sm text-cream/85">
         ~{meal.kcal} kcal · ~{meal.protein} g de proteína
       </p>
@@ -419,7 +419,7 @@ function ExerciseBody({
     <div>
       <ExerciseFigure pose={exercise.pose} label={exercise.name} />
       <div className="space-y-4 px-5 pb-8 pt-4">
-      <h2 id={titleId} className="font-display text-[1.8rem] leading-tight tracking-tight">
+      <h2 id={titleId} className="font-display text-2xl font-extrabold leading-tight tracking-tight sm:text-[28px]">
         {title}
       </h2>
       <p className="text-sm leading-relaxed text-cream/90">{exercise.how}</p>
