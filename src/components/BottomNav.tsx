@@ -48,11 +48,11 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Secciones"
-      className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.6rem,env(safe-area-inset-bottom))]"
+      className="glass-nav fixed inset-x-0 bottom-0 z-40 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:bottom-0 lg:right-auto lg:top-14 lg:w-60 lg:border-r lg:border-t-0 lg:border-line lg:pb-0"
     >
-      <ul className="glass-nav relative mx-auto grid max-w-md grid-cols-5 rounded-[1.4rem] p-1.5">
-        <span aria-hidden="true" className="pointer-events-none absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem)/5)]">
-          <span ref={pill} className="nav-pill absolute inset-0 block rounded-[1rem] will-change-transform" />
+      <ul className="relative mx-auto grid max-w-md grid-cols-5 p-1.5 lg:max-w-none lg:grid-cols-1 lg:content-start lg:gap-1 lg:p-3">
+        <span aria-hidden="true" className="pointer-events-none absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem)/5)] lg:hidden">
+          <span ref={pill} className="nav-pill absolute inset-0 block rounded-lg will-change-transform" />
         </span>
         {LINKS.map((link, i) => (
           <li key={link.to} className="relative z-10">
@@ -60,8 +60,8 @@ export function BottomNav() {
               to={link.to}
               end={link.end}
               className={cn(
-                "flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-[1rem] px-0.5 text-center text-[0.62rem] font-semibold leading-tight transition-colors duration-300",
-                i === index ? "text-[var(--color-accent-ink)]" : "text-muted hover:text-cream",
+                "flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 text-center text-[0.62rem] font-semibold leading-tight transition-colors duration-300 lg:min-h-11 lg:flex-row lg:justify-start lg:gap-3 lg:border-l-2 lg:border-transparent lg:px-3 lg:text-sm",
+                i === index ? "text-accent lg:border-accent lg:bg-panel-2" : "text-muted hover:text-cream",
               )}
             >
               {({ isActive }) => (

@@ -88,7 +88,7 @@ export function MealsPage() {
                 <p className="text-sm font-semibold text-cream/85">
                   {DOW_LONG[itemDow].replace(/^./, (letter) => letter.toUpperCase())} {item.getDate()} · ~{menu.total}
                 </p>
-                <ul className="mt-2 space-y-2">
+                <ul className={cn("mt-2 space-y-2", horizon.view !== "semana" && "lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0 2xl:grid-cols-3")}>
                   {menu.items.map((meal, index) => (
                     <li key={`${toIso(item)}-${meal.time}-${meal.role}`} data-stagger>
                       <MealCard meal={meal} onOpen={() => modals.openMeal(itemDow, index)} />
@@ -101,6 +101,7 @@ export function MealsPage() {
         </div>
       </section>
 
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-8">
       <section data-rise className="mt-8">
         <h2 className="display-title text-2xl">De dónde salen las 2800 kcal</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">{KCAL_INTRO}</p>
@@ -154,6 +155,7 @@ export function MealsPage() {
           ))}
         </ul>
       </section>
+      </div>
 
       <p className="mt-6 text-sm leading-relaxed text-muted">{DISCLAIMER}</p>
     </div>
@@ -174,7 +176,7 @@ function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
             <button type="button" onClick={onOpen} className="min-w-0 break-words text-left text-sm font-bold leading-snug text-cream">
               {meal.role}
             </button>
-            {takeaway ? <span className="chip chip-sky">🥡 Para llevar</span> : null}
+            {takeaway ? <span className="chip chip-sky">Para llevar</span> : null}
           </div>
           <p className="mt-0.5 text-xs text-muted">{mealWhen(meal)}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -195,7 +197,7 @@ function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
       <Expand open={open}>
         <div className="grid gap-3 pt-3 text-sm sm:grid-cols-2">
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#c6ff3d]">Ingredientes</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#f0b08a]">Ingredientes</p>
             <ul className="mt-1 list-disc space-y-0.5 pl-4 text-cream/85">
               {meal.ingredients.map((entry) => (
                 <li key={entry}>{entry}</li>
@@ -203,7 +205,7 @@ function MealCard({ meal, onOpen }: { meal: Meal; onOpen: () => void }) {
             </ul>
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#c6ff3d]">Pasos</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#f0b08a]">Pasos</p>
             <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-cream/85">
               {meal.steps.map((entry) => (
                 <li key={entry}>{entry}</li>

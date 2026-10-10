@@ -60,7 +60,7 @@ export function WeekPage() {
               data-day-panel={active ? "" : undefined}
               className={cn(
                 "card p-4",
-                active && view === "semana" && "ring-1 ring-[#c6ff3d]/60",
+                active && view === "semana" && "ring-1 ring-[#f0b08a]/60",
                 view === "mes" && !active && "hidden",
               )}
             >

@@ -86,13 +86,15 @@ export function TrainingPage() {
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[42rem]">
+    <div className="mx-auto w-full min-w-0 max-w-[42rem] lg:max-w-none">
       <PageIntro title="Entreno">
         Ciclo de 4 semanas desde el lunes 5 de octubre de 2026 hasta el 2 de febrero de 2027. Lunes pecho y tríceps,
         martes cuádriceps y gemelos, miércoles espalda y bíceps, jueves hombro (tríceps en semanas 1 y 3, bíceps en 2 y
         4), viernes femoral, gemelos y glúteo. Fin de semana, abdomen.
       </PageIntro>
 
+      <div className="lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start lg:gap-6">
+      <aside className="min-w-0 lg:sticky lg:top-20">
       <PeriodBar
         label="entreno"
         date={day}
@@ -116,7 +118,7 @@ export function TrainingPage() {
                 onClick={() => horizon.setDate(item)}
                 className={cn(
                   "min-h-14 rounded-row px-0.5 text-center",
-                  on ? "bg-cream text-ink" : "text-muted",
+                  on ? "border border-accent/40 bg-panel-2 text-accent" : "border border-line bg-panel text-muted",
                 )}
               >
                 <span className="block text-[0.62rem] font-semibold">{DOW_LONG[item.getDay()].slice(0, 3)}</span>
@@ -143,14 +145,15 @@ export function TrainingPage() {
         </p>
       </article>
 
-      <div ref={staggerRef}>
+      </aside>
+      <div ref={staggerRef} className="min-w-0">
 
       {groups.map((group) => {
         const exercises = session.exercises.slice(group.from, group.to);
         return (
           <section key={group.label} data-day-panel className="mt-6 min-w-0">
             <h3 className="display-title mb-2 break-words text-2xl">{group.label}</h3>
-            <ul className="space-y-3">
+            <ul className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
               {exercises.map((exercise) => {
                 const index = session.exercises.indexOf(exercise);
                 const checked = Boolean(checks[`${iso}:${exercise.id}`]);
@@ -200,6 +203,7 @@ export function TrainingPage() {
           </section>
         );
       })}
+      </div>
       </div>
     </div>
   );

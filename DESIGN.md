@@ -1,5 +1,16 @@
 # Sistema visual de Hierro
 
+## Hierro Dark (rediseño Google Stitch)
+
+Fuente de diseño: proyecto de Google Stitch "GYM Hierro - Rediseño" (13 pantallas, 10 móviles y 3 de escritorio). Este bloque manda sobre lo que sigue cuando haya conflicto.
+
+- Fondo `#0A0A0A`; superficies `#161616` y `#202020`; líneas `#2C2C2C`; texto `#F2F2F2` y `#9B9B9B`.
+- Acento cobre `#F0B08A` para la selección: pestaña activa, opción activa del selector Día/Semana/Mes y borde de chips activos. No se usa como relleno de botones.
+- Categorías: clase azul acero `#A9D0F2` (fondo `#2A4660`), trabajo arena `#E8C98A` (fondo `#4A3B28`), gym cobre `#F0B08A` (fondo `#4A3228`), comida salvia `#B7DCB8` (fondo `#2A4634`). Franja izquierda de 3px.
+- Tipografía: Syne 700-800 en títulos (título de página 36px), Manrope en el texto. Cifras y horas con números tabulares.
+- Espaciado 4/8/12/16/24/32. Radio 12px en tarjetas y modales, 999px en chips. Sin sombras fuertes ni brillos: la separación se hace con superficie y línea.
+- Encabezado fijo con la palabra HIERRO en mayúsculas y tracking amplio. Barra inferior de 5 pestañas a todo el ancho con línea superior.
+
 La interfaz sigue oscura y callada, pero cada tipo de bloque y cada sección tienen un tinte propio. El color es una franja y un lavado, no un repintado. Las fotos grandes siguen solo en el modal. Este documento manda sobre calendarios, filas, miniaturas y modales. Si un cambio nuevo necesita otro color, primero se justifica aquí.
 
 ## Principio
@@ -18,13 +29,13 @@ Tokens en `src/index.css` (`@theme`). No uses hex sueltos en las pantallas.
 | --- | --- | --- |
 | `--color-ink` | `#0a0a0a` | Fondo de la app |
 | `--color-ink-2` | `#111111` | Fondos secundarios |
-| `--color-panel` | `#171717` | Filas, tarjetas, paneles |
-| `--color-panel-2` | `#222222` | Hover de botones con borde |
+| `--color-panel` | `#161616` | Filas, tarjetas, paneles |
+| `--color-panel-2` | `#202020` | Hover de botones con borde |
 | `--color-line` | `#2c2c2c` | Líneas de hora y separadores |
 | `--color-cream` | `#f2f2f2` | Texto principal y estado activo |
 | `--color-muted` | `#9b9b9b` | Texto secundario |
 | `--color-grid` | `#5e5e5e` | Líneas de la grilla del calendario |
-| `--color-accent` | `#f2f2f2` | Igual que cream. Selección, no un acento de color |
+| `--color-accent` | `#f0b08a` | Cobre. Selección y estado activo |
 | `--color-warn` | `#e6e6e6` | Aviso, sin amarillo |
 | `--color-block-class` | `#2a4660` | Fondo del bloque de clase, azul acero |
 | `--color-rail-class` | `#a9d0f2` | Franja de clase (`bg-rail-class`) |
