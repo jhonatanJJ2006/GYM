@@ -1,0 +1,2 @@
+const v=require('/home/box/.local/lib/node_modules/gltf-validator'); const fs=require('fs'); (async()=>{
+for (const f of process.argv.slice(2)) { const r=await v.validateBytes(new Uint8Array(fs.readFileSync(f))); console.log(f.split('/').pop(), 'E',r.issues.numErrors,'W',r.issues.numWarnings, r.info.animationCount??'', r.issues.messages.filter(m=>m.severity<=1).slice(0,3).map(m=>m.code).join(','));}})();

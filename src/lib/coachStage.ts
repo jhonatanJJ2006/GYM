@@ -1,55 +1,36 @@
 import {
-  Bone,
+  AnimationAction,
+  AnimationClip,
+  AnimationMixer,
   Box3,
   CanvasTexture,
   CircleGeometry,
   DirectionalLight,
   Group,
   HemisphereLight,
+  LoopRepeat,
   Mesh,
   MeshBasicMaterial,
   Object3D,
   PerspectiveCamera,
-  Quaternion,
   Scene,
   SkinnedMesh,
-  Skeleton,
   SRGBColorSpace,
   Vector3,
   WebGLRenderer,
   type Material,
 } from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import type { Joints, Layout } from "../data/figureMotions.ts";
 import type { PoseId } from "../data/poses.ts";
-import { loadGear, type GearAnchors, type GearKit } from "./coachGear.ts";
-import { motionFor, sampleMotion } from "./coachSample.ts";
+import { CLIPS, clipFor, clipSeconds, type ClipName, type GearFile } from "./coachClips.ts";
 
-const DEG = Math.PI / 180;
+/**
+ * El coach y su equipo vienen con clips hechos en Blender (scripts/3d). Aquí solo
+ * se reproducen: el clip del coach y el clip del mismo nombre en el GLB del equipo,
+ * con el mismo origen y el mismo tiempo, así las manos quedan en el agarre.
+ */
 const MODEL_URL = `${import.meta.env.BASE_URL}models/coach.glb`;
-const RED_SHIRT = "Oliver";
-const RED_MESH = "Oliver_body_Oliver_0";
-
-const BONE = {
-  hips: "Hips_01",
-  spine: "Spine_012",
-  chest: "Spine2_014",
-  head: "Head_040",
-  shoulderL: "LeftShoulder_015",
-  shoulderR: "RightShoulder_042",
-  armL: "LeftArm_016",
-  foreL: "LeftForeArm_017",
-  handL: "LeftHand_018",
-  armR: "RightArm_043",
-  foreR: "RightForeArm_044",
-  handR: "RightHand_045",
-  thighL: "LeftUpLeg_02",
-  kneeL: "LeftLeg_03",
-  footL: "LeftFoot_04",
-  thighR: "RightUpLeg_07",
-  kneeR: "RightLeg_08",
-  footR: "RightFoot_09",
-} as const;
+const GEAR_URL = `${import.meta.env.BASE_URL}models/gear`;
 
 type View = {
   canvas: HTMLCanvasElement;
@@ -62,17 +43,20 @@ type View = {
   visible: boolean;
 };
 
+type Animated = {
+  root: Object3D;
+  mixer: AnimationMixer;
+  actions: Map<string, AnimationAction>;
+  current: AnimationAction | null;
+};
+
 type Rig = {
   stage: Group;
-  poseRoot: Group;
-  skeleton: Skeleton;
-  bones: Record<keyof typeof BONE, Bone>;
-  rests: Map<Bone, Quaternion>;
-  localRight: Vector3;
-  localUp: Vector3;
-  localForward: Vector3;
-  gear: GearKit;
-  shadow: Mesh;
+  coach: Animated;
+  bones: Object3D[];
+  gear: Map<GearFile, Animated>;
+  gearLoading: Set<GearFile>;
+  frames: Map<ClipName, { center: Vector3; radius: number }>;
 };
 
 let renderer: WebGLRenderer | null = null;
@@ -86,42 +70,21 @@ let raf = 0;
 let dirty = true;
 let users = 0;
 let disposeTimer = 0;
+let clock: ((canvas: HTMLCanvasElement) => number) | null = null;
 
-const worldUp = new Vector3();
-const worldForward = new Vector3();
-const worldRight = new Vector3();
-const leanedUp = new Vector3();
-const leanedForward = new Vector3();
-const dir = new Vector3();
-const parentQ = new Quaternion();
-const deltaQ = new Quaternion();
-const leanQ = new Quaternion();
-const basisQ = new Quaternion();
-const restDir = new Vector3();
-const desiredLocal = new Vector3();
-const rightLocal = new Vector3();
-const anchor = {
-  hips: new Vector3(),
-  head: new Vector3(),
-  shoulder: new Vector3(),
-  handL: new Vector3(),
-  handR: new Vector3(),
-  footL: new Vector3(),
-  footR: new Vector3(),
-};
-const scratch = new Vector3();
-const gearBox = new Box3();
+const box = new Box3();
 const meshBox = new Box3();
-const flat = new Vector3();
+const point = new Vector3();
+const camDir = new Vector3();
+
+/** Solo para páginas de QA: fija el tiempo de cada lienzo. */
+export function setCoachClock(fn: ((canvas: HTMLCanvasElement) => number) | null) {
+  clock = fn;
+  dirty = true;
+}
 
 function materialsOf(mesh: Mesh): Material[] {
   return Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-}
-
-function disposeMaterial(material: Material) {
-  const mapped = material as Material & { map?: { dispose: () => void } | null };
-  mapped.map?.dispose();
-  material.dispose();
 }
 
 function disposeObject(object: Object3D) {
@@ -131,41 +94,11 @@ function disposeObject(object: Object3D) {
     child.geometry.dispose();
     for (const material of materialsOf(child)) materials.add(material);
   });
-  for (const material of materials) disposeMaterial(material);
-}
-
-function boneNamed(root: Object3D, name: string): Bone {
-  const found = root.getObjectByName(name);
-  if (!(found instanceof Bone)) throw new Error(`El muñeco no trae el hueso ${name}`);
-  return found;
-}
-
-function keepSubtree(seed: Object3D, keep: Set<Object3D>) {
-  keep.add(seed);
-  for (const child of seed.children) keepSubtree(child, keep);
-}
-
-function withAncestors(obj: Object3D, keep: Set<Object3D>) {
-  let cur: Object3D | null = obj;
-  while (cur) {
-    keep.add(cur);
-    cur = cur.parent;
+  for (const material of materials) {
+    const mapped = material as Material & { map?: { dispose: () => void } | null };
+    mapped.map?.dispose();
+    material.dispose();
   }
-}
-
-function pruneExcept(root: Object3D, keep: Set<Object3D>) {
-  const removed: Object3D[] = [];
-  const walk = (obj: Object3D) => {
-    for (const child of [...obj.children]) {
-      if (keep.has(child)) walk(child);
-      else {
-        obj.remove(child);
-        removed.push(child);
-      }
-    }
-  };
-  walk(root);
-  for (const obj of removed) disposeObject(obj);
 }
 
 function shadowTexture(): CanvasTexture {
@@ -184,249 +117,161 @@ function shadowTexture(): CanvasTexture {
   return texture;
 }
 
-function captureBasis(root: Object3D, bones: Rig["bones"]) {
-  const left = new Vector3();
-  const right = new Vector3();
-  const hip = new Vector3();
-  const chest = new Vector3();
-  bones.thighL.getWorldPosition(left);
-  bones.thighR.getWorldPosition(right);
-  bones.hips.getWorldPosition(hip);
-  bones.chest.getWorldPosition(chest);
-  const across = right.sub(left).normalize();
-  const up = chest.sub(hip).normalize();
-  const forward = new Vector3().crossVectors(across, up).normalize();
-  across.crossVectors(up, forward).normalize();
-  root.getWorldQuaternion(basisQ).invert();
-  return {
-    right: across.applyQuaternion(basisQ),
-    up: up.applyQuaternion(basisQ.clone()),
-    forward: forward.applyQuaternion(basisQ),
-  };
+function animated(root: Object3D, clips: AnimationClip[]): Animated {
+  const mixer = new AnimationMixer(root);
+  const actions = new Map<string, AnimationAction>();
+  for (const clip of clips) {
+    const action = mixer.clipAction(clip);
+    action.setLoop(LoopRepeat, Infinity);
+    actions.set(clip.name, action);
+  }
+  return { root, mixer, actions, current: null };
 }
 
-function buildRig(root: Object3D, gear: GearKit): Rig {
-  const oliver = root.getObjectByName(RED_SHIRT);
-  const body = root.getObjectByName(RED_MESH);
-  if (!oliver) throw new Error("El GLB no trae el muñeco Oliver (camisa roja)");
-  if (!(body instanceof SkinnedMesh)) throw new Error("El GLB no trae la malla de la camisa roja");
-
-  const keep = new Set<Object3D>();
-  withAncestors(oliver, keep);
-  withAncestors(body, keep);
-  keepSubtree(oliver, keep);
-  keepSubtree(body, keep);
-  pruneExcept(root, keep);
-
-  body.frustumCulled = false;
-  const bones = {} as Rig["bones"];
-  for (const key of Object.keys(BONE) as (keyof typeof BONE)[]) {
-    bones[key] = boneNamed(oliver, BONE[key]);
+/** Deja activo solo `name` en el tiempo `t`. Si el GLB no trae ese clip, queda quieto. */
+function seek(target: Animated, name: string, t: number) {
+  const action = target.actions.get(name) ?? null;
+  if (target.current !== action) {
+    target.current?.stop();
+    target.current = action;
+    action?.reset().play();
   }
-  const rests = new Map<Bone, Quaternion>();
-  for (const bone of body.skeleton.bones) rests.set(bone, bone.quaternion.clone());
+  if (!action) return;
+  action.time = t;
+  target.mixer.update(0);
+}
 
-  const poseRoot = new Group();
-  poseRoot.add(root);
-  poseRoot.updateMatrixWorld(true);
-  const basis = captureBasis(poseRoot, bones);
-  // La cruz de caderas apunta a la espalda: la cámara y los brazos miran al pecho.
-  basis.forward.negate();
-  const head = bones.head.getWorldPosition(new Vector3());
-  const foot = bones.footL.getWorldPosition(new Vector3());
-  const height = Math.abs(head.y - foot.y);
-  if (height > 0.4 && (height < 1.05 || height > 2.1)) poseRoot.scale.setScalar(1.65 / height);
-
+function buildRig(root: Object3D, clips: AnimationClip[]): Rig {
+  const bones: Object3D[] = [];
+  root.traverse((child) => {
+    if (child instanceof SkinnedMesh) {
+      child.frustumCulled = false;
+      child.castShadow = false;
+    }
+    if ((child as Object3D & { isBone?: boolean }).isBone) bones.push(child);
+  });
+  if (bones.length === 0) throw new Error("El GLB del coach no trae esqueleto");
   const stage = new Group();
   const shadow = new Mesh(
-    new CircleGeometry(0.46, 28),
+    new CircleGeometry(0.55, 28),
     new MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthWrite: false }),
   );
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = 0.008;
-  stage.add(poseRoot, gear.group, shadow);
-
+  shadow.position.y = 0.004;
+  stage.add(root, shadow);
   return {
     stage,
-    poseRoot,
-    skeleton: body.skeleton,
+    coach: animated(root, clips),
     bones,
-    rests,
-    localRight: basis.right,
-    localUp: basis.up,
-    localForward: basis.forward,
-    gear,
-    shadow,
+    gear: new Map(),
+    gearLoading: new Set(),
+    frames: new Map(),
   };
 }
 
-function layoutAngle(layout: Layout): number {
-  // El eje lateral del muñeco apunta al otro lado del eje mundo, así que el
-  // signo queda al revés de la regla de la mano derecha: +90 deja el pecho arriba.
-  if (layout === "supine") return Math.PI / 2;
-  if (layout === "prone") return -Math.PI / 2;
-  return 0;
+function loadGear(file: GearFile) {
+  if (!rig || rig.gear.has(file) || rig.gearLoading.has(file)) return;
+  const target = rig;
+  target.gearLoading.add(file);
+  new GLTFLoader()
+    .loadAsync(`${GEAR_URL}/${file}.glb`)
+    .then((gltf) => {
+      if (rig !== target) {
+        disposeObject(gltf.scene);
+        return;
+      }
+      gltf.scene.visible = false;
+      target.stage.add(gltf.scene);
+      target.gear.set(file, animated(gltf.scene, gltf.animations));
+      target.frames.clear();
+      dirty = true;
+    })
+    .catch((error: unknown) => {
+      console.error(`No se pudo cargar el equipo ${file}.glb`, error);
+    })
+    .finally(() => target.gearLoading.delete(file));
 }
 
-function limbDir(up: Vector3, forward: Vector3, angleDeg: number, out: Vector3) {
-  const a = angleDeg * DEG;
-  out.copy(up).multiplyScalar(-Math.cos(a));
-  out.addScaledVector(forward, -Math.sin(a));
-  if (out.lengthSq() < 1e-8) out.copy(up).multiplyScalar(-1);
-  return out.normalize();
-}
-
-function aim(bone: Bone, worldDir: Vector3, rests: Map<Bone, Quaternion>) {
-  const parent = bone.parent;
-  const rest = rests.get(bone);
-  if (!parent || !rest) return;
-  parent.updateWorldMatrix(true, false);
-  parent.getWorldQuaternion(parentQ);
-  desiredLocal.copy(worldDir).applyQuaternion(parentQ.invert());
-  if (desiredLocal.lengthSq() < 1e-8) return;
-  desiredLocal.normalize();
-  restDir.set(0, 1, 0).applyQuaternion(rest).normalize();
-  if (restDir.dot(desiredLocal) < -0.9995) deltaQ.setFromAxisAngle(restDir, Math.PI);
-  else deltaQ.setFromUnitVectors(restDir, desiredLocal);
-  bone.quaternion.copy(deltaQ).multiply(rest);
-  bone.updateMatrixWorld(true);
-}
-
-function applyLean(spine: Bone, right: Vector3, leanDeg: number, rests: Map<Bone, Quaternion>) {
-  const parent = spine.parent;
-  const rest = rests.get(spine);
-  if (!parent || !rest) return;
-  parent.updateWorldMatrix(true, false);
-  parent.getWorldQuaternion(parentQ);
-  rightLocal.copy(right).applyQuaternion(parentQ.clone().invert());
-  if (rightLocal.lengthSq() < 1e-8) return;
-  rightLocal.normalize();
-  leanQ.setFromAxisAngle(rightLocal, -leanDeg * DEG);
-  spine.quaternion.copy(leanQ).multiply(rest);
-  spine.updateMatrixWorld(true);
-}
-
-function worldBasis(root: Group, localRight: Vector3, localUp: Vector3, localForward: Vector3) {
-  root.getWorldQuaternion(basisQ);
-  worldRight.copy(localRight).applyQuaternion(basisQ);
-  worldUp.copy(localUp).applyQuaternion(basisQ);
-  worldForward.copy(localForward).applyQuaternion(basisQ);
-}
-
-function readAnchors(bones: Rig["bones"]): GearAnchors {
-  bones.hips.getWorldPosition(anchor.hips);
-  bones.head.getWorldPosition(anchor.head);
-  bones.shoulderL.getWorldPosition(anchor.shoulder);
-  bones.shoulderR.getWorldPosition(scratch);
-  anchor.shoulder.add(scratch).multiplyScalar(0.5);
-  bones.handL.getWorldPosition(anchor.handL);
-  bones.handR.getWorldPosition(anchor.handR);
-  bones.footL.getWorldPosition(anchor.footL);
-  bones.footR.getWorldPosition(anchor.footR);
-  return {
-    pose: "squat",
-    layout: "stand",
-    hips: anchor.hips,
-    head: anchor.head,
-    shoulder: anchor.shoulder,
-    handL: anchor.handL,
-    handR: anchor.handR,
-    footL: anchor.footL,
-    footR: anchor.footR,
-    right: worldRight,
-    up: worldUp,
-    forward: worldForward,
-  };
-}
-
-function shown(obj: Object3D): boolean {
-  let cur: Object3D | null = obj;
-  while (cur) {
-    if (!cur.visible) return false;
-    cur = cur.parent;
+function showClip(clip: ClipName, t: number) {
+  if (!rig) return;
+  const info = CLIPS[clip];
+  seek(rig.coach, clip, t);
+  for (const [file, gear] of rig.gear) {
+    const on = file === info.gear;
+    gear.root.visible = on;
+    if (on) seek(gear, clip, t);
   }
-  return true;
-}
-
-function frameStage() {
-  if (!rig) return;
-  // Las anclas se leyeron con el escenario en el origen. No lo pongas en cero
-  // otra vez: eso dejaría las anclas del encuadre anterior y el cuerpo se iría
-  // a las coordenadas crudas del GLB.
+  if (info.gear && !rig.gear.has(info.gear)) loadGear(info.gear);
   rig.stage.updateMatrixWorld(true);
-  const points = [anchor.hips, anchor.head, anchor.handL, anchor.handR, anchor.footL, anchor.footR];
-  let minY = Infinity;
-  for (const point of points) minY = Math.min(minY, point.y);
-  gearBox.makeEmpty();
-  rig.gear.group.traverse((child) => {
-    if (!(child instanceof Mesh) || child instanceof SkinnedMesh || !shown(child)) return;
-    if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
-    const bounds = child.geometry.boundingBox;
-    if (!bounds) return;
-    meshBox.copy(bounds).applyMatrix4(child.matrixWorld);
-    gearBox.union(meshBox);
-  });
-  if (!gearBox.isEmpty()) minY = Math.min(minY, gearBox.min.y);
-  if (!Number.isFinite(minY)) minY = 0;
-  rig.stage.position.x -= anchor.hips.x;
-  rig.stage.position.y -= minY;
-  rig.stage.position.z -= anchor.hips.z;
 }
 
-function applyPose(joints: Joints, layout: Layout, pose: PoseId) {
-  if (!rig) return;
-  // Un solo rig sirve a la miniatura, al héroe y al modal. El equipo se coloca
-  // en coordenadas de mundo: si el escenario sigue desplazado por la vista
-  // anterior, la barra se queda en el encuadre y Oliver vuelve al punto del GLB.
-  rig.stage.position.set(0, 0, 0);
-  rig.stage.quaternion.identity();
-  rig.stage.scale.set(1, 1, 1);
-  rig.stage.updateMatrixWorld(true);
-  for (const [bone, rest] of rig.rests) bone.quaternion.copy(rest);
-  rig.poseRoot.quaternion.setFromAxisAngle(rig.localRight, layoutAngle(layout));
-  rig.poseRoot.position.set(joints.shift * 0.012, joints.lift * 0.008, 0);
-  rig.poseRoot.updateMatrixWorld(true);
-  worldBasis(rig.poseRoot, rig.localRight, rig.localUp, rig.localForward);
-  applyLean(rig.bones.spine, worldRight, joints.lean, rig.rests);
-  rig.poseRoot.updateMatrixWorld(true);
-  worldBasis(rig.poseRoot, rig.localRight, rig.localUp, rig.localForward);
-
-  aim(rig.bones.thighL, limbDir(worldUp, worldForward, joints.thighL, dir), rig.rests);
-  aim(rig.bones.kneeL, limbDir(worldUp, worldForward, joints.thighL + joints.kneeL, dir), rig.rests);
-  aim(rig.bones.thighR, limbDir(worldUp, worldForward, joints.thighR, dir), rig.rests);
-  aim(rig.bones.kneeR, limbDir(worldUp, worldForward, joints.thighR + joints.kneeR, dir), rig.rests);
-  aim(rig.bones.footL, limbDir(worldUp, worldForward, joints.footL, dir), rig.rests);
-  aim(rig.bones.footR, limbDir(worldUp, worldForward, joints.footR, dir), rig.rests);
-
-  leanQ.setFromAxisAngle(worldRight, -joints.lean * DEG);
-  leanedUp.copy(worldUp).applyQuaternion(leanQ);
-  leanedForward.copy(worldForward).applyQuaternion(leanQ);
-  aim(rig.bones.armL, limbDir(leanedUp, leanedForward, joints.armL, dir), rig.rests);
-  aim(rig.bones.foreL, limbDir(leanedUp, leanedForward, joints.armL + joints.elbL, dir), rig.rests);
-  aim(rig.bones.armR, limbDir(leanedUp, leanedForward, joints.armR, dir), rig.rests);
-  aim(rig.bones.foreR, limbDir(leanedUp, leanedForward, joints.armR + joints.elbR, dir), rig.rests);
-
-  rig.skeleton.update();
-  rig.poseRoot.updateMatrixWorld(true);
-  const anchors = readAnchors(rig.bones);
-  anchors.pose = pose;
-  anchors.layout = layout;
-  rig.gear.place(anchors);
-  frameStage();
+/** Encuadre por clip: caja de huesos y equipo al inicio del bucle. */
+function clipFrame(clip: ClipName): { center: Vector3; radius: number } {
+  if (!rig) return { center: new Vector3(0, 0.9, 0), radius: 1 };
+  const cached = rig.frames.get(clip);
+  if (cached) return cached;
+  box.makeEmpty();
+  for (let i = 0; i < 3; i += 1) {
+    showClip(clip, (clipSeconds() * i) / 3);
+    for (const bone of rig.bones) box.expandByPoint(bone.getWorldPosition(point));
+  }
+  box.expandByScalar(0.12);
+  box.min.y = Math.min(box.min.y, 0);
+  const file = CLIPS[clip].gear;
+  const gear = file ? rig.gear.get(file) : undefined;
+  if (gear) {
+    gear.root.traverse((child) => {
+      if (!(child instanceof Mesh)) return;
+      if (!child.geometry.boundingBox) child.geometry.computeBoundingBox();
+      const bounds = child.geometry.boundingBox;
+      if (!bounds) return;
+      meshBox.copy(bounds).applyMatrix4(child.matrixWorld);
+      box.union(meshBox);
+    });
+  }
+  const center = box.getCenter(new Vector3());
+  const radius = box.getSize(new Vector3()).length() / 2;
+  const result = { center, radius };
+  if (!file || gear) rig.frames.set(clip, result);
+  return result;
 }
 
-function frameCamera(layout: Layout) {
-  if (!camera) return;
-  flat.set(worldForward.x, 0, worldForward.z);
-  if (flat.lengthSq() < 0.12) flat.set(worldRight.x, 0, worldRight.z);
-  if (flat.lengthSq() < 1e-6) flat.set(0, 0, 1);
-  flat.normalize();
-  const side = scratch.set(worldRight.x, 0, worldRight.z);
-  if (side.lengthSq() > 1e-4) flat.addScaledVector(side.normalize(), 0.42).normalize();
-  const lying = layout === "supine" || layout === "prone";
-  const dist = lying ? 3.45 : 3.2;
-  camera.position.set(flat.x * dist, lying ? 1.65 : 1.2, flat.z * dist);
-  camera.lookAt(0, lying ? 0.42 : 0.84, 0);
+function frameCamera(clip: ClipName, aspect: number) {
+  if (!camera || !rig) return;
+  const { center, radius } = clipFrame(clip);
+  // El coach mira a +Z. "side" evita que la máquina tape el cuerpo.
+  const view = CLIPS[clip].view;
+  if (view === "side") camDir.set(-1, 0.32, 0.55);
+  else if (view === "high") camDir.set(-0.55, 0.62, 1);
+  else camDir.set(-0.5, 0.28, 1);
+  camDir.normalize();
+  const fov = (camera.fov * Math.PI) / 180;
+  const fit = Math.min(1, aspect);
+  const dist = (radius * 0.92) / Math.sin((fov * fit) / 2);
+  camera.aspect = aspect;
+  camera.position.copy(center).addScaledVector(camDir, dist);
+  camera.near = Math.max(0.05, dist - radius * 2);
+  camera.far = dist + radius * 3;
+  camera.lookAt(center);
+  camera.updateProjectionMatrix();
+}
+
+function paintFallback(view: View) {
+  const w = Math.max(1, Math.round(view.cssW || view.canvas.width || 120));
+  const h = Math.max(1, Math.round(view.cssH || view.canvas.height || 120));
+  fitCanvas(view, w, h);
+  const ctx = view.ctx;
+  ctx.clearRect(0, 0, w, h);
+  const s = Math.min(w, h);
+  ctx.save();
+  ctx.translate(w / 2, h / 2);
+  ctx.fillStyle = "rgba(160,160,170,0.55)";
+  const bar = s * 0.36;
+  ctx.fillRect(-bar, -s * 0.02, bar * 2, s * 0.04);
+  for (const side of [-1, 1]) {
+    ctx.fillRect(side * bar - (side > 0 ? 0 : s * 0.08), -s * 0.12, s * 0.08, s * 0.24);
+  }
+  ctx.restore();
 }
 
 const atlas = document.createElement("canvas");
@@ -450,13 +295,14 @@ function fitCanvas(view: View, w: number, h: number) {
 }
 
 function paintView(view: View, timeMs: number, w: number, h: number) {
-  if (!renderer || !camera || !rig) return;
-  const motion = motionFor(view.pose);
-  applyPose(sampleMotion(motion, timeMs, view.reduced), motion.layout, view.pose);
-  frameCamera(motion.layout);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  renderer.render(scene!, camera);
+  if (!renderer || !camera || !rig || !scene) return;
+  const clip = clipFor(view.pose);
+  const seconds = clipSeconds();
+  const ms = clock ? clock(view.canvas) : timeMs;
+  const t = view.reduced ? 0 : (((ms / 1000) % seconds) + seconds) % seconds;
+  frameCamera(clip, w / h);
+  showClip(clip, t);
+  renderer.render(scene, camera);
 }
 
 function renderHero(view: View, timeMs: number) {
@@ -583,21 +429,24 @@ function ensureRenderer() {
 async function ensureModel() {
   if (rig || failed) return;
   if (!loadPromise) {
-    loadPromise = Promise.all([
-      new GLTFLoader().loadAsync(MODEL_URL),
-      loadGear(),
-    ]).then(([gltf, gear]) => {
-      ensureRenderer();
-      rig = buildRig(gltf.scene, gear);
-      scene?.add(rig.stage);
-      dirty = true;
-      ensureLoop();
-    }).catch((error: unknown) => {
-      failed = true;
-      loadPromise = null;
-      console.error("No se pudo cargar public/models/coach.glb", error);
-      throw error;
-    });
+    loadPromise = new GLTFLoader()
+      .loadAsync(MODEL_URL)
+      .then((gltf) => {
+        ensureRenderer();
+        rig = buildRig(gltf.scene, gltf.animations);
+        scene?.add(rig.stage);
+        dirty = true;
+        ensureLoop();
+      })
+      .catch((error: unknown) => {
+        failed = true;
+        loadPromise = null;
+        renderer?.dispose();
+        renderer = null;
+        console.error("No se pudo cargar el coach 3D (public/models/coach.glb)", error);
+        for (const view of views) paintFallback(view);
+        throw error;
+      });
   }
   await loadPromise;
 }
@@ -607,7 +456,8 @@ function disposeStage() {
   raf = 0;
   if (rig && scene) {
     scene.remove(rig.stage);
-    rig.gear.dispose();
+    rig.coach.mixer.stopAllAction();
+    for (const gear of rig.gear.values()) gear.mixer.stopAllAction();
     disposeObject(rig.stage);
   }
   rig = null;
@@ -660,6 +510,7 @@ export function attachCoachView(
     ensureLoop();
   }).catch(() => {
     canvas.dataset.coach = "error";
+    paintFallback(view);
   });
 
   return {
