@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { animate } from "animejs";
 import { cn } from "../lib/utils.ts";
+import { ProfilePanel, WeekStatsPanel } from "./Extras.tsx";
 import { IconCalendar, IconClasses, IconMeal, IconTrain, IconWeek } from "./Icons.tsx";
 
 const LINKS = [
@@ -48,7 +49,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Secciones"
-      className="glass-nav fixed inset-x-0 bottom-0 z-40 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:bottom-0 lg:right-auto lg:top-14 lg:w-60 lg:border-r lg:border-t-0 lg:border-line lg:pb-0"
+      className="glass-nav fixed inset-x-0 bottom-0 z-40 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:bottom-0 lg:right-auto lg:top-14 lg:w-60 lg:border-r lg:overflow-y-auto lg:border-t-0 lg:border-line lg:pb-0"
     >
       <ul className="relative mx-auto grid max-w-md grid-cols-5 p-1.5 lg:max-w-none lg:grid-cols-1 lg:content-start lg:gap-1 lg:p-3">
         <span aria-hidden="true" className="pointer-events-none absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem)/5)] lg:hidden">
@@ -75,6 +76,11 @@ export function BottomNav() {
           </li>
         ))}
       </ul>
+      <div className="hidden space-y-3 px-3 pb-4 lg:block">
+        <p className="px-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-muted">Perfil</p>
+        <ProfilePanel />
+        <WeekStatsPanel />
+      </div>
     </nav>
   );
 }

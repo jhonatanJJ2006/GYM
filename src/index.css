@@ -239,3 +239,30 @@
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+.field {
+  width: 100%;
+  min-height: 2.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-ink);
+  padding: 0 0.6rem;
+  color: var(--color-cream);
+  font-size: 0.875rem;
+}
+.btn-accent,
+.btn-line {
+  min-height: 2.5rem;
+  border-radius: 0.6rem;
+  padding: 0 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background-color 150ms ease, opacity 150ms ease;
+}
+.btn-accent { background: var(--color-accent); color: var(--color-accent-ink); }
+.btn-accent:hover { background: #f4c2a3; }
+.btn-line { border: 1px solid var(--color-line); background: var(--color-panel); color: var(--color-cream); }
+.btn-line:hover { background: var(--color-panel-2); }
+.btn-accent:disabled,
+.btn-line:disabled { opacity: 0.4; cursor: not-allowed; }
+.fade-right { mask-image: linear-gradient(90deg, #000 85%, transparent); -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); }

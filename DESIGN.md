@@ -9,7 +9,13 @@ Fuente de diseño: proyecto de Google Stitch "GYM Hierro - Rediseño" (13 pantal
 - Categorías: clase azul acero `#A9D0F2` (fondo `#2A4660`), trabajo arena `#E8C98A` (fondo `#4A3B28`), gym cobre `#F0B08A` (fondo `#4A3228`), comida salvia `#B7DCB8` (fondo `#2A4634`). Franja izquierda de 3px.
 - Tipografía: Syne 700-800 en títulos (título de página 36px), Manrope en el texto. Cifras y horas con números tabulares.
 - Espaciado 4/8/12/16/24/32. Radio 12px en tarjetas y modales, 999px en chips. Sin sombras fuertes ni brillos: la separación se hace con superficie y línea.
-- Encabezado fijo con la palabra HIERRO en mayúsculas y tracking amplio. Barra inferior de 5 pestañas a todo el ancho con línea superior.
+- Encabezado fijo con la palabra HIERRO en mayúsculas y tracking amplio: menú (cajón con secciones, perfil y avance) y aviso con los bloques que quedan hoy. Barra inferior de 5 pestañas en móvil; barra lateral con perfil y avance de la semana en escritorio (1024px o más).
+- Calendario Semana en escritorio: tres paneles (barra lateral, grilla semanal y detalle del día).
+- Clases: tira de días Lun a Sáb y tarjetas con tipo, modalidad, hora, NRC, lugar y docente. Semana: etiqueta Planificación, insignias de semana y ciclo, leyenda de colores y tarjetas por día con bloques de gym, materia y trabajo.
+- Comidas: tarjetas con foto grande 16:9, etiqueta de categoría y hora; casilla para marcar la comida como hecha; barras de kcal y proteína consumidas contra la meta del día.
+- Datos locales (localStorage, sin backend): `hierro.perfil`, `hierro.comidas.hechas` (índices por fecha), `hierro.eventos` (eventos propios, se filtran con su categoría) y `hierro.entreno.checks`. Carga = ejercicios hechos sobre planeados en los días de la semana hasta hoy; cumplimiento = ejercicios y comidas hechos sobre planeados.
+- Entreno guiado: un ejercicio a la vez, contador de series, temporizador de descanso leído del texto del ejercicio y estado hecho compartido con la lista.
+- Botones: `btn-accent` (cobre relleno, solo acciones principales como Nuevo evento o Iniciar entreno guiado) y `btn-line`. Las filas deslizables terminan con un desvanecido (`fade-right`).
 
 La interfaz sigue oscura y callada, pero cada tipo de bloque y cada sección tienen un tinte propio. El color es una franja y un lavado, no un repintado. Las fotos grandes siguen solo en el modal. Este documento manda sobre calendarios, filas, miniaturas y modales. Si un cambio nuevo necesita otro color, primero se justifica aquí.
 

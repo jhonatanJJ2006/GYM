@@ -5,6 +5,8 @@ import { Legend } from "../components/Legend.tsx";
 import { DayAgenda, WeekAgenda, WeekGrid } from "../components/system/WeekGrid.tsx";
 import { Button } from "../components/ui/button.tsx";
 import { IconCalendar } from "../components/Icons.tsx";
+import { NewEventButton } from "../components/Extras.tsx";
+import { isoWeek } from "../lib/progress.ts";
 import {
   MONTHS,
   WEEK_LETTERS,
@@ -112,13 +114,27 @@ export function CalendarPage() {
   }
 
   const active = FILTERS.filter((item) => kinds[item.id]);
+  const wide = view === "semana" && !narrow;
 
   return (
     <div>
       <PageIntro title="Calendario">Día, semana o mes · 1 oct – 28 feb</PageIntro>
 
-      <div className="lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start lg:gap-6">
-      <aside className="min-w-0 lg:sticky lg:top-20">
+      <div data-rise className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="chip text-muted">Semana {isoWeek(today)}</span>
+        <button
+          type="button"
+          disabled={!isInRange(today)}
+          onClick={() => choose(new Date(today.getFullYear(), today.getMonth(), today.getDate()))}
+          className={cn("chip transition-colors hover:text-cream disabled:opacity-40", isSameDay(cursor, today) ? "border-accent/40 text-accent" : "text-muted")}
+        >
+          Hoy
+        </button>
+        <NewEventButton iso={toIso(cursor)} className="ml-auto min-h-9 rounded-full px-3.5 text-xs" />
+      </div>
+
+      <div className={cn("lg:items-start lg:gap-6", wide ? "lg:block" : "lg:grid lg:grid-cols-[19rem_minmax(0,1fr)]")}>
+      <aside className={cn("min-w-0", wide ? "lg:mb-4 lg:flex lg:flex-wrap lg:items-center lg:gap-4 lg:[&>*]:mb-0" : "lg:sticky lg:top-20")}>
 
       <div className="card mb-3 grid grid-cols-3 gap-1 p-1" role="tablist" aria-label="Vista del calendario">
         {(
@@ -172,7 +188,7 @@ export function CalendarPage() {
 
       <div className="sticky top-14 z-20 -mx-4 mb-4 bg-ink/95 px-4 py-2 sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:bg-transparent lg:px-0">
         <div
-          className="no-scrollbar flex gap-2 overflow-x-auto py-0.5 lg:flex-wrap lg:overflow-visible"
+          className="no-scrollbar fade-right flex gap-2 overflow-x-auto py-0.5 pr-8 lg:flex-wrap lg:overflow-visible lg:pr-0 lg:[mask-image:none]"
           role="group"
           aria-label="Filtros del calendario"
           onKeyDown={(event) => {
@@ -265,8 +281,20 @@ export function CalendarPage() {
       {view === "semana" && narrow ? (
         <WeekAgenda days={week} kinds={kinds} selected={cursor} onSelect={choose} />
       ) : null}
-      {view === "semana" && !narrow ? (
-        <WeekGrid days={week} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
+      {wide ? (
+        <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_21rem] xl:items-start xl:gap-6">
+          <div className="min-w-0">
+            <WeekGrid days={week} kinds={kinds} selected={cursor} today={today} onSelect={choose} />
+          </div>
+          <aside className="mt-4 min-w-0 rounded-xl border border-line bg-panel p-4 xl:sticky xl:top-20 xl:mt-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">Detalle del día</p>
+            <p className="mb-3 font-display text-lg font-bold">
+              {formatLong(cursor).replace(/^./, (letter) => letter.toUpperCase())}
+              {isSameDay(cursor, today) ? <span className="chip ml-2 align-middle text-accent">Hoy</span> : null}
+            </p>
+            <DayAgenda day={cursor} kinds={kinds} />
+          </aside>
+        </div>
       ) : null}
 
       {view === "mes" ? (

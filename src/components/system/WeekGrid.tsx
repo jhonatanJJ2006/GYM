@@ -8,6 +8,8 @@ import { buildDay, type TimelineItem } from "../../lib/schedule.ts";
 import { classInterval, formatClock, formatSpan, parseClock, spanInterval } from "../../lib/time.ts";
 import { cn } from "../../lib/utils.ts";
 import { useModals } from "../Modals.tsx";
+import { eventsFor, useEvents } from "../Extras.tsx";
+import type { CustomEvent } from "../../lib/store.ts";
 
 const START_HOUR = 5;
 const END_HOUR = 25;
@@ -302,6 +304,13 @@ export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boole
   const modals = useModals();
   const plan = isInRange(day) ? buildDay(day) : null;
   const items = (plan?.items.filter((item) => kinds[item.kind]) ?? []).slice().sort((a, b) => a.start - b.start || itemEnd(a) - itemEnd(b));
+  const [allEvents, setEvents] = useEvents();
+  const custom = eventsFor(allEvents, toIso(day)).filter((event) => kinds[event.kind]);
+  type Entry = { start: number; item?: TimelineItem; event?: CustomEvent };
+  const entries: Entry[] = [
+    ...items.map((item) => ({ start: item.start, item })),
+    ...custom.map((event) => ({ start: parseClock(event.start), event })),
+  ].sort((a, b) => a.start - b.start);
   const listRef = useRef<HTMLOListElement>(null);
   const dayKey = toIso(day);
   useEffect(() => {
@@ -318,7 +327,7 @@ export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boole
     return () => {
       anim.revert();
     };
-  }, [dayKey, items.length]);
+  }, [dayKey, entries.length]);
 
   function onKey(event: KeyboardEvent<HTMLOListElement>) {
     if (!["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
@@ -341,22 +350,41 @@ export function DayAgenda({ day, kinds }: { day: Date; kinds: Record<Kind, boole
   return (
     <div className="w-full min-w-0" role="region" aria-label="Agenda del día">
       {plan?.holiday ? <p className="mb-2 text-sm leading-relaxed text-muted">{plan.holiday}</p> : null}
-      {items.length === 0 ? (
+      {entries.length === 0 ? (
         <p className="rounded-row border border-line bg-panel px-3 py-3 text-sm text-muted">Nada con estos filtros.</p>
       ) : (
         <>
-        <div data-rise className="mb-3 flex items-end justify-between gap-3 rounded-xl border border-line bg-panel px-4 py-3">
+        <div className="mb-3 flex items-end justify-between gap-3 rounded-xl border border-line bg-panel-2 px-4 py-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">Primer bloque</p>
-            <p className="font-display text-5xl font-extrabold leading-none tabular-nums text-cream">{agendaTimes(items[0]!).start}</p>
+            <p className="font-display text-4xl font-extrabold leading-none tabular-nums text-cream sm:text-5xl xl:text-4xl">{entries[0]!.item ? agendaTimes(entries[0]!.item).start : entries[0]!.event!.start}</p>
           </div>
-          <p className="pb-1 text-right text-xs text-muted">
-            {items.length} {items.length === 1 ? "bloque" : "bloques"}
-            <span className="block truncate text-cream/85">{agendaLabel(items[0]!)}</span>
+          <p className="min-w-0 pb-1 text-right text-xs text-muted">
+            {entries.length} {entries.length === 1 ? "bloque" : "bloques"}
+            <span className="block truncate text-cream/85">{entries[0]!.item ? agendaLabel(entries[0]!.item) : entries[0]!.event!.title}</span>
           </p>
         </div>
         <ol ref={listRef} className="space-y-3" onKeyDown={onKey}>
-          {items.map((item, index) => {
+          {entries.map((entry, index) => {
+            if (entry.event) {
+              const event = entry.event;
+              return (
+                <li key={event.id} data-tl className="min-w-0">
+                  <div className={cn("relative flex w-full min-w-0 items-start justify-between gap-3 overflow-hidden rounded-xl border border-dashed border-line py-3 pl-4 pr-3.5", CARD_BG[event.kind])}>
+                    <span aria-hidden className={cn("absolute inset-y-0 left-0 w-[3px]", `tl-dot-${event.kind}`)} />
+                    <span className="min-w-0 space-y-0.5">
+                      <span className={cn("block text-[11px] font-semibold uppercase tracking-wider", CARD_TEXT[event.kind])}>{CARD_LABEL[event.kind]} · propio</span>
+                      <span className="block break-words font-display text-base font-bold leading-snug">{event.title}</span>
+                      <button type="button" className="text-xs text-muted underline-offset-2 hover:text-cream hover:underline" onClick={() => setEvents((current) => current.filter((item) => item.id !== event.id))}>
+                        Eliminar
+                      </button>
+                    </span>
+                    <span className={cn("shrink-0 rounded border bg-ink/50 px-2 py-1 text-xs font-medium tabular-nums", CARD_TEXT[event.kind], CARD_BORDER[event.kind])}>{event.start} – {event.end}</span>
+                  </div>
+                </li>
+              );
+            }
+            const item = entry.item!;
             const times = agendaTimes(item);
             const label = agendaLabel(item);
             const thumb = itemThumb(item);
