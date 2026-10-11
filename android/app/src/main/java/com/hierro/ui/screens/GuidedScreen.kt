@@ -48,7 +48,12 @@ fun restDone(context: Context) {
         else @Suppress("DEPRECATION") (context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator)
         vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 180, 120, 180), -1))
     }
-    runCatching { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80).startTone(ToneGenerator.TONE_PROP_BEEP2, 300) }
+    runCatching {
+        // Se libera al terminar: cada ToneGenerator sin liberar ocupa una pista de audio nativa.
+        val tone = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80)
+        tone.startTone(ToneGenerator.TONE_PROP_BEEP2, 300)
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ tone.release() }, 400)
+    }
 }
 
 @Composable

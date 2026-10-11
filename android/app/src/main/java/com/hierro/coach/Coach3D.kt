@@ -35,9 +35,13 @@ import com.hierro.ui.theme.H
 import io.github.sceneview.Scene
 import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
+import io.github.sceneview.SceneView
+import io.github.sceneview.loaders.ModelLoader
 import io.github.sceneview.rememberCameraNode
-import io.github.sceneview.rememberEngine
-import io.github.sceneview.rememberModelLoader
+import android.os.Handler
+import android.os.Looper
+import androidx.compose.runtime.DisposableEffect
+import com.google.android.filament.Engine
 
 private const val TAG = "Coach3D"
 
@@ -47,6 +51,27 @@ fun supports3D(context: Context): Boolean {
     val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager ?: return false
     return am.deviceConfigurationInfo.reqGlEsVersion >= 0x30000
 }
+
+/**
+ * Motor de Filament y cargador de modelos compartidos por toda la app.
+ *
+ * Antes cada Coach3D creaba su propio motor con rememberEngine(). Al salir de la pantalla
+ * Compose destruía el motor antes de que el SceneView soltara su callback de cuadros y su
+ * superficie, y el siguiente cuadro usaba memoria nativa ya liberada: la app se cerraba al
+ * volver de Ejercicio, Gym o Entreno guiado. Con un solo motor que vive lo que vive el
+ * proceso, el SceneView siempre se destruye con el motor todavía vivo.
+ */
+object CoachRuntime {
+    private var engine: Engine? = null
+    private var loader: ModelLoader? = null
+
+    fun engine(): Engine = engine ?: SceneView.createEngine(SceneView.createEglContext()).also { engine = it }
+
+    fun loader(context: Context): ModelLoader =
+        loader ?: SceneView.createModelLoader(engine(), context.applicationContext).also { loader = it }
+}
+
+private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
 
 private fun Animator.indexOf(name: String): Int = (0 until animationCount).firstOrNull { getAnimationName(it) == name } ?: -1
 
@@ -65,8 +90,12 @@ fun Coach3D(pose: String, modifier: Modifier = Modifier, label: String = "") {
     }
     val clip = CoachClips.clipFor(pose)
     val info = CoachClips.infoFor(pose)
-    val engine = rememberEngine()
-    val loader = rememberModelLoader(engine)
+    val runtime = remember { runCatching { CoachRuntime.engine() to CoachRuntime.loader(context) }.onFailure { Log.w(TAG, "Sin motor 3D", it) }.getOrNull() }
+    if (runtime == null) {
+        CoachFallback(pose, modifier, label)
+        return
+    }
+    val (engine, loader) = runtime
     val nodes = remember(clip) {
         runCatching {
             val coach = ModelNode(loader.createModelInstance(CoachClips.COACH), false, null, null)
@@ -76,6 +105,15 @@ fun Coach3D(pose: String, modifier: Modifier = Modifier, label: String = "") {
             }
             listOfNotNull(coach, gear)
         }.onFailure { Log.w(TAG, "No se pudo cargar el coach", it) }.getOrNull()
+    }
+    // Los nodos se liberan después de que el SceneView se suelte (mismo cuadro, ya sin callback).
+    val alive = remember(nodes) { booleanArrayOf(true) }
+    DisposableEffect(nodes) {
+        onDispose {
+            alive[0] = false
+            val old = nodes
+            mainHandler.post { old?.forEach { runCatching { it.destroy() } } }
+        }
     }
     if (nodes.isNullOrEmpty()) {
         CoachFallback(pose, modifier, label)
@@ -112,6 +150,7 @@ fun Coach3D(pose: String, modifier: Modifier = Modifier, label: String = "") {
         cameraManipulator = null,
         childNodes = nodes,
         onFrame = { frameNanos ->
+            if (!alive[0]) return@Scene
             val t = CoachClips.loopTime((frameNanos - startNanos) / 1_000_000)
             nodes.forEachIndexed { i, node ->
                 val index = indices[i]

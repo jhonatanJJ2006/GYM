@@ -66,7 +66,9 @@ object Codec {
     fun profile(raw: String?): Profile = raw?.let { runCatching { json.decodeFromString(Profile.serializer(), it) }.getOrNull() } ?: DEFAULT_PROFILE
     fun meals(raw: String?): MealLog = raw?.let { runCatching { json.decodeFromString(mealSer, it) }.getOrNull() } ?: emptyMap()
     fun training(raw: String?): TrainingLog = raw?.let { runCatching { json.decodeFromString(trainSer, it) }.getOrNull() } ?: emptyMap()
-    fun events(raw: String?): List<CustomEvent> = raw?.let { runCatching { json.decodeFromString(eventsSer, it) }.getOrNull() } ?: emptyList()
+    /** Descarta eventos con horas o fecha ilegibles: antes uno así cerraba la app al abrir el calendario. */
+    fun events(raw: String?): List<CustomEvent> = (raw?.let { runCatching { json.decodeFromString(eventsSer, it) }.getOrNull() } ?: emptyList())
+        .filter { e -> Time.parseClockOrNull(e.start) != null && Time.parseClockOrNull(e.end) != null && runCatching { Dates.parseIso(e.iso) }.isSuccess }
 
     /** Como readChecks() de la web: si el largo no coincide, todo en falso. */
     fun shopping(raw: String?, size: Int): List<Boolean> {

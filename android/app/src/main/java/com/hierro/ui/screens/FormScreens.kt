@@ -93,7 +93,7 @@ fun NewEventScreen(vm: AppViewModel, iso: String) {
         ChipRow { Kind.entries.forEach { k -> ToggleChip(k.card, kind == k.id, { kind = k.id }, dot = k.rail()) } }
         if (error.isNotEmpty()) Text(error, style = H.type.small.copy(color = H.Danger))
         AccentButton("Guardar evento", {
-            val normalized = listOf(start, end).map { runCatching { Time.formatClock(Time.parseClock(it)) }.getOrDefault(it) }
+            val normalized = listOf(start, end).map { v -> Time.parseClockOrNull(v)?.let(Time::formatClock) ?: v }
             val result = vm.addEvent(title, Dates.toIso(date), normalized[0], normalized[1], kind)
             if (result == null) nav.back() else error = result
         }, Modifier.fillMaxWidth())

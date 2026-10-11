@@ -1,11 +1,11 @@
-# Copiar a .github/workflows/android.yml (el token del bot no puede escribir workflows).
+# Copiar a .github/workflows/android.yml (el token actual no tiene permiso de workflow).
 name: Android
 on:
   push:
-    branches: [main]
-    paths: ["android/**"]
+    branches: [main, feat/android-app]
+    paths: ["android/**", ".github/workflows/android.yml"]
   pull_request:
-    paths: ["android/**"]
+    paths: ["android/**", ".github/workflows/android.yml"]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,8 +19,10 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew assembleDebug testDebugUnitTest lintDebug --console=plain
-      - run: ./gradlew assembleDebug -Phierro.abi=arm64-v8a -Phierro.minify=true --console=plain
+      - name: Compilar, pruebas unitarias y de UI (Robolectric) y lint
+        run: ./gradlew assembleDebug assembleDebugAndroidTest testDebugUnitTest lintDebug --console=plain
+      - name: APK arm64 minificado
+        run: ./gradlew assembleDebug -Phierro.abi=arm64-v8a -Phierro.minify=true --console=plain
       - uses: actions/upload-artifact@v4
         with:
           name: gym-hierro-arm64
@@ -31,4 +33,4 @@ jobs:
           name: reportes
           path: |
             android/app/build/reports
-            android/app/build/outputs/roborazzi
+            android/app/build/test-results

@@ -15,7 +15,7 @@ object Agenda {
         plan.day(day)?.items?.forEach { item ->
             list += Upcoming("${item.kind.id}-${item.start}", item.start, label(item), item.kind)
         }
-        eventsFor(events, Dates.toIso(day)).forEach { list += Upcoming(it.id, Time.parseClock(it.start), it.title, Kind.of(it.kind)) }
+        eventsFor(events, Dates.toIso(day)).forEach { e -> Time.parseClockOrNull(e.start)?.let { list += Upcoming(e.id, it, e.title, Kind.of(e.kind)) } }
         return list.filter { it.start >= minute }.sortedBy { it.start }
     }
 
@@ -63,7 +63,8 @@ object Agenda {
     /** Validación del formulario Nuevo evento. Devuelve el error o null. */
     fun validateEvent(title: String, start: String, end: String): String? = when {
         title.isBlank() -> "Ponle un nombre al evento."
-        end <= start -> "La hora de fin debe ser después del inicio."
+        Time.parseClockOrNull(start) == null || Time.parseClockOrNull(end) == null -> "Escribe las horas como HH:MM, por ejemplo 18:30."
+        Time.parseClockOrNull(end)!! <= Time.parseClockOrNull(start)!! -> "La hora de fin debe ser después del inicio."
         else -> null
     }
 }

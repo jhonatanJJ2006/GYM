@@ -50,7 +50,7 @@ fun DayAgenda(plan: PlanRepository, day: LocalDate, kinds: Set<Kind>, events: Li
     val dayPlan = plan.day(day)
     val items = (dayPlan?.items ?: emptyList()).filter { it.kind in kinds }.sortedWith(compareBy({ it.start }, { it.end }))
     val custom = Agenda.eventsFor(events, Dates.toIso(day)).filter { Kind.of(it.kind) in kinds }
-    val entries: List<Pair<Int, Any>> = (items.map { it.start to it as Any } + custom.map { Time.parseClock(it.start) to it as Any }).sortedBy { it.first }
+    val entries: List<Pair<Int, Any>> = (items.map { it.start to it as Any } + custom.mapNotNull { e -> Time.parseClockOrNull(e.start)?.let { it to e as Any } }).sortedBy { it.first }
     Column(Modifier.fillMaxWidth()) {
         dayPlan?.holiday?.let { Text(it, style = H.type.body.copy(color = H.Muted), modifier = Modifier.padding(bottom = 8.dp)) }
         if (entries.isEmpty()) {

@@ -157,7 +157,8 @@ enum class Kind(val id: String, val label: String, val card: String, val title: 
     Comida("comida", "Comidas", "Comida", "Comida");
 
     companion object {
-        fun of(id: String): Kind = entries.first { it.id == id }
+        /** Categoría desconocida (datos viejos o de otra versión) cae en Gym en vez de cerrar la app. */
+        fun of(id: String): Kind = entries.firstOrNull { it.id == id } ?: Gym
     }
 }
 

@@ -7,6 +7,14 @@ object Time {
         return h * 60 + m
     }
 
+    /** Hora "H:MM" o "HH:MM" entre 00:00 y 23:59; null si el texto no es una hora. */
+    fun parseClockOrNull(value: String): Int? {
+        val m = Regex("^\\s*(\\d{1,2})\\s*:\\s*(\\d{2})\\s*$").find(value) ?: return null
+        val h = m.groupValues[1].toInt()
+        val min = m.groupValues[2].toInt()
+        return if (h in 0..23 && min in 0..59) h * 60 + min else null
+    }
+
     /** El horario de clase lista el último minuto ocupado (11:59). */
     fun classInterval(start: String, end: String) = Interval(parseClock(start), parseClock(end) + 1)
 
