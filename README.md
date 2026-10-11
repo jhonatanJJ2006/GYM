@@ -14,6 +14,10 @@ Entre semana hay 5 a 6 horas de trabajo en huecos que no pisan clases (tampoco l
 
 Calendario, semana, entreno, clases y comidas cambian entre día, semana y mes. El control de fecha salta a cualquier día del rango, aunque no esté en la semana que se está viendo.
 
+## App Android
+
+La app nativa (Kotlin y Jetpack Compose) esta en `android/`. Ver `android/README.md`.
+
 ## Comandos
 
 ```bash
